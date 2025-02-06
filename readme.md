@@ -350,6 +350,7 @@ Características:
 - - rails new nome_do_projeto --database=ADAPTADOR: Altera o banco de dados da aplicação (SQLite3 é o padrão. É possível modificar posteriormente)
 - rails server (ou apenas "s"): Inicia o projeto
 - - rails s -e [production | development | test]: Altera o modo de execução da aplicação
+- rails generate [model | view | controller | scaffold | etc..] <name?>
 
 ## Banco de Dados
 
@@ -362,3 +363,61 @@ Para configurar o banco de dados, modifique o arquivo **config/database.yml**.
 #### Comandos
 
 - rake db:create - Cria o banco de dados de acordo com o **config/database.yml** (DB de produção deve ser especificado)
+
+## CoC (Convention over Configuration)
+
+É um paradigma de projeto que visa diminuir o número de decissões que os desenvolvedores devem fazer, ganhando simplicidade sem perder a flexibilidade.
+
+Em Rails, os comandos geradores de models, views, controlers, schemas, etc. é um CoC, pois, não há a necessidade de desenvolver todo um código _boilerplate_.
+
+### Scaffold (Andaime)
+
+No contexto Rails é como se o app recém gerado estivesse pré-moldado para que você o personalize, sem a necessidade de criá-lo do absoluto zero.
+
+Gera os arquivos necessários (MVC) para realizar CRUD da entidade criada e também o arquivo de _migrate_. É necessário realizar a migração para o banco de dados (próx. conteúdo).
+
+![Scaffold](./images/Scaffold.jpeg)
+
+> OBS: O nome do modelo é no singular, mas no banco de dados é no plural (convenção).
+
+```shell
+# Para criar um Scaffold, utilize o seguinte comando
+rails generate scaffold nome:tipo nome:tipo nome:tipo ...
+```
+
+## Migration
+
+A troca de informações entre o Banco de Dados e a aplicação Rails é realizada através das _migrates_.
+
+Além dos campos criados pelo programador, o arquivo _migrate_ também cria alguns campos, são eles:
+
+- id: Chave primária do tipo autoincremento
+- timestamps: Gera dois campos, created_at e updated_at. São atualizados automaticamente.
+
+```shell
+# Deixa o banco de dados igual ao script schema. A tabela pode ser criada, modificada ou removida
+rake db:migrate
+```
+
+## Views
+
+### Embedded Ruby
+
+É um sistema de template que combina a linguagem Ruby com texto. Sua extensão é __*.erb__.
+
+Tags
+- <% %>: Código ruby sem saída para HTML
+- <%= %>: Código ruby cujo retorno será impresso no HTML
+- <%= -%>: Código ruby cujo retorno será impresso no HTML, porém, remove a quebra de linha final
+- <%# %>: Comenta o código ruby, pode estar junto de = e -.
+
+### Interpolação de váriaveis em texto
+
+Adiciona o valor duma variável na string.
+
+```ruby
+variavel = "interpolado"
+"Minha string #{variavel}" # Saída: Minha string interpolada
+
+<%= "Interpolando em embedded ruby: #{variavel}" %>
+```
