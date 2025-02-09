@@ -351,6 +351,7 @@ Características:
 - rails server (ou apenas "s"): Inicia o projeto
 - - rails s -e [production | development | test]: Altera o modo de execução da aplicação
 - rails generate [model | view | controller | scaffold | etc..] <name?>
+- rails console (ou apenas "c"): Prompt de comando para a aplicação Rails. Todas as classes presentes no app Rails são carregadas e ficam prontas para uso no console.
 
 ## Banco de Dados
 
@@ -374,7 +375,7 @@ Em Rails, os comandos geradores de models, views, controlers, schemas, etc. é u
 
 No contexto Rails é como se o app recém gerado estivesse pré-moldado para que você o personalize, sem a necessidade de criá-lo do absoluto zero.
 
-Gera os arquivos necessários (MVC) para realizar CRUD da entidade criada e também o arquivo de _migrate_. É necessário realizar a migração para o banco de dados (próx. conteúdo).
+Gera os arquivos necessários (MVC) e configura as rotas para realizar CRUD da entidade criada e também o arquivo de _migrate_. É necessário realizar a migração para o banco de dados (próx. conteúdo).
 
 ![Scaffold](./images/Scaffold.jpeg)
 
@@ -403,9 +404,10 @@ rake db:migrate
 
 ### Embedded Ruby
 
-É um sistema de template que combina a linguagem Ruby com texto. Sua extensão é __*.erb__.
+É um sistema de template que combina a linguagem Ruby com texto. Sua extensão é **\*.erb**.
 
 Tags
+
 - <% %>: Código ruby sem saída para HTML
 - <%= %>: Código ruby cujo retorno será impresso no HTML
 - <%= -%>: Código ruby cujo retorno será impresso no HTML, porém, remove a quebra de linha final
@@ -420,4 +422,71 @@ variavel = "interpolado"
 "Minha string #{variavel}" # Saída: Minha string interpolada
 
 <%= "Interpolando em embedded ruby: #{variavel}" %>
+```
+
+## Models
+
+Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma comunicação com o Banco de Dados gerando as informações na mesma. Active Record é um ORM (Object Relational Mapping).
+
+## Controllers
+
+Local onde está presente as **ações** do sistema. Para toda _ação_, haverá uma _view_ relacionada a ação.
+
+O arroba "@" antes do nome da variável indica que a variável é uma variável de instância. Em Rails, ao criar uma variável de instância no controller, a view também terá acesso a ela.
+
+> OBS: O nome da _view_ **deve** ser o mesmo do método do _controller_.
+
+```ruby
+# Controller "customers_controller.rb"
+def index
+    @customers = Customer.all
+end
+
+# View "customers/index.html.erb"
+<% @customer.each do |customer| %>
+    <%= customer.name %>
+<% end %>
+```
+
+## Rotas
+
+> config/routes.rb
+
+Arquivo que determina as rotas (e verbos) da aplicação. A url "/rails/info/routes" mostra todas as rotas disponíveis no aplicativo.
+
+```ruby
+# [get | post | put | patch | delete | options] "nome_da_rota" => "view#action"
+get "inicio" => "welcome#index"
+
+# Rota padrão (raiz), index da aplicação
+root "view#action"
+```
+
+### REST / RESTful
+
+REST (Representational State Transfer) é um estilo de arquitetura de software para sistemas distribuídos, amplamente usado em **APIs web**. Ele se baseia em princípios como:
+
+- Recursos: Tudo é tratado como um recurso (por exemplo, usuários, produtos) identificado por URLs.
+- Métodos HTTP: Usa verbos como GET (ler), POST (criar), PUT/PATCH (atualizar) e DELETE (remover) para operações.
+- Stateless: Cada requisição é independente e contém todas as informações necessárias.
+- Representações: Os recursos/respostas podem ser representados em formatos como JSON ou XML.
+
+Em resumo, REST é uma forma simples e eficiente de criar APIs que seguem padrões claros e escaláveis.
+
+> Adiciona semântica nas requisições web.
+
+### Helpers
+
+São comandos Rails para ajudar o desenvolvedor.
+
+Utilitários:
+
+- link_to
+
+```
+# View - link_to(name, path)
+<%= link_to "Texto", :action => "action_name" %>
+
+# <%= link_to "Texto", "/customers" %> >> 'customers_path' é gerado automaticamente pelo Rails (/rails/info/routes)
+<%= link_to "Texto", customers_path %>
 ```
