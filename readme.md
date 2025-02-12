@@ -490,3 +490,89 @@ Utilitários:
 # <%= link_to "Texto", "/customers" %> >> 'customers_path' é gerado automaticamente pelo Rails (/rails/info/routes)
 <%= link_to "Texto", customers_path %>
 ```
+
+# Decidim
+
+> Em desenvolvimento. Sujeito a alterações
+
+## Criando content_block (cell)
+
+```ruby
+# config/initializers/custom_content_blocks.rb 
+# manifests-registry pattern ('custom_content_blocks' pode ser outro nome)
+# :homepage = escopo / :meu_bloco = nome da cell
+# "content_blocks" presente no path é o nome do seu módulo personalizado
+Decidim.content_blocks.register(:homepage, :meu_bloco) do |content_block|
+  content_block.cell = "decidim/content_blocks/meu_bloco"
+  content_block.public_name_key = "decidim.content_blocks.meu_bloco.name" # I18n lang locale path '*.yml'
+
+  # (Opcional todos as linhas a partir desta) Cria um formulário de edição de cell no painel administrativo
+  content_block.settings_form_cell = "decidim/content_blocks/meu_bloco_settings_form"
+
+  # Define o campo "meu_bloco" como um "atributo" do bloco (o nome não precisa ser igual ao da célula)
+  content_block.settings do |settings|
+    settings.attribute :meu_bloco, type: :text
+
+    # (Opcional) Adicione o argumento 'translated: true' para que o atributo tenha vários campos de idiomas. Gera um hash de idiomas. Ex.: {"pt-BR" => "TEXTO_AQUI"}
+    # settings.attribute :meu_bloco, type: :text, translated: true
+  end
+end
+
+# config/locales/pt-BR.yml
+pt-BR:
+  decidim:
+    content_blocks:
+      meu_bloco:
+        name: "Meu Bloco"
+        settings_form: # (Opcional) Apenas se tiver conteúdo definido pelo ADM
+          label: "Conteúdo" # Texto do atributo que será modificado pelo ADM.
+
+# (Opcional) Apenas se tiver conteúdo definido pelo ADM
+# app/cells/decidim/content_blocks/meu_bloco_settings_form_cell.rb
+module Decidim
+  module ContentBlocks
+    class MeuBlocoSettingsFormCell < Decidim::ViewModel
+      alias form model # 'model' será o objeto acessado dentro do template *.erb
+
+      def content_block
+        options[:content_block]
+      end
+
+      # Método que busca o texto do campo 'label', pode ser outro nome
+      def label
+        I18n.t("decidim.content_blocks.meu_bloco.settings_form.label")
+      end
+    end
+  end
+end
+
+# (Opcional) Apenas se tiver conteúdo definido pelo ADM
+# app/cells/decidim/content_blocks/meu_bloco_settings_form_cell/show.erb
+<% form.fields_for :settings, form.object.settings do |settings_fields| %>
+  <%= settings_fields.text_area :meu_bloco, label: label %>
+  # (Opcional) Adicione o argumento 'translated' para que o atributo seja traduzido pelo 'locale'
+  # <%= settings_fields.translated :text_area, :meu_bloco, label: label %>
+<% end %>
+
+# app/cells/decidim/content_blocks/meu_bloco_cell.rb
+module Decidim
+  module ContentBlocks
+    class MeuBlocoCell < Decidim::ViewModel
+      def nome_do_metodo
+        "Hello, world!"
+      end
+
+      def show
+        render
+      end
+    end
+  end
+end
+
+# app/cells/decidim/content_blocks/meu_bloco/show.erb
+<section id="meu_bloco">
+  <h2><%= nome_do_metodo %></h2> # Chama o método 'nome_do_metodo'
+  <p>Hello, world</p> # Texto estático
+  <p><%= model.settings.meu_bloco %></p> # Texto dinâmico, definido no painel administrativo
+</section>
+```
