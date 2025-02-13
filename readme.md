@@ -498,7 +498,7 @@ Utilitários:
 ## Criando content_block (cell)
 
 ```ruby
-# config/initializers/custom_content_blocks.rb 
+# config/initializers/custom_content_blocks.rb
 # manifests-registry pattern ('custom_content_blocks' pode ser outro nome)
 # :homepage = escopo / :meu_bloco = nome da cell
 # "content_blocks" presente no path é o nome do seu módulo personalizado
@@ -575,4 +575,78 @@ end
   <p>Hello, world</p> # Texto estático
   <p><%= model.settings.meu_bloco %></p> # Texto dinâmico, definido no painel administrativo
 </section>
+```
+
+## Configuração SMTP
+
+> Envio de emails através do **console** busca a configuração de script ruby. Envio de emails através da plataforma busca a configuração definida na \<url>/system da organização
+
+```ruby
+# app/config/environments/[development | production].rb
+
+# ENV.fetch("KEY") busca pelas variáveis de ambiente
+# NÃO utilize 'Rails.application.secrets.*' onde * seria a variavel
+config.action_mailer.delivery_method = :smtp
+config.action_mailer.smtp_settings = {
+  address:              ENV.fetch("SMTP_ADDRESS"),
+  port:                 ENV.fetch("SMTP_PORT").to_i,
+  domain:               ENV.fetch("SMTP_DOMAIN"),
+  user_name:            ENV.fetch("SMTP_USERNAME"),
+  password:             ENV.fetch("SMTP_PASSWORD"),
+  authentication:       :login,
+  enable_starttls_auto: true
+}
+```
+
+```yml
+# app/config/application.yml (gem Figaro)
+
+SMTP_ADDRESS: "smtp.gmail.com"
+SMTP_PORT: "587"
+SMTP_DOMAIN: "localhost"
+SMTP_USERNAME: "email@example.org"
+SMTP_PASSWORD: "senha_monstro"
+```
+
+### Gemas necessárias
+
+> OBS: **delayed_job** deve estar em execução junto do servidor. É um processo paralelo que deve ser iniciado **manualmente**.
+
+- gem "passenger"
+- gem "delayed_job_active_record"
+- gem "daemons"
+
+```shell
+# Instalação (Após ter adicionado no Gemfile)
+
+bundle install
+bin/rails generate delayed_job:active_record
+bin/rake db:migrate
+```
+
+```ruby
+# Configuração
+# config/initializers/decidim.rb
+
+config.application_name = "Application name"
+config.mailer_sender = "email@example.org"
+```
+
+```shell
+# Iniciando serviço delayed_job
+bin/delayed_job restart
+
+# Verificando status do delayed_job
+bin/delayed_job status
+```
+
+```shell
+# Envio de email através do prompt 'rails console'
+
+ActionMailer::Base.mail(
+  from: ENV.fetch('SMTP_USERNAME'),
+  to: 'email@example.org',
+  subject: 'Teste de e-mail',
+  body: 'Este é um e-mail de teste.'
+).deliver_now
 ```
