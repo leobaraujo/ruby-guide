@@ -624,14 +624,6 @@ bin/rails generate delayed_job:active_record
 bin/rake db:migrate
 ```
 
-```ruby
-# Configuração
-# config/initializers/decidim.rb
-
-config.application_name = "Application name"
-config.mailer_sender = "email@example.org"
-```
-
 ```shell
 # Iniciando serviço delayed_job
 bin/delayed_job restart
