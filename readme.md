@@ -60,7 +60,7 @@ array_a.at(1)
 
 ### Hash
 
-É uma coleção de pares chave-valor. É similar ao array, porém, seus índices são definidos arbitráriamente.
+É uma coleção de pares chave-valor. É similar ao array, porém, seus índices são definidos arbitráriamente. As chaves devem ser String ou Symbol.
 
 ```ruby
 # Criando hash
@@ -70,9 +70,24 @@ hash_a = {
     "chave_c" => false
 }
 
+# Symbol (Conteúdo mais à frente)
+hash_b = {
+    :chave_a => "valor",
+    :chave_b => 123,
+    :chave_c => false
+}
+
+# Retorna a 'key' como symbol
+hash_c = {
+    chave_a: "valor",
+    chave_b: 123,
+    chave_c: false
+}
+
 # Acessando hash
 hash_a
 hash_a["chave_a"]
+hash_c[:chave_a]
 ```
 
 ## Métodos
@@ -250,6 +265,24 @@ att.falar "Lorem Ipsum"
 att.correr
 ```
 
+### Escopo "privado / private"
+
+Em Ruby, os atributos e métodos de uma classe fazem parte de um escopo.
+
+```ruby
+class Pessoa
+    def falar(txt)
+        respirar
+        puts "Fulano disse: #{txt}."
+    end
+
+    private
+      def respirar
+        puts "Fulano respirou."
+      end
+end
+```
+
 ## Módulo
 
 Módulo é uma coleção de métodos e constantes.
@@ -299,6 +332,26 @@ end
 mm = MeuMixin.new
 mm.calcular
 mm.enviar_email
+```
+
+## Symbols x Strings
+
+Simbolo é todo objeto iniciado por dois pontos (:) seguido por uma palavra qualquer. Texto é uma string contida entre aspas simples ou duplas.
+
+O método **\*.object_id** retorna o _id_ único do objeto, inclusive strings e inteiros. Por mais que o _conteúdo_ da string, por exemplo, seja o mesmo, o object*id será diferente. Porém, o **object_id** de um \_symbol* será o mesmo. Ou seja, a string é repetida na memória quando declarada com o mesmo conteúdo, mas o symbol não.
+
+```ruby
+# Symbol
+:my_text.class # Saída: String
+:my_text.object_id # Saída: 984808
+:my_text.object_id # Saída: 984808
+:my_text.object_id # Saída: 984808
+
+# Texto
+"my_text".class # Saída: Symbol
+"my_text".object_id # Saída: 835345435
+"my_text".object_id # Saída: 825124463
+"my_text".object_id # Saída: 865434534
 ```
 
 # Gemas
@@ -424,6 +477,18 @@ variavel = "interpolado"
 <%= "Interpolando em embedded ruby: #{variavel}" %>
 ```
 
+### Partials
+
+São arquivos com a extensão _.html.erb_ cujo nome começam com underline (\_).
+
+```ruby
+# app/view/customer/new.html.erb
+<%= render "form" %>
+
+# app/view/customer/_form.html.erb (É um "mini-controller" contém lógica de
+programação e renderização. No contexto React, seria como um componente.) ...
+```
+
 ## Models
 
 Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma comunicação com o Banco de Dados gerando as informações na mesma. Active Record é um ORM (Object Relational Mapping).
@@ -446,6 +511,30 @@ end
 <% @customer.each do |customer| %>
     <%= customer.name %>
 <% end %>
+```
+
+### before_action x before_filter
+
+> São o mesmo elemento. before_filter até rails 3.x e before_action >= 4.x.
+
+Em Rails, filtros são métodos que são executados antes, depois ou ambos os casos (around) de uma ação de controle. Evita repetição de código (DRY).
+
+```ruby
+# before_action :method_name, only: [:method_name, :method_name]
+
+class Customer < ApplicationController
+  # OBS: São filtros exclusivo do *Rails*
+  before_action :set_customer, only: [:hello]
+
+  def hello
+    puts customer.name
+  end
+
+  private
+    def set_customer
+      @customer = {id: 1, name: "John Doe", email: "example@email.org"}
+    end
+end
 ```
 
 ## Rotas
@@ -489,6 +578,28 @@ Utilitários:
 
 # <%= link_to "Texto", "/customers" %> >> 'customers_path' é gerado automaticamente pelo Rails (/rails/info/routes)
 <%= link_to "Texto", customers_path %>
+```
+
+## Active Record
+
+> Active Record também é um padrão de projeto para Banco de Dados relacionais.
+
+Active Record é um framework presente no Ruby on Rails e é responsável por tratar a persistência das informações no Banco de Dados.
+
+Active Record permite o desenvolvedor crie DBs sem necessitar de SQL, pois, utiliza DSL (Doman Specif Language)
+
+```ruby
+# Operações CRUD
+# Create
+model = <Model>.create(name: "John Doe", age: 20) # Cria o objeto no Banco de Dados e retorna a instância do modelo criado
+model = <Model>.new(name: "John Doe", age: 20) # Instância o objeto e depois salva no banco de dados
+model.save
+
+# Read
+<Model>.all # Retorna um array
+<Model>.last # Retorna o último elemento
+<Model>.where(name: :Josivaldo) # Filtra os objetos e retorna um array. Argumento é 'hash'
+<Model>.find(:id => 1) # Filtra os objetos e retorna um único elemento. Argumento é 'hash'
 ```
 
 # Decidim
