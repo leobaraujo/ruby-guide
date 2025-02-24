@@ -696,7 +696,7 @@ end
 # app/config/environments/[development | production].rb
 
 # ENV.fetch("KEY") busca pelas variáveis de ambiente
-# NÃO utilize 'Rails.application.secrets.*' onde * seria a variavel
+# NÃO utilize 'Rails.application.secrets.*' (Verificar config/secrets.yml)
 config.action_mailer.delivery_method = :smtp
 config.action_mailer.smtp_settings = {
   address:              ENV.fetch("SMTP_ADDRESS"),
@@ -736,11 +736,15 @@ bin/rake db:migrate
 ```
 
 ```shell
-# Iniciando serviço delayed_job
-bin/delayed_job restart
+# Execução delayed_job
 
-# Verificando status do delayed_job
+# Desenvolvimento
+bin/delayed_job restart
 bin/delayed_job status
+
+# Produção
+RAILS_ENV=production bin/delayed_job stop
+RAILS_ENV=production bin/delayed_job start
 ```
 
 ```shell
