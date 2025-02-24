@@ -340,6 +340,8 @@ Simbolo é todo objeto iniciado por dois pontos (:) seguido por uma palavra qual
 
 O método **\*.object_id** retorna o _id_ único do objeto, inclusive strings e inteiros. Por mais que o _conteúdo_ da string, por exemplo, seja o mesmo, o object*id será diferente. Porém, o **object_id** de um \_symbol* será o mesmo. Ou seja, a string é repetida na memória quando declarada com o mesmo conteúdo, mas o symbol não.
 
+> OBS: Symbols que requerem caracteres especiais (inclusive espaços), utilize aspas. Ex.: :'pt-BR'
+
 ```ruby
 # Symbol
 :my_text.class # Saída: String
@@ -363,6 +365,8 @@ O método **\*.object_id** retorna o _id_ único do objeto, inclusive strings e 
 > TODO
 
 # Ruby on Rails
+
+[Descrição dos métodos](https://apidock.com/rails)
 
 ## História
 
@@ -405,6 +409,8 @@ Características:
 - - rails s -e [production | development | test]: Altera o modo de execução da aplicação
 - rails generate [model | view | controller | scaffold | etc..] <name?>
 - rails console (ou apenas "c"): Prompt de comando para a aplicação Rails. Todas as classes presentes no app Rails são carregadas e ficam prontas para uso no console.
+- rails db:[create | migrate | seed]: TODO
+- rails assets:precompile: TODO
 
 ## Banco de Dados
 
@@ -455,6 +461,8 @@ rake db:migrate
 
 ## Views
 
+> NOTA: Toda view, partial, etc.. Passa por app/views/application.html.erb. Ao utilizar prompts generators para framework front-end, o nome do "application" é 'application' (nome do root da view).
+
 ### Embedded Ruby
 
 É um sistema de template que combina a linguagem Ruby com texto. Sua extensão é **\*.erb**.
@@ -481,12 +489,12 @@ variavel = "interpolado"
 
 São arquivos com a extensão _.html.erb_ cujo nome começam com underline (\_).
 
-```ruby
+```shell
 # app/view/customer/new.html.erb
 <%= render "form" %>
 
 # app/view/customer/_form.html.erb (É um "mini-controller" contém lógica de
-programação e renderização. No contexto React, seria como um componente.) ...
+# programação e renderização. No contexto React, seria como um componente.) ...
 ```
 
 ## Models
@@ -551,6 +559,16 @@ get "inicio" => "welcome#index"
 root "view#action"
 ```
 
+### Recuperando parâmetros
+
+Dentro de um _Controller_, acesse o _hash_ **params**.
+
+```ruby
+# 'Customer' é um modelo exemplo. 'find()' é um método 'read' do ActiveRecord
+# ':id' é um symbol criado na rota. Ex.: GET /users/:id
+Customer.find(params[:id])
+```
+
 ### REST / RESTful
 
 REST (Representational State Transfer) é um estilo de arquitetura de software para sistemas distribuídos, amplamente usado em **APIs web**. Ele se baseia em princípios como:
@@ -566,11 +584,12 @@ Em resumo, REST é uma forma simples e eficiente de criar APIs que seguem padrõ
 
 ### Helpers
 
-São comandos Rails para ajudar o desenvolvedor.
+São comandos **Rails** para ajudar o desenvolvedor.
 
 Utilitários:
 
-- link_to
+- link*to: Substitui o "href" do elemento \_anchor*
+- [Lista completa](https://guides.rubyonrails.org/action_view_helpers.html)
 
 ```
 # View - link_to(name, path)
@@ -602,6 +621,37 @@ model.save
 <Model>.find(:id => 1) # Filtra os objetos e retorna um único elemento. Argumento é 'hash'
 ```
 
+## i18n (Internationalization)
+
+Maneira simplificada para traduzir páginas Rails.
+
+Para modificar a _locale_ padrão, altere "config/application.rb" em "config.i18n.default_locale".
+
+Observações:
+
+- Tradução: Traduzir textos
+- Localização: Localizar data/hora/moeda (Requer tradução, veja link a seguir)
+
+[i18n de data em pt-BR](https://github.com/svenfuchs/rails-i18n/blob/master/rails/locale/pt-BR.yml)
+
+```ruby
+# NOTA: Caso a chave não seja encontrada, será renderizado o nome da chave e não seu valor.
+
+# Tradução em métodos
+i18n.t('caminho.da.chave') # Tradução
+i18n.l() # Localização
+
+# Tradução nas views
+t(:'caminho.da.chave') # Tradução
+l() # Localização
+```
+
+## Framework front-end
+
+### Twitter Bootstrap
+
+Framework web front-end para desenvolver aplicativos responsivos. Acesse [aqui](https://getbootstrap.com/2.0.2/).
+
 # Decidim
 
 > Em desenvolvimento. Sujeito a alterações
@@ -630,7 +680,7 @@ Decidim.content_blocks.register(:homepage, :meu_bloco) do |content_block|
 end
 
 # config/locales/pt-BR.yml
-pt-BR:
+"pt-BR":
   decidim:
     content_blocks:
       meu_bloco:
