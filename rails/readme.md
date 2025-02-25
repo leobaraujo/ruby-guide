@@ -52,11 +52,14 @@ Para configurar o banco de dados, modifique o arquivo **config/database.yml**.
 
 ### Rake (Contexto Rails)
 
+> OBS: comandos _rails db:[create | migrate | seed]_ servem como proxys de comandos rakes a partir da versão 5 do Rails, ou seja, ao utilizar _rails db:create_, você estará utilizando _rake db:create_ "por baixo dos panos".
+
 É uma gema para gerenciamento de tarefas. Contém scripts geradores úteis para aplicações Rails.
 
 #### Comandos
 
 - rake db:create - Cria o banco de dados de acordo com o **config/database.yml** (DB de produção deve ser especificado)
+- rake db:migrate - Gera as tableas de acordo com os models da aplicação
 
 ## CoC (Convention over Configuration)
 
