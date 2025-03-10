@@ -92,7 +92,7 @@ hash_c[:chave_a]
 
 ## Métodos
 
-Métodos são blocos de código que realizam uma tarefa específica e podem ser reutilizados em diferentes partes de um programa. Eles são semelhantes a funções em outras linguagens de programação.
+Métodos são blocos de código que realizam uma tarefa específica e podem ser reutilizados em diferentes partes de um programa.
 
 Um método pode retornar um valor usando a palavra-chave _return_. Se _return_ não for usado explicitamente, o método retorna o valor da última expressão avaliada.
 
@@ -147,8 +147,6 @@ Closure é uma funcionalidade que permite escrever um pedaço de código que pod
 - Utilizado como um valor (podendo ser atribuído, passado como parâmetro, etc.)
 - Pode ser executado em qualquer lugar
 - Referenciam variáveis no contexto onde são criados
-
-> Em Ruby, blocks, procs e lambda são closures.
 
 ### Blocks, Procs e Lambda
 
@@ -210,11 +208,11 @@ lambda_a.call
 lambda_b.call("GeeksforGeeks")
 ```
 
-## Recebendo blocos como argumento
+## Recebendo blocks como argumento
 
 ### yield
 
-O yield para a execução do método e passa o controle para o bloco que foi passado como parâmetro pelo método. Na prática, serve para inserir blocos de código dentro dum método.
+A palavra-chave yield para a execução do método e passa o controle para o bloco que foi passado como parâmetro pelo método. Na prática, serve para inserir blocos de código dentro dum método.
 
 ```ruby
 # Criando função
@@ -283,11 +281,74 @@ class Pessoa
 end
 ```
 
+### Variáveis de instância
+
+Em Ruby, o '@' antes do nome de uma variável indica que ela é uma variável de instância. Variáveis de instância são associadas a uma instância de uma classe e podem ser acessadas em qualquer método dessa instância. Elas são privadas, ou seja, requer getter e setter para ser acessada fora da classe.
+
+```ruby
+class Pessoa
+    # Método construtor (construct)
+    def initialize(nome, idade)
+        @nome = nome
+        @idade = idade
+    end
+
+    # Getter para @nome
+    def nome
+        @nome
+    end
+
+    # Setter para @nome
+    # Atenção à sintaxe
+    def nome=(novo_nome)
+        @nome = novo_nome
+    end
+
+  def apresentar
+    puts "Olá, meu nome é #{@nome} e tenho #{@idade} anos."
+  end
+end
+
+pessoa = Pessoa.new("João", 30)
+pessoa.apresentar  # Saída: "Olá, meu nome é João e tenho 30 anos."
+
+pessoa.nome = "John"
+puts pessoa.nome
+```
+
+### Variáveis de classe
+
+Pertencem à classe como um todo e são compartilhadas por todas as instâncias da classe.
+
+```ruby
+class Pessoa
+  @@contador = 0  # Variável de classe
+
+  def initialize(nome)
+    @nome = nome  # Variável de instância
+    @@contador += 1
+  end
+
+  def self.contador
+    @@contador
+  end
+end
+
+pessoa1 = Pessoa.new("João")
+pessoa2 = Pessoa.new("Maria")
+
+puts Pessoa.contador  # Saída: 2
+```
+
 ## Módulo
 
-Módulo é uma coleção de métodos e constantes.
+Módulo é uma coleção de métodos e constantes. É possível adicionar um módulo à uma classe com **include** ou **require**.
 
-> NOTA: É uma convenção utilizar SCREAMING_SNAKE_CASE no nome das constantes. Utilize 'include' para que a classe tenha acesso ao módulo.
+Quando você _inclui_ um módulo em uma classe, os métodos do módulo se tornam métodos de _instância da classe_. Quando você _estende_ um módulo em uma classe, os métodos do módulo se tornam _métodos de classe_.
+
+Se o módulo define métodos como _métodos de módulo_ (usando **self**), você pode chamá-los diretamente usando o operador de resolução de escopo (::) ou ponto (.).
+
+> NOTA: É uma convenção utilizar SCREAMING_SNAKE_CASE no nome das constantes.
 
 ```ruby
 # Criando módulo
@@ -298,10 +359,16 @@ module Sobre
     def somar(x, y)
         x + y
     end
+
+    def self.subtrair(x, y)
+        x - y
+    end
 end
 
 # Acessando módulo
-Sobre::VERSAO
+Sobre::VERSAO           # Saída: "3.1.1"
+Sobre.subtrair(2, 1)    # Saída: 1
+Sobre::subtrair(3, 1)   # Saída: 2
 ```
 
 ## Mixin
@@ -325,32 +392,33 @@ end
 # Criando mixin
 class MeuMixin
     include Calculadora
-    include Email
+    extend Email
 end
 
 # Utilizando Mixin
-mm = MeuMixin.new
-mm.calcular
-mm.enviar_email
+mixin = MeuMixin.new
+mixin.calcular
+
+MeuMixin.enviar_email
 ```
 
 ## Symbols x Strings
 
 Simbolo é todo objeto iniciado por dois pontos (:) seguido por uma palavra qualquer. Texto é uma string contida entre aspas simples ou duplas.
 
-O método **\*.object_id** retorna o _id_ único do objeto, inclusive strings e inteiros. Por mais que o _conteúdo_ da string, por exemplo, seja o mesmo, o object*id será diferente. Porém, o **object_id** de um \_symbol* será o mesmo. Ou seja, a string é repetida na memória quando declarada com o mesmo conteúdo, mas o symbol não.
+O método **\*.object_id** retorna o _id_ único do objeto, inclusive strings e inteiros. Por mais que o _conteúdo_ da string, por exemplo, seja o mesmo, o object_id será diferente. Porém, o **object_id** de um _symbol_ será o mesmo. Ou seja, a string é repetida na memória quando declarada com o mesmo conteúdo, mas o symbol não.
 
 > OBS: Symbols que requerem caracteres especiais (inclusive espaços), utilize aspas. Ex.: :'pt-BR'
 
 ```ruby
 # Symbol
-:my_text.class # Saída: String
+:my_text.class      # Saída: String
 :my_text.object_id # Saída: 984808
 :my_text.object_id # Saída: 984808
 :my_text.object_id # Saída: 984808
 
 # Texto
-"my_text".class # Saída: Symbol
+"my_text".class     # Saída: Symbol
 "my_text".object_id # Saída: 835345435
 "my_text".object_id # Saída: 825124463
 "my_text".object_id # Saída: 865434534

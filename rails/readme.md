@@ -73,7 +73,7 @@ No contexto Rails é como se o app recém gerado estivesse pré-moldado para que
 
 Gera os arquivos necessários (MVC) e configura as rotas para realizar CRUD da entidade criada e também o arquivo de _migrate_. É necessário realizar a migração para o banco de dados (próx. conteúdo).
 
-![Scaffold](./images/Scaffold.jpeg)
+![Scaffold](../images/Scaffold.jpeg)
 
 > OBS: O nome do modelo é no singular, mas no banco de dados é no plural (convenção).
 
