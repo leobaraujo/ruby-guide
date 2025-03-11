@@ -1,3 +1,9 @@
+# TODO
+
+- Separar conteúdo relacionado a "gems"
+- Lista de gemas [clique aqui](https://www.youtube.com/watch?v=dMyDS4oYlvo&list=PLe3LRfCs4go-mkvHRMSXEOG-HDbzesyaP&index=22)
+- gem faker: Informações falsas ideais para seed
+
 # Ruby on Rails
 
 [Descrição dos métodos](https://apidock.com/rails)
@@ -56,10 +62,24 @@ Para configurar o banco de dados, modifique o arquivo **config/database.yml**.
 
 É uma gema para gerenciamento de tarefas. Contém scripts geradores úteis para aplicações Rails.
 
+> Comando _rake -T_ mostra todos os rake task do projeto. Para filtrar, utilize _rake -T db_ e tudo que começar com "db" será mostrado.
+
+#### Sintaxe
+
+```shell
+# rake namespace:rake_task
+rake db:create
+```
+
 #### Comandos
 
 - rake db:create - Cria o banco de dados de acordo com o **config/database.yml** (DB de produção deve ser especificado)
 - rake db:migrate - Gera as tableas de acordo com os models da aplicação
+- rake db:seed - Popula tabelas com informações pré-definidas. Casos de uso: Tabelas auxiliares como lista de bancos suportados, cidades, etc. (Arquivo db/seeds.rb)
+
+#### Criando Rake Task
+
+TODO
 
 ## CoC (Convention over Configuration)
 
@@ -98,11 +118,11 @@ rake db:migrate
 
 ## Views
 
-> NOTA: Toda view, partial, etc.. Passa por app/views/application.html.erb. Ao utilizar prompts generators para framework front-end, o nome do "application" é 'application' (nome do root da view).
+> NOTA: Toda view, partial, etc.. Passa por app/views/application.html.erb (root da view).
 
 ### Embedded Ruby
 
-É um sistema de template que combina a linguagem Ruby com texto. Sua extensão é **\*.erb**.
+É um sistema de template que combina a linguagem Ruby com texto. Sua extensão é **.erb**.
 
 Tags
 
@@ -144,7 +164,7 @@ Local onde está presente as **ações** do sistema. Para toda _ação_, haverá
 
 O arroba "@" antes do nome da variável indica que a variável é uma variável de instância. Em Rails, ao criar uma variável de instância no controller, a view também terá acesso a ela.
 
-> OBS: O nome da _view_ **deve** ser o mesmo do método do _controller_.
+> OBS: O nome da _view_ **deve** ser o mesmo do **método** do _controller_, no caso, index.
 
 ```ruby
 # Controller "customers_controller.rb"
@@ -153,23 +173,24 @@ def index
 end
 
 # View "customers/index.html.erb"
-<% @customer.each do |customer| %>
+<% @customers.each do |customer| %>
     <%= customer.name %>
 <% end %>
 ```
 
 ### before_action x before_filter
 
-> São o mesmo elemento. before_filter até rails 3.x e before_action >= 4.x.
+> São o mesmo elemento. before*filter até rails 3.x e before_action >= 4.x. São filtros exclusivo do \_Rails*.
 
 Em Rails, filtros são métodos que são executados antes, depois ou ambos os casos (around) de uma ação de controle. Evita repetição de código (DRY).
 
 ```ruby
-# before_action :method_name, only: [:method_name, :method_name]
+# before_action :method_to_include, only: [:method_name, :method_name]
 
 class Customer < ApplicationController
-  # OBS: São filtros exclusivo do *Rails*
   before_action :set_customer, only: [:hello]
+  #after_action :set_customer, only: [:hello]
+  #around_action :set_customer, only: [:hello]
 
   def hello
     puts customer.name
@@ -186,10 +207,10 @@ end
 
 > config/routes.rb
 
-Arquivo que determina as rotas (e verbos) da aplicação. A url "/rails/info/routes" mostra todas as rotas disponíveis no aplicativo.
+Arquivo que determina as rotas (e verbos) da aplicação. A URL "<host>/rails/info/routes" mostra todas as rotas disponíveis no aplicativo.
 
 ```ruby
-# [get | post | put | patch | delete | options] "nome_da_rota" => "view#action"
+# [get | post | put | patch | delete | options] "nome_da_rota" => "controller#action"
 get "inicio" => "welcome#index"
 
 # Rota padrão (raiz), index da aplicação
@@ -225,7 +246,7 @@ São comandos **Rails** para ajudar o desenvolvedor.
 
 Utilitários:
 
-- link*to: Substitui o "href" do elemento \_anchor*
+- link_to: Substitui o "href" do elemento \_anchor\*
 - [Lista completa](https://guides.rubyonrails.org/action_view_helpers.html)
 
 ```
@@ -288,3 +309,7 @@ l() # Localização
 ### Twitter Bootstrap
 
 Framework web front-end para desenvolver aplicativos responsivos. Acesse [aqui](https://getbootstrap.com/2.0.2/).
+
+### Rails Composer
+
+App terceiro que gera template de views.
