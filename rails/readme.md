@@ -64,11 +64,37 @@ Para configurar o banco de dados, modifique o arquivo **config/database.yml**.
 
 > Comando _rake -T_ mostra todos os rake task do projeto. Para filtrar, utilize _rake -T db_ e tudo que começar com "db" será mostrado.
 
-#### Sintaxe
-
 ```shell
+# Sintaxe
+
 # rake namespace:rake_task
 rake db:create
+```
+
+#### Criando Rake Task
+
+As tasks geradas pelo comando generate são salvas em _lib/tasks/_ com a extensão _.rake_
+
+> Comando: _rails generate task [namespace] [task_name]_
+
+```ruby
+# rails generate task utils say_hello
+# lib/tasks/utils.rake
+namespace :utils do
+  desc "Say Hello World n times"      # Descrição ao utilizar 'rake -T'
+  task say_hello: :environment do
+  # Algoritmo
+    if Rails.env.development?     # Verifica o ambiente
+      ENV['QTD'].to_i.times do |i|     # Valor da chave 'QTD' ao utilizar o comando rake (ARGV contém todos argumentos)
+        puts "Hello World"
+      end
+    end
+  end
+
+  # Para adicionar mais uma rake task a este namespace, copie e modifique o bloco a cima
+end
+
+# Comando: rake utils:say_hello QTD=10
 ```
 
 #### Comandos
@@ -157,6 +183,38 @@ São arquivos com a extensão _.html.erb_ cujo nome começam com underline (\_).
 ## Models
 
 Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma comunicação com o Banco de Dados gerando as informações na mesma. Active Record é um ORM (Object Relational Mapping).
+
+### Associações
+
+- belongs_to: Pertence
+- has_many: Tem muitos
+
+![Associação](./images/Associacao.jpeg)
+
+> Associações/referências dentro de tabelas em Ruby seguem a seguinte convenção: model-name_id. Lembre-se que o nome dos models são no __singular__ (as tabelas ficarão no plural).
+
+No exemplo acima, "Child" belongs_to "Father" e "Father" has_many "Child".
+
+```shell
+rails g model Father name:string
+rails g model Child name:string father:references
+
+# OBS: É preciso adicionar "has_many :child" no model Father
+```
+
+Para controlar os modelos com Orientação a objetos, é possível fazer da seguinte forma:
+
+```ruby
+pai = Father.create(name: "John Doe")
+filho = Child.create(name: "Junior Doe")
+
+filho.father = pai  # Necessário para salvar o modelo
+filho.save!
+
+# ou
+
+father.children.create(name: "Maria Doe")
+```
 
 ## Controllers
 
