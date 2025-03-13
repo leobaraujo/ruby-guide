@@ -128,6 +128,22 @@ Gera os arquivos necessários (MVC) e configura as rotas para realizar CRUD da e
 rails generate scaffold nome:tipo nome:tipo nome:tipo ...
 ```
 
+#### Adicionando/removendo campos
+```shell
+# Sintaxe
+# Troque YYY pelo nome do model. Adicione o "s" em "Field" caso seja mais de um campo
+rails generate migration AddFieldToYYY atribute:type
+rails generate migration RemoveXXXFromYYY
+
+# Exemplo
+rails g migration addFieldToPerson name:string
+
+# Aplicando modificações no Banco de Dados
+rake db:migrate
+```
+
+> É preciso permitir os novos campos no controller para realizar atualizações nas requisições
+
 ## Migration
 
 A troca de informações entre o Banco de Dados e a aplicação Rails é realizada através das _migrates_.
@@ -180,6 +196,23 @@ São arquivos com a extensão _.html.erb_ cujo nome começam com underline (\_).
 # programação e renderização. No contexto React, seria como um componente.) ...
 ```
 
+### Formulário
+
+```ruby
+# Select
+# OBS: {include_blank: [true | false | "string_placeholder"]}
+select("model_name", "attribute", %w(option option option), {include_blank: true})
+
+# "f" representa o model no closure "form_for". ":attribute" é o symbol com o nome do atributo do model. "@person.sex" altera o "M" para "Masculino" (neste caso) para quando for modificar o model
+f.select(:attribute, options_for_select([["Masculino", "M"], ["Feminino", "F"]], @person.sex), {include_blank: "Selecione"})
+
+# Collection select
+# f.collection_select(nome_do_campo, modelos_para_popular, valor, nome_da_option, include_blank)
+f.collection_select(:model_id, @models, :id, :name, include_blank: true)
+
+# OBS: "include_blank" pode ser substituido para "prompt" que contém uma mensagem padrão. Evite chamar o model dentro da view, utilize uma variável que contenha a informação desejada
+```
+
 ## Models
 
 Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma comunicação com o Banco de Dados gerando as informações na mesma. Active Record é um ORM (Object Relational Mapping).
@@ -189,9 +222,9 @@ Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma c
 - belongs_to: Pertence
 - has_many: Tem muitos
 
-![Associação](./images/Associacao.jpeg)
+![Associação](/images/Associacao.jpeg)
 
-> Associações/referências dentro de tabelas em Ruby seguem a seguinte convenção: model-name_id. Lembre-se que o nome dos models são no __singular__ (as tabelas ficarão no plural).
+> Associações/referências dentro de tabelas em Ruby seguem a seguinte convenção: model-name_id. Lembre-se que o nome dos models são no __singular__ (as tabelas ficarão no plural) e o "_id" será adicionado automaticamente.
 
 No exemplo acima, "Child" belongs_to "Father" e "Father" has_many "Child".
 
@@ -314,6 +347,10 @@ Utilitários:
 # <%= link_to "Texto", "/customers" %> >> 'customers_path' é gerado automaticamente pelo Rails (/rails/info/routes)
 <%= link_to "Texto", customers_path %>
 ```
+
+#### Criando helper
+
+Os _helpers_ encontram-se na pasta _/app/helpers_. Cada model tem seu helper e o helper criado dentro de "application_helper.rb" será um helper global. O método criado pode ser chamado na view especificada ou em todas (caso tenha sido criado em "application_helper").
 
 ## Active Record
 
