@@ -48,6 +48,7 @@ Características:
 - rails server (ou apenas "s"): Inicia o projeto
 - - rails s -e [production | development | test]: Altera o modo de execução da aplicação
 - rails generate [model | view | controller | scaffold | etc..] <name?>
+- rails destroy migration [nome_da_migration]: TODO
 - rails console (ou apenas "c"): Prompt de comando para a aplicação Rails. Todas as classes presentes no app Rails são carregadas e ficam prontas para uso no console.
 - rails db:[create | migrate | seed]: TODO
 - rails assets:precompile: TODO
@@ -129,6 +130,7 @@ rails generate scaffold nome:tipo nome:tipo nome:tipo ...
 ```
 
 #### Adicionando/removendo campos
+
 ```shell
 # Sintaxe
 # Troque YYY pelo nome do model. Adicione o "s" em "Field" caso seja mais de um campo
@@ -217,6 +219,16 @@ f.collection_select(:model_id, @models, :id, :name, include_blank: true)
 
 Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma comunicação com o Banco de Dados gerando as informações na mesma. Active Record é um ORM (Object Relational Mapping).
 
+> OBS: É possível criar métodos personalizados dentro do model.
+
+```ruby
+class Person < ApplicationRecord
+  def hello
+    "Hello!!"
+  end
+end
+```
+
 ### Associações
 
 - belongs_to: Pertence
@@ -224,7 +236,7 @@ Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma c
 
 ![Associação](/images/Associacao.jpeg)
 
-> Associações/referências dentro de tabelas em Ruby seguem a seguinte convenção: model-name_id. Lembre-se que o nome dos models são no __singular__ (as tabelas ficarão no plural) e o "_id" será adicionado automaticamente.
+> Associações/referências dentro de tabelas em Ruby seguem a seguinte convenção: model-name_id. Lembre-se que o nome dos models são no **singular** (as tabelas ficarão no plural) e o "\_id" será adicionado automaticamente.
 
 No exemplo acima, "Child" belongs_to "Father" e "Father" has_many "Child".
 
@@ -354,11 +366,11 @@ Os _helpers_ encontram-se na pasta _/app/helpers_. Cada model tem seu helper e o
 
 ## Active Record
 
-> Active Record também é um padrão de projeto para Banco de Dados relacionais.
-
 Active Record é um framework presente no Ruby on Rails e é responsável por tratar a persistência das informações no Banco de Dados.
 
 Active Record permite o desenvolvedor crie DBs sem necessitar de SQL, pois, utiliza DSL (Doman Specif Language)
+
+> Active Record também é um padrão de projeto para Banco de Dados relacionais. **É onde ocorre as validações**.
 
 ```ruby
 # Operações CRUD
@@ -373,6 +385,29 @@ model.save
 <Model>.where(name: :Josivaldo) # Filtra os objetos e retorna um array. Argumento é 'hash'
 <Model>.find(:id => 1) # Filtra os objetos e retorna um único elemento. Argumento é 'hash'
 ```
+
+### Validações (Active Record Validations)
+
+Active Record Validation verifica o valor do atributo antes de salvá-lo no banco de dados, as alterações são realizadas dentro do model.
+
+Lista de critérios possíveis [aqui](https://guides.rubyonrails.org/active_record_validations.html).
+
+```ruby
+# Modelo
+class Person < ApplicationRecord
+  # Valida que o atributo "name" não é vazio (nil)
+  validates :name, presence: true
+  validates :email, presence: true, uniqueness: true
+end
+
+# Execução
+Person.new(name: "John Doe").valid? # true
+Person.new(name: nil).valid?        # false
+```
+
+### Métodos de model
+
+TODO: Validações e mensagens de erro personalizadas
 
 ## i18n (Internationalization)
 
@@ -398,6 +433,10 @@ i18n.l() # Localização
 t(:'caminho.da.chave') # Tradução
 l() # Localização
 ```
+
+## Upload de arquivos
+
+> gem Paperclip
 
 ## Framework front-end
 
