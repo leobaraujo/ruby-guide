@@ -281,16 +281,53 @@ class Pessoa
 end
 ```
 
-### Variáveis de instância
+### Self
 
-Em Ruby, o '@' antes do nome de uma variável indica que ela é uma variável de instância. Variáveis de instância são associadas a uma instância de uma classe e podem ser acessadas em qualquer método dessa instância. Elas são privadas, ou seja, requer getter e setter para ser acessada fora da classe.
+> Em Ruby, a palavra-chave _self_ tem um funcionamento semelhante ao **this** em outras linguagens de programação. Porém, pode se referir tanto à instância quanto à classe.
+
+Self é uma palavra reservada que dá acesso ao objeto corrente. Por exemplo, ao instanciar uma classe chamada Pessoa através da variável _ps_, estou acessando a classe (objeto corrente) através dessa variável.
+
+Quando utilizamos o _self_ fora duma classe, acessamos o _namespace_ global que é o **main**.
+
+```ruby
+puts self   # Saída: main
+
+class Pessoa
+    # Helper que gera o getter e setter
+    attr_accessor :nome
+
+    # Método construtor
+    def initialize(nom)
+        self.nome = nome    # Self refere-se à instância atual
+    end
+
+    def saudacao
+        puts "Olá, meuy nome é ${self.nome}"
+    end
+
+    def self.natureza
+        puts "Método de classe"
+    end
+end
+
+Pessoa.natureza # Saída: "Método de classe"
+ps = Pessoa.new("João")
+ps.saudacao       # Saída: "Olá, meuy nome é João"
+```
+
+#### Variáveis de instância
+
+Em Ruby, o '@' (ou self) antes do nome de uma variável indica que ela é uma variável de instância. Variáveis de instância são associadas a uma instância de uma classe e podem ser acessadas em qualquer método dessa instância. Elas são privadas, ou seja, requer getter e setter para ser acessada fora da classe.
 
 ```ruby
 class Pessoa
+    # Helper gerador de getter/setter
+    attr_accessor :idade
+
     # Método construtor (construct)
     def initialize(nome, idade)
         @nome = nome
-        @idade = idade
+        self.idade = idade
     end
 
     # Getter para @nome
@@ -305,7 +342,7 @@ class Pessoa
     end
 
   def apresentar
-    puts "Olá, meu nome é #{@nome} e tenho #{@idade} anos."
+    puts "Olá, meu nome é #{@nome} e tenho #{idade} anos."
   end
 end
 
@@ -319,6 +356,8 @@ puts pessoa.nome
 ### Variáveis de classe
 
 Pertencem à classe como um todo e são compartilhadas por todas as instâncias da classe.
+
+> Em Java, por exemplo, seriam métodos estáticos.
 
 ```ruby
 class Pessoa
@@ -338,6 +377,35 @@ pessoa1 = Pessoa.new("João")
 pessoa2 = Pessoa.new("Maria")
 
 puts Pessoa.contador  # Saída: 2
+```
+
+### Monkey Patch
+
+> Também é possível modificar uma classe com o método **class_eval**. Para modificar métodos de um objeto, utilize **instance_eval**.
+
+Permite o desenvolvedor a modificar uma classe já existente em momento de execução através das seguintes formas:
+
+- Criando um novo método
+- Sobreescrevendo um método existente
+
+```ruby
+# Criando
+class String
+    def novo_metodo
+        puts "Sou um novo método!"
+    end
+end
+
+"teste".novo_metodo # Saída: "Sou um novo método!"
+
+# Sobreescrita
+class String
+    def novo_metodo
+        puts "Olá ${self}"
+    end
+end
+
+"teste".novo_metodo # Saída: "Olá teste"
 ```
 
 ## Módulo
@@ -406,7 +474,7 @@ MeuMixin.enviar_email
 
 Simbolo é todo objeto iniciado por dois pontos (:) seguido por uma palavra qualquer. Texto é uma string contida entre aspas simples ou duplas.
 
-O método **\*.object_id** retorna o _id_ único do objeto, inclusive strings e inteiros. Por mais que o _conteúdo_ da string, por exemplo, seja o mesmo, o object_id será diferente. Porém, o **object_id** de um _symbol_ será o mesmo. Ou seja, a string é repetida na memória quando declarada com o mesmo conteúdo, mas o symbol não.
+O método **\*.object_id** retorna o _id_ único do objeto, inclusive strings e inteiros. Por mais que o _conteúdo_ da string, por exemplo, seja o mesmo, o object*id será diferente. Porém, o **object_id** de um \_symbol* será o mesmo. Ou seja, a string é repetida na memória quando declarada com o mesmo conteúdo, mas o symbol não.
 
 > OBS: Symbols que requerem caracteres especiais (inclusive espaços), utilize aspas. Ex.: :'pt-BR'
 
