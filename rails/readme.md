@@ -384,6 +384,14 @@ model.save
 <Model>.last # Retorna o último elemento
 <Model>.where(name: :Josivaldo) # Filtra os objetos e retorna um array. Argumento é 'hash'
 <Model>.find(:id => 1) # Filtra os objetos e retorna um único elemento. Argumento é 'hash'
+
+# Método "where" com "like"
+<Model>.where("name like '%#{params[:name]}%'") # ERRO: Perigo de SQL Injection
+<Model>.where("name like ?", "%#{params[:name]}%") # Correto
+
+# TODO: Pesquisar escopos (Scopes)
+
+# DICA: Modifique o Model para ter um método where_like
 ```
 
 ### Validações (Active Record Validations)

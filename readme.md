@@ -16,7 +16,7 @@ Características:
 
 Sintaxe:
 
-> TODO
+- Ruby style guide: Um guia sobre como escrever seu código Ruby [Link](https://github.com/rubocop/ruby-style-guide)
 
 Instalação:
 
@@ -33,6 +33,14 @@ ruby meu_script.rb
 - REPL: Read-eval-print-loop - Permite executar código Ruby direto pelo promp de comando. Alternativas:
 - - IRB: Interactive Ruby Shell
 - - PRY: É uma Ruby Gem parecido com o IRB, porém, há recursos adicionais como: Destaque de sintaxe, preenchimento automático, depuração, etc...
+
+## Parênteses, Colchetes e Chaves
+
+Em Ruby, **parênteses** é opcional, inclusive no momento de criar o método.
+
+**Colchetes** são utilizados para criar/acessar arrays.
+
+**Chaves** são utilizadas para criar hashs e closures (blocos). Também é utilizado para substituir o _do...end_ quando ele é apenas uma única linha.
 
 ## Array e Hash
 
@@ -381,12 +389,14 @@ puts Pessoa.contador  # Saída: 2
 
 ### Monkey Patch
 
-> Também é possível modificar uma classe com o método **class_eval**. Para modificar métodos de um objeto, utilize **instance_eval**.
+> Afeta todas as instâncias da classe.
 
 Permite o desenvolvedor a modificar uma classe já existente em momento de execução através das seguintes formas:
 
 - Criando um novo método
 - Sobreescrevendo um método existente
+
+> Também é possível modificar uma classe com o método **class_eval**. Para modificar métodos de um objeto, utilize **instance_eval**.
 
 ```ruby
 # Criando
@@ -468,6 +478,57 @@ mixin = MeuMixin.new
 mixin.calcular
 
 MeuMixin.enviar_email
+```
+
+## Singleton Pattern x Singleton Class
+
+Singleton Pattern é um padrão de projeto (_Design Pattern_) que garante a _existência de apenas uma instância de uma classe_ mantendo um ponto global de acesso ao seu objeto.
+
+Em Ruby, o padrão Singleton _parece_ uma classe estática. É comumente utilizado em classes que instanciam Banco de Dados e geram Logs.
+
+```ruby
+require "singleton"
+
+class Foobar
+    include Singleton
+
+    def oi
+        puts "Oi"
+    end
+end
+
+foo = Foobar.new    # ERROR!
+Foobar.instance.oi  # Saída: "Oi"
+```
+
+Singleton Class (também chamada de Eigenclass ou Metaclass) é uma classe especial que é criada automaticamente para um objeto específico. Essa classe é usada para armazenar métodos que são exclusivos para aquele objeto, ou seja, métodos que não são compartilhados com outras instâncias da mesma classe.
+
+É a mesma coisa que realizar o _object.instance_eval do_.
+
+> Ruby Object Model
+
+```ruby
+class Teste
+    def oi
+        puts "Oi"
+    end
+end
+
+x = Teste.new
+y = Teste.new
+
+x.oi    # Saída: "Oi"
+y.oi    # Saída: "Oi"
+
+# Adicionando um método à Singleton Class do objeto y
+class << y
+    def hello
+        puts "Hello"
+    end
+end
+
+x.hello # ERROR!
+y.hello # Saída: "Hello"
 ```
 
 ## Symbols x Strings
