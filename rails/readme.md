@@ -215,6 +215,57 @@ f.collection_select(:model_id, @models, :id, :name, include_blank: true)
 # OBS: "include_blank" pode ser substituido para "prompt" que contém uma mensagem padrão. Evite chamar o model dentro da view, utilize uma variável que contenha a informação desejada
 ```
 
+#### Formulários complexos e Nested Attributes
+
+**Problemática**: Ao criar um usuário através de um formulário com os campos "Nome, e-mail e telefone" e "Endereço, cód. postal, referência", como saber quais dados são do modelo Usuário e quais dados são do modelo Endereço?
+
+Quando um modelo tem o helper __has_one__ (no caso, Usuário tem apenas um endereço) o método __build_\*__ (* é o nome do modelo) fica acessível para o modelo. O método faz com que ao criar o Endereço e salvar o usuário sejam salvos duas entidades diferentes no banco de dados.
+
+> É preciso atualizar o controller para permitir os novos campos vindo do formulário.
+
+```ruby
+# OBS: As classes contém construtor apenas para demonstrar os seus atributos
+
+# Criando classes
+class Usuario
+  attr_accessor :nome, :email, :telefone
+  has_one :endereco
+  accepts_nested_attributes_for :endereco
+
+  def initialize(nome, email, telefone)
+    self.nome = nome
+    self.email = email
+    self.telefone = telefone
+  end
+end
+
+class Endereco
+  attr_accessor :endereco, :cep, :referencia
+  belongs_to :usuario
+
+  def initialize(endereco, cep, referencia)
+    self.endereco = endereco
+    self.cep = cep
+    self.referencia = referencia
+  end
+end
+
+# Criando sem "accepts_nested_attributes_for"
+usuario = Usuario.new(nome: "John Doe", email: "johndoe@email.com", telefone: "12345678")
+usuario.build_endereco(endereco: "Rua A", cep: "87654321", referencia: "Padaria")
+
+# Criando com "accepts_nested_attributes_for"
+usuario = Usuario.new(nome: "John Doe", email: "johndoe@email.com", telefone: "12345678", endereco_attributes: {endereco: "Rua A", cep: "87654321", referencia: "Padaria"})
+```
+
+```ruby
+# Controller
+def new
+  @usuario = Usuario.new
+  @usuario.build_endereco # Novo
+end
+```
+
 ## Models
 
 Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma comunicação com o Banco de Dados gerando as informações na mesma. Active Record é um ORM (Object Relational Mapping).
@@ -366,7 +417,9 @@ Os _helpers_ encontram-se na pasta _/app/helpers_. Cada model tem seu helper e o
 
 ## Active Record
 
-Active Record é um framework presente no Ruby on Rails e é responsável por tratar a persistência das informações no Banco de Dados.
+Active Record é uma gem presente no Ruby on Rails e é responsável por tratar a persistência das informações no Banco de Dados.
+
+> NOTA: Para visualizar os campos do modelo, veja os arquivos de migrate.
 
 Active Record permite o desenvolvedor crie DBs sem necessitar de SQL, pois, utiliza DSL (Doman Specif Language)
 
@@ -445,6 +498,10 @@ l() # Localização
 ## Upload de arquivos
 
 > gem Paperclip
+
+## Devise
+
+[Guia da gem](https://github.com/heartcombo/devise)
 
 ## Framework front-end
 
