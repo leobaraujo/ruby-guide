@@ -219,7 +219,7 @@ f.collection_select(:model_id, @models, :id, :name, include_blank: true)
 
 **Problemática**: Ao criar um usuário através de um formulário com os campos "Nome, e-mail e telefone" e "Endereço, cód. postal, referência", como saber quais dados são do modelo Usuário e quais dados são do modelo Endereço?
 
-Quando um modelo tem o helper __has_one__ (no caso, Usuário tem apenas um endereço) o método __build_\*__ (* é o nome do modelo) fica acessível para o modelo. O método faz com que ao criar o Endereço e salvar o usuário sejam salvos duas entidades diferentes no banco de dados.
+Quando um modelo tem o helper **has_one** (no caso, Usuário tem apenas um endereço) o método **build\_\*** (\* é o nome do modelo) fica acessível para o modelo. O método faz com que ao criar o Endereço e salvar o usuário sejam salvos duas entidades diferentes no banco de dados.
 
 > É preciso atualizar o controller para permitir os novos campos vindo do formulário.
 
@@ -526,11 +526,33 @@ l() # Localização
 
 [Guia da gem](https://github.com/varvet/pundit)
 
-### Ransack
+## Ransack
 
 > Pesquisa no Banco de Dados como "ElasticSearch"
 
 [Guia da gem](https://github.com/activerecord-hackery/ransack)
+
+## Testes
+
+Principais tipos de testes:
+
+- **Teste Unitário**: É toda a aplicação de teste na assinaturas de entrada e saída de um sistema. Consiste em validar dados válidos e inválidos via I/O. Uma unidade é a menor parte testável de um programa de computador. **Testa métodos** na prática.
+- **Teste de Integração**: É a fase do teste de software em que módulos são combinados e testados em grupo. Ela sucede o teste de unidade, em que os módulos são testados individualmente, e antecede o teste de sistema, em que o sistema completo (integrado) é testado num ambiente que simula o ambiente de produção. **É quando temos mais de um teste de unidade testado ao mesmo tempo**.
+- **Teste de Aceitação**: É uma fase do processo de teste em que um teste de caixa-preta é realizado num sistema antes de sua disponibilização. Tem por função verificar o sistema em relação aos seus requisitos originais, e às necessidades atuais do usuário. **Testa se o sistema atende aos requisitos**, valida as ações do usuário como clicar e preencher campos.
+
+A gem _RSpec(-Rails)_ (pasta _spec_) é utilizada para Testes Unitários e de Integração, já para Testes de Aceitação, é utilizado a gem _Capybara_. Por padrão o Rails utiliza a biblioteca MiniTest (pasta padrão _test_).
+
+### TDD (Test Driven Development)
+
+É uma metodologia de desenvolvimento de software que visa criar software de maior qualidade e confiabilidade.
+
+Como funciona o TDD?
+
+- O desenvolvedor escreve um teste que representa o que o código deve fazer
+- O desenvolvedor cria o código para passar nesse teste
+- O código é alterado iterativamente até que os testes sejam bem-sucedidos
+
+![TDD](../images/tdd.png)
 
 ## Framework front-end
 
