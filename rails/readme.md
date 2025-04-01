@@ -470,6 +470,21 @@ Person.new(name: nil).valid?        # false
 
 TODO: Validações e mensagens de erro personalizadas
 
+### Enum
+
+```ruby
+class Conversation < ActiveRecord::Base
+  # Cria um enum cujo valor no Banco de Dados será o 'key' do 'value'
+  enum status: [:active, :archived]
+end
+
+# Gera métodos para definir e checar automaticamente
+conversation.active!    # Define o valor de "status" para active (0)
+conversation.archived!  # Define o valor de "status" para archived (1)
+conversation.active?    # Retorna "true" ou "false" dependendo do valor do "status"
+conversation.status     # Saída: "archived"
+```
+
 ## i18n (Internationalization)
 
 Maneira simplificada para traduzir páginas Rails.
@@ -501,7 +516,21 @@ l() # Localização
 
 ## Devise
 
+> Autenticação
+
 [Guia da gem](https://github.com/heartcombo/devise)
+
+### Pundit
+
+> Autorização
+
+[Guia da gem](https://github.com/varvet/pundit)
+
+### Ransack
+
+> Pesquisa no Banco de Dados como "ElasticSearch"
+
+[Guia da gem](https://github.com/activerecord-hackery/ransack)
 
 ## Framework front-end
 
