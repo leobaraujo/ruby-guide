@@ -266,6 +266,26 @@ def new
 end
 ```
 
+### Conteúdo head personalizado
+
+Dentro da tag head em _app/views/layouts/application.html.erb_ adicione __<%= yield :head %>__ e dentro da view, adicione o bloco __content\_for :head do__. Adicione o _yield_ na primeira linha da tag head.
+
+```html
+<!-- app/views/layouts/application.html.erb -->
+<head>
+  <%= yield :head %>
+  <!-- ... -->
+</head>
+```
+
+```html
+<!-- app/views/minha_view/index.html.erb -->
+<% content_for :head do %>
+  <title>A simple page</title>
+<% end %>
+<p>Hello, Rails!</p>
+```
+
 ## Models
 
 Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma comunicação com o Banco de Dados gerando as informações na mesma. Active Record é um ORM (Object Relational Mapping).
@@ -563,3 +583,39 @@ Framework web front-end para desenvolver aplicativos responsivos. Acesse [aqui](
 ### Rails Composer
 
 App terceiro que gera template de views.
+
+## Asset Pipeline
+
+Provê um framework para concatenar (unificar) e minificar (comprimir) recursos como JavaScript e CSS. Também permite escrever esses formatos a partir de pré-processadores como CoffeeScript, Sass e ERB.
+
+> Gem padrão: Sprockets. OBS: Requer um runtime JS em ruby como ExecJS.
+
+Fingerprint (impressão digital) é a técnica que "força" o navegador a fazer o download dos _assets_ afim de sobreescrever o cache. Esta técnica é realizada modificando o nome dos assets e quando o navegador identifica um novo nome para o recurso, ele realiza o download - é uma ação realizada automaticamente quando os assets são compilados.
+
+Locais onde é recomendado colocar os arquivos tipo assets (Organização):
+
+- app/assets: Local onde fica os assets gerados __automaticamente__
+- lib/assets: Assets __criados__ pelo desenvolvedor
+- vendor/assets: Assets de __terceiros__ como plugins
+
+
+### Assets personalizados
+
+Para apontar quais assets devem ser pré-compilados, modifique o seguinte arquivo:
+
+```ruby
+# config/initializers/assets.rb
+Rails.application.config.assets.precompile += %w( nome_do_asset.[js | coffee | sass | css] )
+```
+
+Para utilizar o asset compilado, modifique o seguinte arquivo:
+
+```html
+<!-- app/views/layouts/application.html.erb -->
+<%= stylesheet_link_tag 'nome_do_asset' %>
+<%= javascript_include_tag 'nome_do_asset' %>
+
+<!-- params[:controller] retorna a página atual (url) -->
+<!-- Faz com que cada página tenha seu assets -->
+ <%= javascript_include_tag params[:controller] %>
+```
