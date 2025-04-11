@@ -2,6 +2,7 @@
 
 - Separar conteúdo relacionado a "gems"
 - Lista de gemas [clique aqui](https://www.youtube.com/watch?v=dMyDS4oYlvo&list=PLe3LRfCs4go-mkvHRMSXEOG-HDbzesyaP&index=22)
+- Ruby-Toolbox [Clique aqui](https://www.ruby-toolbox.com/)
 - gem faker: Informações falsas ideais para seed
 
 # Ruby on Rails
@@ -268,7 +269,7 @@ end
 
 ### Conteúdo head personalizado
 
-Dentro da tag head em _app/views/layouts/application.html.erb_ adicione __<%= yield :head %>__ e dentro da view, adicione o bloco __content\_for :head do__. Adicione o _yield_ na primeira linha da tag head.
+Dentro da tag head em _app/views/layouts/application.html.erb_ adicione **<%= yield :head %>** e dentro da view, adicione o bloco **content_for :head do**. Adicione o _yield_ na primeira linha da tag head.
 
 ```html
 <!-- app/views/layouts/application.html.erb -->
@@ -281,7 +282,7 @@ Dentro da tag head em _app/views/layouts/application.html.erb_ adicione __<%= yi
 ```html
 <!-- app/views/minha_view/index.html.erb -->
 <% content_for :head do %>
-  <title>A simple page</title>
+<title>A simple page</title>
 <% end %>
 <p>Hello, Rails!</p>
 ```
@@ -330,6 +331,29 @@ filho.save!
 # ou
 
 father.children.create(name: "Maria Doe")
+```
+
+#### Through
+
+Uma associação [has_many | has_one] :through é frequentemente usada para configurar um relacionamento muitos-para-muitos (ou um-para-um) com outro modelo/entidade.
+
+> Gem recomendada: Cocoon
+
+```ruby
+class Medico < ApplicationRecord
+  has_many :consulta
+  has_many :pacientes, through: :consulta
+end
+
+class Paciente < ApplicationRecord
+  has_many :consulta
+  has_many :medicos, through: :consulta
+end
+
+class Consulta < ApplicationRecord
+  belongs_to :medico
+  belongs_to :paciente
+end
 ```
 
 ## Controllers
@@ -576,6 +600,18 @@ Como funciona o TDD?
 
 ## Framework front-end
 
+### Adicionando assets de terceiros
+
+Utilize o **content_for :head do** dentro da view que deseja adicionar o asset. Para JavaScript utilize a tag _javascript\_include\_tag 'nome\_do\_asset'_ e para CSS utilize _stylesheet\_link\_tag 'nome\_do\_asset'_.
+
+> Lembre-se que é preciso carregar o asset em: config/initializers/assets.rb
+
+Locais onde é recomendado colocar os arquivos tipo assets (Organização):
+
+- app/assets: Local onde fica os assets gerados **automaticamente**
+- lib/assets: Assets **criados** pelo desenvolvedor
+- vendor/assets: Assets de **terceiros** como plugins
+
 ### Twitter Bootstrap
 
 Framework web front-end para desenvolver aplicativos responsivos. Acesse [aqui](https://getbootstrap.com/2.0.2/).
@@ -594,10 +630,9 @@ Fingerprint (impressão digital) é a técnica que "força" o navegador a fazer 
 
 Locais onde é recomendado colocar os arquivos tipo assets (Organização):
 
-- app/assets: Local onde fica os assets gerados __automaticamente__
-- lib/assets: Assets __criados__ pelo desenvolvedor
-- vendor/assets: Assets de __terceiros__ como plugins
-
+- app/assets: Local onde fica os assets gerados **automaticamente**
+- lib/assets: Assets **criados** pelo desenvolvedor
+- vendor/assets: Assets de **terceiros** como plugins
 
 ### Assets personalizados
 
@@ -612,10 +647,44 @@ Para utilizar o asset compilado, modifique o seguinte arquivo:
 
 ```html
 <!-- app/views/layouts/application.html.erb -->
-<%= stylesheet_link_tag 'nome_do_asset' %>
-<%= javascript_include_tag 'nome_do_asset' %>
+<%= stylesheet_link_tag 'nome_do_asset' %> <%= javascript_include_tag
+'nome_do_asset' %>
 
 <!-- params[:controller] retorna a página atual (url) -->
 <!-- Faz com que cada página tenha seu assets -->
- <%= javascript_include_tag params[:controller] %>
+<%= javascript_include_tag params[:controller] %>
 ```
+
+## Ajax
+
+Função JavaScript que permite realizar requisições assincronas sem que a página seja recarregada.
+
+> Ciclo Ruby on Rails (RoR): Browser > Controller > JavaScript > Browser
+
+```ruby
+# OBS: Resposta no formato HTML e Json serão ignoradas neste exemplo. "format.js" será o hook para solicitações tipo JS.
+
+# app/controllers/meu_controller.rb
+def create
+  @user = User.new(user_params)
+
+  respond_to do |format|
+    if @user.save # Sucesso
+      format.js   # retorna o arquivo: app/views/minha_view/create.js.erb
+    else          # Erro
+      format.js
+    end
+  end
+end
+```
+
+```html
+<!-- Adicione "remote: true" no helper "form_for" para relizar chamadas ajax -->
+
+<!-- app/views/minha_view/create.html.erb -->
+<%= form_for(@user, remote: true) do |f| %> <%# ... %> <% end %>
+```
+
+## Painel Administrativo (activeadmin)
+
+> gem: activeadmin [link](https://github.com/activeadmin/activeadmin)
