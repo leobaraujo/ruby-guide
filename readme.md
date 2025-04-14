@@ -28,11 +28,165 @@ Executando script ruby:
 ruby meu_script.rb
 ```
 
+## Preparando setup
+
+> TODO
+
+- Instalação
+- IDE
+  - Extensões
+- Intellisense
+
 ## REPL: IRB e PRY
 
 - REPL: Read-eval-print-loop - Permite executar código Ruby direto pelo promp de comando. Alternativas:
 - - IRB: Interactive Ruby Shell
 - - PRY: É uma Ruby Gem parecido com o IRB, porém, há recursos adicionais como: Destaque de sintaxe, preenchimento automático, depuração, etc...
+
+## Sintaxe básica
+
+```ruby
+#
+```
+
+### Printing
+
+```ruby
+puts "Hello"    # Hello\n (Adiciona quebra de linha)
+print "World"   # World
+```
+
+### Variables & Data Types
+
+Nomes de variáveis são case-sensitive e podem começar com letras e \_ (underline), podem continuar com letras, números e \_.
+
+É uma conveção começar com letra minúscula e quando necessário adicionar uma nova palavra, separe com \_, tal conveção é chamada de **snake_case**. Ex.: minha_variavel.
+
+```ruby
+name = "Mike"   # String
+age = 30        # Integer
+gpa = 3.5       # Float (Decimal)
+is_tall = true  # Booblean -> true/false
+```
+
+### Comments
+
+```ruby
+# Comentário de única linha
+
+=begin
+  Comentário de
+  várias linhas
+  ...
+=end
+```
+
+### Concat
+
+```ruby
+nome = "Leandro"
+
+puts "Meu nome é #{nome}"
+puts "Meu nome é " + nome
+```
+
+### Casting
+
+```ruby
+3.14.to_i   # Float para Integer
+3.to_f      # Integer para Float
+3.0.to_s    # Float para String
+"4".to_i    # String para Integer
+"4.2".to_f  # String para Float
+```
+
+### Strings
+
+```ruby
+greeting = "Hello"
+
+greeting.length         # 5
+greeting[0]             # H
+greeting.include? "ell" # true
+greeting.include? "z"   # false
+greeting[1,3]           # ell
+```
+
+### Numbers
+
+> Atenção à ordem dos operadores.
+
+```ruby
+# Operadores
+2 + 3       # Aritmética básica: +, -, * e /
+3 ** 2      # Exponenciação
+10 % 3      # Resto da divisão
+10 / 3.0    # Saída: 3.333 (Float)
+10 / 3      # Saúda: 3 (Integer)
+
+# Atribuição
+num = 10
+num += 100  # Sinais de atribuição +=, -=, /= e *=
+
+# Métodos
+-10.abs()       # 10 (+)
+36.6.round()    # 37
+
+# Classe Math
+Math.sqrt(100)  # 10
+Math.log(0)     # -Infinity
+```
+
+### User Input
+
+```ruby
+name = gets         # Espera pelo input do usuário. Armazena o "enter" após o input
+name = gets.chomp   # Não armazena o "enter" ao finalizar o input
+```
+
+### Arrays
+
+```ruby
+# Criando/adicionando/modificando
+lista = [9, 8.1, true, "cinco"]
+lista[4] = "seis"
+lista[4] = "dez"
+lista.push(0)
+
+# Acessando
+lista[0]        # 9
+lista.at(1)     # 8.1
+lista[-1]       # dez
+lista[1, 3]     # [8.1, true, "cinco"] (starting_index, lenght)
+lista[1..3]     # [8.1, true, "cinco"] Index 2 até index 4
+lista.length    # Comprimento do array: 6
+```
+
+### 2d Arrays
+
+### Array Functions
+
+### Methods
+
+### If Statements
+
+### Switch Statements
+
+### Dictionaries
+
+### While Loops
+
+### For Loops
+
+### Exception Catching
+
+### Classes & Objects
+
+### Constructors
+
+### Getters & Setters
+
+### Inheritance
 
 ## Parênteses, Colchetes e Chaves
 
