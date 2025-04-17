@@ -1,26 +1,32 @@
 # Ruby
 
+> Versão de estudo: 3.1.1 ([Documentação](https://ruby-doc.org/core-3.1.1/))
+
 ## História
 
-Foi publicada em 1995 por Yukihiro "Matz" Matsumoto no Japão. Ela combina ideias de várias linguagens como Perl, Smalltalk, Eiffel, Ada e Lisp, e é conhecida por sua sintaxe legível e elegante.
+Foi publicada em 1995 por Yukihiro Matsumoto ("Matz") no Japão. Ela combina ideias de várias linguagens como Perl, Smalltalk, Eiffel, Ada e Lisp, e é conhecida por sua sintaxe legível e elegante.
+
+Inicialmente, Ruby não era uma linguagem bem documentada, pois Matz preferia escrever programas a documentação. Ele expressa a sua gratidão a Dave Thomas e Andy Hunt, autores do livro "Programming Ruby" (também conhecido como "PickAxe"), por terem apresentado Ruby em grande escala fora do Japão.
 
 Características:
 
 - Interpretada
 - Alto nível
 - Tipagem dinâmica
-- Orientada a objetos (Tudo é objeto, inclusive números)
-- Multithreading
-- Sistema robusto de tratamento de exceções, semelhante ao Java
-- Extensão do arquivo: \*.rb
+- Multiparadigma, mas com ênfase em Orientação a objetos
+- Multithread
+- Gerenciamento de Pacotes com [RubyGems](https://rubygems.org/?locale=pt-BR)
+- Extensão do arquivo: **.rb**
 
-Sintaxe:
+## Preparando o ambiente
 
-- Ruby style guide: Um guia sobre como escrever seu código Ruby [Link](https://github.com/rubocop/ruby-style-guide)
+Observações:
+- Ruby e Ruby on Rails (RoR) é melhor executado em sistemas GNU/Linux
+- Caso utilize Windows, é recomendado o uso de WSL ou Docker
 
-Instalação:
-
-- [rvm](https://rvm.io/rvm/install) ou [rbenv](https://github.com/rbenv/rbenv): São gerenciadores de versões Ruby
+Passos:
+1. Instalar Ruby com um gerenciador de versões como [rvm](https://rvm.io/rvm/install) ou [rbenv](https://github.com/rbenv/rbenv)
+2. Instalar a Ruby Gem "bundler": gem install bundler
 
 Executando script ruby:
 
@@ -28,42 +34,15 @@ Executando script ruby:
 ruby meu_script.rb
 ```
 
-## Preparando setup
-
-> TODO
-
-- Instalação
-- IDE
-  - Extensões
-- Intellisense
-
 ## REPL: IRB e PRY
 
-- REPL: Read-eval-print-loop - Permite executar código Ruby direto pelo promp de comando. Alternativas:
-- - IRB: Interactive Ruby Shell
-- - PRY: É uma Ruby Gem parecido com o IRB, porém, há recursos adicionais como: Destaque de sintaxe, preenchimento automático, depuração, etc...
+- REPL (Read-Eval-Print-Loop): Permite que você digite código Ruby em um prompt e veja os resultados imediatamente
+- - IRB (Interactive Ruby Shell): Ferramenta **padrão** do Ruby para executar códigos no prompt
+- - PRY: É uma [Ruby Gem](https://rubygems.org/gems/pry) parecido com o IRB, porém, há recursos adicionais como: Destaque de sintaxe, preenchimento automático, depuração, entre outros
 
 ## Sintaxe básica
 
-### Printing
-
-```ruby
-puts "Hello"    # Hello\n (Adiciona quebra de linha)
-print "World"   # World
-```
-
-### Variables & Data Types
-
-Nomes de variáveis são case-sensitive e podem começar com letras e \_ (underline), podem continuar com letras, números e \_.
-
-É uma conveção começar com letra minúscula e quando necessário adicionar uma nova palavra, separe com \_, tal conveção é chamada de **snake_case**. Ex.: minha_variavel.
-
-```ruby
-name = "Mike"   # String
-age = 30        # Integer
-gpa = 3.5       # Float (Decimal)
-is_tall = true  # Booblean -> true/false
-```
+Ruby Style Guide: Um guia sobre como escrever seu código Ruby [Link](https://github.com/rubocop/ruby-style-guide).
 
 ### Comments
 
@@ -77,16 +56,32 @@ is_tall = true  # Booblean -> true/false
 =end
 ```
 
-### Concat (Interpolation)
+### Variables & Data Types
+
+Os nomes de variáveis locais devem começar com uma letra minúscula ou um sublinhado \_. Variáveis de instância começam com @ e variáveis de classe com @@. Variáveis globais começam com $. É uma conveção utilizar **snake_case** para nomes de variáveis e métodos (funções). Ex.: minha_variavel.
 
 ```ruby
-nome = "Leandro"
+# Números
+inteiro = 1     # Integer
+decimal = 3.14  # Float
 
-puts "Meu nome é #{nome}"
-puts "Meu nome é " + nome
+# Strings
+palavra1 = 'Hello'
+palavra2 = ", "
+palavra3 = %q{world!}
+
+# Boolean
+is_true = true
+is_false = false
+
+# Vazio
+# OBS: Em Ruby, nil é um objeto (a instância singleton da classe NilClass)
+vazio = nil
 ```
 
 ### Casting
+
+> TODO
 
 ```ruby
 3.14.to_i   # Float para Integer
@@ -96,33 +91,34 @@ puts "Meu nome é " + nome
 "4.2".to_f  # String para Float
 ```
 
-### Strings
+### Concat (Interpolation)
 
 ```ruby
-greeting = "Hello"
-
-greeting.length         # 5
-greeting[0]             # H
-greeting.include? "ell" # true
-greeting.include? "z"   # false
-greeting[1, 3]          # ell [start_index, length]
-greeting[0..3]          # hell [start_index, end_index] (Range)
+palavra1 + palavra2 + palavra3        # Resultado: "Hello, world!"
+"A primeira palavra é: #{palavra1}"   # Resultado: "A primeira palavra é: Hello"
+"1" + 2                               # Resultado: *TypeError*
+"1, 2, #{3}"                          # Resultado: "1, 2, 3"
 ```
 
-### Numbers
+### Printing
 
-> Atenção à ordem dos operadores.
+```ruby
+puts "Hello"    # Hello\n (Adiciona quebra de linha no final do texto)
+print "World"   # World
+```
+
+### Numbers operators and methods
 
 ```ruby
 # Operadores aritméticos: +, -, *, / e %
 3 ** 2      # Exponenciação
 10 % 3      # Resto da divisão
-10 / 3.0    # Saída: 3.333 (Float)
-10 / 3      # Saída: 3 (Integer)
+10 / 3.0    # Resultado: 3.333 (Float)
+10 / 3      # Resultado: 3 (Integer)
 
 # Operadores de atribuição: =, +=, -=, *=, /= e %=
 num = 10
-num += 100
+num += 100  # Resultado: 110
 
 # Métodos
 -10.abs()       # 10 (+)
@@ -142,23 +138,31 @@ name = gets.chomp   # Não armazena o "enter" ao finalizar o input
 
 ### Arrays
 
+São coleções ordenadas e indexadas por inteiros de qualquer objeto. São objetos da classe Array.
+
 ```ruby
-# Criando/adicionando/modificando
-lista = [9, 8.1, true, "cinco"]
-lista[4] = "seis"
-lista[4] = "dez"
-lista.push(0)
+# Criando
+array_a = [9, 8.1, true, "cinco"]
+array_b = Array[]
+array_b = Array.new
+array_b = Array.new(3)          # Saída:  [nil, nil, nil]
+array_b = Array.new(3, "A")     # Saída:  ["A", "A", "A"]
+array_c = %w("Cada palavra se torna um elemento indexado")
+
+# Adicionando e modificando
+array_a[4] = "seis"
+array_a[4] = "dez"
+array_a.push(0)
 
 # Acessando
-lista[0]        # 9
-lista.at(1)     # 8.1
-lista[-1]       # dez
-lista[1, 3]     # [8.1, true, "cinco"] (starting_index, lenght)
-lista[1..3]     # [8.1, true, "cinco"] Index 1 até index 3
-lista.length    # Comprimento do array: 6
+array_a[0]            # 9
+array_a.at(1)         # 8.1
+array_a[-1]           # dez
+array_a[1, 3]         # [8.1, true, "cinco"] (start, count)
+array_a[1..3]         # [8.1, true, "cinco"] (start..end)
 ```
 
-### 2d Arrays
+#### 2d Arrays
 
 ```ruby
 my_grid = [[1, 2], [3, 4]]
@@ -169,20 +173,34 @@ puts my_grid[0][0]  # Saída: 5
 puts my_grid[0][1]  # Saída: 2
 ```
 
-### Array Functions
+#### Principais métodos
 
-```ruby
-my_array = []
-
-my_array.push("Hello")
-my_array.reverse
-my_array.sort
-my_array.include? "Hello"
-my_array.each { |i| puts i }    # Block
-my_array.each do |i|            # Block
-    puts i
-end
-```
+- +: Concatenação de arrays
+- -: Diferença de arrays
+- <<: Adiciona um objeto ao final do array (append)
+- <=>: Comparação de arrays
+- ==: Verifica se dois arrays têm o mesmo comprimento e conteúdo
+- []=: Atribuição de elemento ou subarray
+- clear: Remove todos os elementos do array
+- compact: Retorna uma cópia do array com todos os elementos nil removidos
+- compact!: Remove os elementos nil do array original
+- delete: Remove todas as ocorrências de um determinado valor do array
+- delete_at: Remove o elemento em um determinado índice
+- each: Itera sobre cada elemento do array, passando-o para o bloco (Enumerable)
+- empty?: Retorna true se o array estiver vazio
+- flatten: Retorna um novo array que é uma versão unidimensional do array original (recursivamente)
+- flatten!: Modifica o array original para ser uma versão unidimensional
+- include?: Retorna true se o array contém um determinado objeto
+- join: Concatena todos os elementos em uma string, separados por um separador opcional
+- length, size: Retorna o número de elementos no array
+- push: Adiciona um ou mais elementos ao final do array
+- pop: Remove e retorna o último elemento do array
+- shift: Remove e retorna o primeiro elemento do array
+- slice!: Remove e retorna o elemento ou subarray especificado
+- sort: Retorna um novo array com os elementos ordenados
+- sort!: Ordena os elementos no array original
+- uniq: Retorna um novo array com valores duplicados removidos
+- uniq!: Remove valores duplicados do array original
 
 ### Methods
 
@@ -412,6 +430,8 @@ Em Ruby, **parênteses** é opcional, inclusive no momento de criar o método.
 **Chaves** são utilizadas para criar hashs e closures (blocos). Também é utilizado para substituir o _do...end_ quando ele é apenas uma única linha.
 
 ## Array e Hash
+
+> TODO: Remover
 
 ### Array
 
@@ -755,6 +775,10 @@ pessoa2 = Pessoa.new("Maria")
 
 puts Pessoa.contador  # Saída: 2
 ```
+
+### Variável global
+
+> TODO: $my_var
 
 ### Monkey Patch
 
