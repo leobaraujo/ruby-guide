@@ -45,10 +45,6 @@ ruby meu_script.rb
 
 ## Sintaxe básica
 
-```ruby
-#
-```
-
 ### Printing
 
 ```ruby
@@ -81,7 +77,7 @@ is_tall = true  # Booblean -> true/false
 =end
 ```
 
-### Concat
+### Concat (Interpolation)
 
 ```ruby
 nome = "Leandro"
@@ -109,7 +105,8 @@ greeting.length         # 5
 greeting[0]             # H
 greeting.include? "ell" # true
 greeting.include? "z"   # false
-greeting[1,3]           # ell
+greeting[1, 3]          # ell [start_index, length]
+greeting[0..3]          # hell [start_index, end_index] (Range)
 ```
 
 ### Numbers
@@ -117,16 +114,15 @@ greeting[1,3]           # ell
 > Atenção à ordem dos operadores.
 
 ```ruby
-# Operadores
-2 + 3       # Aritmética básica: +, -, * e /
+# Operadores aritméticos: +, -, *, / e %
 3 ** 2      # Exponenciação
 10 % 3      # Resto da divisão
 10 / 3.0    # Saída: 3.333 (Float)
-10 / 3      # Saúda: 3 (Integer)
+10 / 3      # Saída: 3 (Integer)
 
-# Atribuição
+# Operadores de atribuição: =, +=, -=, *=, /= e %=
 num = 10
-num += 100  # Sinais de atribuição +=, -=, /= e *=
+num += 100
 
 # Métodos
 -10.abs()       # 10 (+)
@@ -158,35 +154,254 @@ lista[0]        # 9
 lista.at(1)     # 8.1
 lista[-1]       # dez
 lista[1, 3]     # [8.1, true, "cinco"] (starting_index, lenght)
-lista[1..3]     # [8.1, true, "cinco"] Index 2 até index 4
+lista[1..3]     # [8.1, true, "cinco"] Index 1 até index 3
 lista.length    # Comprimento do array: 6
 ```
 
 ### 2d Arrays
 
+```ruby
+my_grid = [[1, 2], [3, 4]]
+
+my_grid[0][0] = 5
+
+puts my_grid[0][0]  # Saída: 5
+puts my_grid[0][1]  # Saída: 2
+```
+
 ### Array Functions
+
+```ruby
+my_array = []
+
+my_array.push("Hello")
+my_array.reverse
+my_array.sort
+my_array.include? "Hello"
+my_array.each { |i| puts i }    # Block
+my_array.each do |i|            # Block
+    puts i
+end
+```
 
 ### Methods
 
+```ruby
+def add_numbers(num1, num2=100)
+    # return num1 + num2
+    num1 + num2             # Retorno implícito
+end
+
+puts add_numbers(5, 10)     # Saída: 15
+puts add_numbers(6)         # Saída: 106
+puts add_numbers 5, 10      # Saída: 15 - Parênteses é opcional
+puts add_numbers 6          # Saída: 106
+```
+
 ### If Statements
+
+```ruby
+# Operadores lógicos: && (and), || (or) e ! (not)
+# Operadores relacionais: ==, !=, >, <, >=, <= e String.equals()
+
+# if...else statement
+if true and true
+  # code
+elsif true or false
+  # code
+elsif true and not false
+  # code
+else
+  # code
+end
+
+# if modifier (code if condition)
+puts "Hello, world!" if true
+```
+
+### Unless Statement
+
+Executa código se a condição for falsa. Se a condição for verdadeira, o código especificado na cláusula else será executado.
+
+```ruby
+unless false
+   # code
+else
+   # code
+end
+
+# unless modifier (code unless false condition)
+puts "Hello, world!" unless false
+```
 
 ### Switch Statements
 
+```ruby
+case "A"
+    when "A"
+      # code
+    when "B"
+      # code
+    when "C"
+      # code
+    else
+      # code
+end
+```
+
 ### Dictionaries
+
+```ruby
+# Relação chave/valor
+my_dictionary = {
+  "Andy" => "A",    # (key) String
+  :Stanley => "B",  # (key) Symbol
+  is_true: false,   # (key) Symbol
+  3 => 10.0,        # (key) Integer
+}
+
+# Acessando
+my_dictionary["Andy"]
+my_dictionary[:Stanley]
+my_dictionary[:is_true]
+my_dictionary[3]            # 3 é a chave e não o index
+
+puts my_dictionary # Saída: {"Andy" => "A", :Stanley => "B", :is_true => false, 3 => 10.0}
+```
 
 ### While Loops
 
+```ruby
+=begin
+  while true
+    # code
+  end
+=end
+
+index = 1
+
+while index <= 5
+  puts index
+  index += 1
+end
+```
+
 ### For Loops
+
+```ruby
+for index in 0..5
+  puts index
+end
+
+5.times do |index|
+  puts index
+end
+
+lucky_nums = [1, 2, 3, 4, 5]
+for lucky_num in lucky_nums
+  puts lucky_num
+end
+
+lucky_nums.each do |lucky_num|
+  puts lucky_num
+end
+```
 
 ### Exception Catching
 
+```ruby
+begin
+  # Código que pode lançar algum erro
+rescue OneTypeOfException
+  # Código a ser executado caso a exceção seja lançada
+rescue AnotherTypeOfException => error_variable
+  # Código a ser executado caso a exceção seja lançada
+rescue # Exceção genérica
+  # Código a ser executado caso ocorra qualquer outra exceção
+ensure
+  # Código que SEMPRE será executado
+end
+
+# Lança um 'RuntimeError' com a mensagem "Porque sim"
+raise "Porque sim"
+```
+
 ### Classes & Objects
 
-### Constructors
+```ruby
+class Book
+  # Helper que cria getters e setter para os atributos da classe
+  attr_accessor :title, :author
 
-### Getters & Setters
+  # Método construtor da classe
+  def initialize(title, author)
+    # @ sinaliza que a variável é uma 'Variável de instância' assim como 'self.*'
+    @title = title
+    self.author = author
+  end
 
-### Inheritance
+  def readBook()
+    puts "Reading #{self.title} by #{self.author}"
+  end
+
+  # Criando getter e setter *manualmente*
+  # setter
+  def title=(title)
+    @title = title
+  end
+
+  # getter
+  def title
+    @title
+  end
+end
+
+book1 = Book.new("Harry Potter", "JK Rowling")
+# book1.title = "Harry Potter"
+# book1.author = "JK Rowling"
+book1.readBook      # Saída: "Reading Harry Potter by JK Rowling"
+
+puts book1.title    # Saída: "Harry Potter"
+```
+
+#### Inheritance (Herança)
+
+```ruby
+class Person
+  attr_accessor :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def run
+    puts "My top speed is 20km/h"
+  end
+end
+
+# '<' atribui 'Person' como superclasse de 'Athlete'
+class Athlete < Person
+  attr_accessor :sport
+
+  def initialize(name, sport)
+    @sport = sport
+    super(name)     # Encaminha os parâmetros para a superclasse
+  end
+
+  # Polymorphism usando herança
+  def run
+    puts "My top speed is 40km/h"
+  end
+end
+
+person1 = Person.new("John Doe")
+person1.run
+
+athlete1 = Athlete.new("Doe Jhon", "Soccer")
+puts athlete1.name  # Saída: "Doe Jhon"
+athlete1.run
+
+```
 
 ## Parênteses, Colchetes e Chaves
 
