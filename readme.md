@@ -21,10 +21,12 @@ Características:
 ## Preparando o ambiente
 
 Observações:
+
 - Ruby e Ruby on Rails (RoR) é melhor executado em sistemas GNU/Linux
-- Caso utilize Windows, é recomendado o uso de WSL ou Docker
+- Caso utilize Windows, é recomendado o uso de [WSL](https://learn.microsoft.com/pt-br/windows/wsl/about) ou [Docker](https://www.docker.com/)
 
 Passos:
+
 1. Instalar Ruby com um gerenciador de versões como [rvm](https://rvm.io/rvm/install) ou [rbenv](https://github.com/rbenv/rbenv)
 2. Instalar a Ruby Gem "bundler": gem install bundler
 
@@ -40,7 +42,7 @@ ruby meu_script.rb
 - - IRB (Interactive Ruby Shell): Ferramenta **padrão** do Ruby para executar códigos no prompt
 - - PRY: É uma [Ruby Gem](https://rubygems.org/gems/pry) parecido com o IRB, porém, há recursos adicionais como: Destaque de sintaxe, preenchimento automático, depuração, entre outros
 
-## Sintaxe básica
+## Syntax
 
 Ruby Style Guide: Um guia sobre como escrever seu código Ruby [Link](https://github.com/rubocop/ruby-style-guide).
 
@@ -79,16 +81,24 @@ is_false = false
 vazio = nil
 ```
 
-### Casting
+#### Symbol
 
 > TODO
 
+### Casting
+
 ```ruby
-3.14.to_i   # Float para Integer
-3.to_f      # Integer para Float
-3.0.to_s    # Float para String
-"4".to_i    # String para Integer
-"4.2".to_f  # String para Float
+3.14.to_i()           # Float para Integer
+3.to_f()              # Integer para Float
+3.0.to_s()            # Float para String
+"4".to_i()            # String para Integer
+"4.2".to_f()          # String para Float
+
+range = 1..5
+array = range.to_a()  # Range para Array
+
+array = [[:a, 1], [:b, 2], [:c, 3]]
+hash = array.to_h()   # 2d Array para hash
 ```
 
 ### Concat (Interpolation)
@@ -103,8 +113,8 @@ palavra1 + palavra2 + palavra3        # Resultado: "Hello, world!"
 ### Printing
 
 ```ruby
-puts "Hello"    # Hello\n (Adiciona quebra de linha no final do texto)
-print "World"   # World
+puts("Hello")    # Hello\n (Adiciona quebra de linha no final do texto)
+print("World")   # World
 ```
 
 ### Numbers operators and methods
@@ -132,8 +142,8 @@ Math.log(0)     # -Infinity
 ### User Input
 
 ```ruby
-name = gets         # Espera pelo input do usuário. Armazena o "enter" após o input
-name = gets.chomp   # Não armazena o "enter" ao finalizar o input
+name = gets()         # Espera pelo input do usuário. Armazena o "enter" após o input
+name = gets.chomp()   # Não armazena o "enter" ao finalizar o input
 ```
 
 ### Arrays
@@ -144,7 +154,7 @@ São coleções ordenadas e indexadas por inteiros de qualquer objeto. São obje
 # Criando
 array_a = [9, 8.1, true, "cinco"]
 array_b = Array[]
-array_b = Array.new
+array_b = Array.new()
 array_b = Array.new(3)          # Saída:  [nil, nil, nil]
 array_b = Array.new(3, "A")     # Saída:  ["A", "A", "A"]
 array_c = %w("Cada palavra se torna um elemento indexado")
@@ -180,7 +190,6 @@ puts my_grid[0][1]  # Saída: 2
 - <<: Adiciona um objeto ao final do array (append)
 - <=>: Comparação de arrays
 - ==: Verifica se dois arrays têm o mesmo comprimento e conteúdo
-- []=: Atribuição de elemento ou subarray
 - clear: Remove todos os elementos do array
 - compact: Retorna uma cópia do array com todos os elementos nil removidos
 - compact!: Remove os elementos nil do array original
@@ -204,26 +213,110 @@ puts my_grid[0][1]  # Saída: 2
 
 ### Methods
 
+Um método pode retornar um valor implicitamente (o resultado da última expressão avaliada) ou explicitamente usando a palavra-chave return. Ou seja, ele **sempre** retorna algo.
+
+Existem convenções de nomenclatura para tipos específicos de métodos:
+
+- Predicate methods (?): Métodos que atuam como consultas geralmente terminam com um ponto de interrogação, retornam um valor booleano
+- Bang methods (!): Métodos que podem modificar o objeto receptor frequentemente terminam com um ponto de exclamação, geralmente têm uma versão correspondente sem o "!" que retorna uma nova cópia modificada do objeto
+
 ```ruby
+# num2=100 define um valor padrão caso não tenha argumento
 def add_numbers(num1, num2=100)
     # return num1 + num2
     num1 + num2             # Retorno implícito
 end
 
 puts add_numbers(5, 10)     # Saída: 15
-puts add_numbers(6)         # Saída: 106
-puts add_numbers 5, 10      # Saída: 15 - Parênteses é opcional
-puts add_numbers 6          # Saída: 106
+puts add_numbers(5)         # Saída: 105
+```
+
+#### Diferentes formas de chamar métodos
+
+Em Ruby, a invocação de métodos e a definição de seus parâmetros oferecem flexibilidade. Veja as diferentes formas.
+
+Invocação de Métodos:
+
+- Com parênteses
+- Sem parênteses
+
+Definição de Parâmetros em Métodos:
+
+- Parâmetros regulares: São definidos dentro dos parênteses após o nome do método na definição
+- Parâmetros com valores padrão: Você pode definir valores padrão para os parâmetros. Se um argumento não for fornecido na chamada do método, o valor padrão será usado
+- Parâmetros variáveis (Array parameter): Um parâmetro precedido por um asterisco \* permite que o método receba um número variável de argumentos, que serão agrupados em um array
+- Parâmetro de bloco (Block parameter): Um método pode receber um bloco de código como um argumento implícito (usando yield dentro do método) ou explícito (usando &nome_do_bloco na definição do método)
+
+```ruby
+# Criando métodos
+def regular(x, y)
+  x + y
+end
+
+def no_param
+  puts "Hello world"
+end
+
+def default_value(x, y = 10)
+  x + y
+end
+
+def args_param(*args)
+  sum = 0
+  args.each { |num| sum += num }
+  return sum
+end
+
+def block_param(&block)
+  my_var = "Bloco executado com sucesso!"
+
+  # Forma explícita
+  if block
+    puts "Executando bloco..."
+    block.call my_var
+  else
+    puts "Nenhum bloco de código foi encontrado"
+  end
+
+  # Forma implícita
+  # yield my_var
+  # yield my_var if block_given?   # Executa o bloco caso seja encontrado. "block_given?" é um helper
+end
+
+# Invocando método
+# OBS: Em Ruby, os parênteses são geralmente opcionais na chamada de métodos. É importante notar que, em casos mais complexos, o uso de parênteses pode ajudar a evitar ambiguidades e tornar o código mais legível
+
+regular(1, 2)           # Saída: 3
+regular 1, 2            # Saída: 3
+
+no_param()              # Saída: "Hello world"
+no_param                # Saída: "Hello world"
+
+default_value(1)        # Saída: 11
+default_value 1         # Saída: 11
+default_value(1, 2)     # Saída: 3
+default_value 1, 2      # Saída: 3
+
+args_param(1, 2, 3)     # Saída: 6
+args_param 1, 2         # Saída: 3
+
+block_param { |black_method_var| puts black_method_var }
+block_param do
+  texto = "Bloco executado com sucesso"
+  puts texto
+end
 ```
 
 ### If Statements
 
+> Em Ruby, **apenas** _nil_ e _false_ são considerados valores falsos (falsy). Todos os outros valores são considerados verdadeiros (truthy), incluindo a string "", o número 0, um array vazio [] e um hash vazio {}.
+
 ```ruby
 # Operadores lógicos: && (and), || (or) e ! (not)
-# Operadores relacionais: ==, !=, >, <, >=, <= e String.equals()
+# Operadores relacionais: ==, !=, >, <, >= e <=
 
 # if...else statement
-if true and true
+if expressão_a_ser_avaliada == true and 1 < 2
   # code
 elsif true or false
   # code
@@ -235,6 +328,21 @@ end
 
 # if modifier (code if condition)
 puts "Hello, world!" if true
+```
+
+Importante notar que _if_ em Ruby **é uma expressão**, não apenas uma statement, o que significa que ela retorna um valor. O valor retornado é o valor da última expressão avaliada dentro do bloco de código que foi executado.
+
+```ruby
+artist = "Eminem"
+handle = if artist == "Gillespie"
+          "Dizzy"
+        elsif artist == "Parker"
+          "Bird"
+        else
+          "unknown"
+        end
+
+puts handle   # Saída: "unknown"
 ```
 
 ### Unless Statement
@@ -252,7 +360,22 @@ end
 puts "Hello, world!" unless false
 ```
 
+### Ternary Operator
+
+Uma forma concisa de escrever uma if...else statement em uma única linha.
+
+```ruby
+# condição ? <executar se verdadeiro> : <executar se falso>
+
+puts 1 < 2 ? "a" : "b"  # Saída: "a"
+```
+
 ### Switch Statements
+
+Assim como as if statements, case é uma expressão e retorna um valor.
+
+> NOTA: Cada expressão é comparada com o operador de igualdade de caso (===).
+> **Não** há necessidade de colocar a palavra-chave "break" no final de cada "when" como nas outras linguagens de programação.
 
 ```ruby
 case "A"
@@ -262,7 +385,7 @@ case "A"
       # code
     when "C"
       # code
-    else
+    else        # Cláusula padrão caso não tenha correspondência
       # code
 end
 ```
@@ -946,7 +1069,7 @@ O método **\*.object_id** retorna o _id_ único do objeto, inclusive strings e 
 "my_text".object_id # Saída: 865434534
 ```
 
-# Gemas
+## Gemas
 
 > TODO
 
