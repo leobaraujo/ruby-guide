@@ -8,7 +8,7 @@ Foi publicada em 1995 por Yukihiro Matsumoto ("Matz") no Japão. Ela combina ide
 
 Inicialmente, Ruby não era uma linguagem bem documentada, pois Matz preferia escrever programas a documentação. Ele expressa a sua gratidão a Dave Thomas e Andy Hunt, autores do livro "Programming Ruby" (também conhecido como "PickAxe"), por terem apresentado Ruby em grande escala fora do Japão.
 
-## Características:
+## Características
 
 - Interpretada
 - Alto nível
@@ -140,6 +140,20 @@ array = range.to_a()  # Range para Array
 
 array = [[:a, 1], [:b, 2], [:c, 3]]
 hash = array.to_h()   # 2d Array para hash
+```
+
+### Constants
+
+Uma constante em Ruby é qualquer nome de variável que **começa com letra maiúscula**. Permite **reatribuição**, mas exibe um warning.
+
+É recomendado o uso do "SCREAMING_SNAKE_CASE" para nomear constantes.
+
+```ruby
+PI = 3.14159
+puts PI               # Saída: 3.14159
+
+PI = "Hello world"    # warning: already initialized constant PI
+puts PI               # Saída: "Hello world"
 ```
 
 ### Concat (Interpolation)
@@ -458,38 +472,94 @@ case "A"
 end
 ```
 
-### While Loops
+### While Loop
+
+Variáveis locais existentes podem ser usadas dentro do loop, e quaisquer novas variáveis locais criadas dentro do corpo do loop estarão **disponíveis após a sua execução**.
+
+Palavras-chave que permitem alterar o fluxo normal através de um loop while:
+
+- break: Encerra o loop imediatamente
+- next: Pula para o final da iteração atual, começando efetivamente a próxima iteração
+- redo: Repete a iteração do loop desde o início, mas sem reavaliar a condição
+- retry: Reinicia o loop, reavaliando a condição
+
+> TODO: Pesquisar sobre "Uso de Ranges em condições booleanas".
 
 ```ruby
-=begin
-  while true
-    # code
-  end
-=end
+# OBS: "do" é opcional
+num = 1
 
-index = 1
+while num <= 5 do
+  num += 1
+  foo = "bar"   # Declarando variável dentro do loop while
+end
 
-while index <= 5
-  puts index
-  index += 1
+puts foo    # Saída: "bar"
+```
+
+### Until Loop
+
+O loop until é o oposto do loop while. Ele continua enquanto a condição for falsa.
+
+Loops while e until podem ser usados de forma praticamente intercambiável. A escolha entre eles geralmente depende de qual condição de parada torna o código mais legível.
+
+```ruby
+num = 1
+
+until num > 5
+  num += 1
+end
+
+# until de uma linha (modificador)
+count = 0
+puts count += 1 until count == 5
+```
+
+### Loop do
+
+É uma construção de **loop infinito**, usada quando você quer executar algo continuamente até usar um `break` **explicitamente**.
+
+```ruby
+i = 0
+
+loop do
+  i += 1
+  break if i > 5
 end
 ```
 
-### For Loops
+### For Loop
+
+Um loop for é uma estrutura de loop utilizada para **iterar através de uma coleção de informações**, como um array ou um range.
+
+> Executa o corpo do loop uma vez para cada elemento na expressão fornecida (coleção).
+> `break`, `redo`, `next` e `retry` são palavras-chave de controle de fluxo que podem ser utilizadas.
 
 ```ruby
-for index in 0..5
-  puts index
+for num in 0..5
+  puts num
 end
 
-5.times do |index|
-  puts index
+5.times do |num|
+  puts num
 end
 
 lucky_nums = [1, 2, 3, 4, 5]
 for lucky_num in lucky_nums
   puts lucky_num
 end
+```
+
+#### For Loop X Each
+
+A única diferença entre um `for loop` e sua forma equivalente `each`, está no **escopo das variáveis locais**.
+
+Os loops for são estruturas embutidas na linguagem e não introduzem um novo escopo. Isso significa que variáveis locais existentes antes do loop for podem ser usadas dentro dele, e quaisquer novas variáveis locais criadas dentro do corpo do loop for estarão disponíveis após a sua a sua execução.
+
+Isso contrasta com os blocos (como aqueles usados com `each`), onde as variáveis locais criadas dentro do bloco geralmente **não** são acessíveis fora do bloco
+
+```ruby
+lucky_nums = [1, 2, 3, 4, 5]
 
 lucky_nums.each do |lucky_num|
   puts lucky_num
@@ -498,15 +568,26 @@ end
 
 ### Exception Catching
 
+O mecanismo principal para capturar exceções em Ruby é a estrutura `begin`, `rescue` e `end`.
+
+Ao levantar uma exceção, Ruby compara-a com os parâmetros de cada cláusula `rescue` por sua vez.
+A comparação `(===)` tem sucesso se a exceção levantada é da **mesma classe** que o parâmetro **ou uma subclasse** dele.
+
+Uma cláusula `rescue` sem parâmetros é tratada como se tivesse um parâmetro `StandardError`. Portanto, ela captura StandardError e suas subclasses. Para capturar **qualquer exceção** (incluindo aquelas que não herdam de StandardError), você deve usar `Exception`.
+
+> A palavra-chave `retry` dentro de uma cláusula rescue **reinicia** o bloco begin/end. CUIDADO com loop infinito!
+
 ```ruby
 begin
-  # Código que pode lançar algum erro
+  # Código que pode lançar uma exceção
 rescue OneTypeOfException
-  # Código a ser executado caso a exceção seja lançada
+  # Código a ser executado caso a exceção especificada seja lançada
 rescue AnotherTypeOfException => error_variable
-  # Código a ser executado caso a exceção seja lançada
-rescue # Exceção genérica
+  # Código a ser executado caso a exceção especificada seja lançada
+rescue # Exceção genérica (StandardError)
   # Código a ser executado caso ocorra qualquer outra exceção
+else
+  # Código a ser executado somente se nenhuma exceção foi lançada
 ensure
   # Código que SEMPRE será executado
 end
@@ -516,6 +597,8 @@ raise "Porque sim"
 ```
 
 ### Classes & Objects
+
+Em Ruby, **tudo** o que você manipula é um objeto. Isso inclui até mesmo tipos de dados básicos como `strings`, `números`, e os valores booleanos `true` e `false`.
 
 ```ruby
 class Book
@@ -660,6 +743,10 @@ lambda_b = -> (x) {puts "Hello! " + x}
 lambda_a.call
 lambda_b.call("GeeksforGeeks")
 ```
+
+## Catch/Throw
+
+> TODO
 
 ## Classes
 
@@ -956,6 +1043,10 @@ end
 x.hello # ERROR!
 y.hello # Saída: "Hello"
 ```
+
+## Variáveis especiais (global magic variables)
+
+> TODO
 
 ## Gemas
 
