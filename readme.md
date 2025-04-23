@@ -8,7 +8,7 @@ Foi publicada em 1995 por Yukihiro Matsumoto ("Matz") no Japão. Ela combina ide
 
 Inicialmente, Ruby não era uma linguagem bem documentada, pois Matz preferia escrever programas a documentação. Ele expressa a sua gratidão a Dave Thomas e Andy Hunt, autores do livro "Programming Ruby" (também conhecido como "PickAxe"), por terem apresentado Ruby em grande escala fora do Japão.
 
-Características:
+## Características:
 
 - Interpretada
 - Alto nível
@@ -62,6 +62,8 @@ Ruby Style Guide: Um guia sobre como escrever seu código Ruby [Link](https://gi
 
 Os nomes de variáveis locais devem começar com uma letra minúscula ou um sublinhado \_. Variáveis de instância começam com @ e variáveis de classe com @@. Variáveis globais começam com $. É uma conveção utilizar **snake_case** para nomes de variáveis e métodos (funções). Ex.: minha_variavel.
 
+> Temas como variáveis de instância, variáveis de classe e variável global serão abortados mais à frente.
+
 ```ruby
 # Números
 inteiro = 1     # Integer
@@ -81,9 +83,48 @@ is_false = false
 vazio = nil
 ```
 
-#### Symbol
+#### Symbols x Strings
 
-> TODO
+_Symbol_ é todo objeto prefixado por dois pontos (:) e seguido por uma palavra qualquer.
+
+O método **\*.object_id** retorna o _id_ único do objeto, inclusive de strings e inteiros. Por mais que o conteúdo da string seja o mesmo, o object_id será **diferente**. Porém, o object_id de um symbol será o **mesmo**. Ou seja, a string é repetida na memória quando declarada com o mesmo conteúdo, mas o symbol não.
+
+> OBS: Utilize aspas para symbols que requerem caracteres especiais (inclusive espaços). Ex.: :'pt-BR' e :'symbol com espaço'
+
+```ruby
+# Symbol
+:my_text.class          # Saída: Symbol
+:my_text.object_id      # Saída: 984808
+:my_text.object_id      # Saída: 984808
+:my_text.object_id      # Saída: 984808
+
+# String
+"my_text".class         # Saída: String
+"my_text".object_id     # Saída: 765434533
+"my_text".object_id     # Saída: 835345434
+"my_text".object_id     # Saída: 925124465
+```
+
+#### Range
+
+Um range (intervalo) representa uma sequência de valores ou um intervalo, você pode pensar neles como listas ordenadas. Tem um ponto de início e um ponto de fim. Eles podem ser criados usando literais `..` e `...` ou o método `Range.new`.
+
+```ruby
+# O formato de dois pontos (..) cria um range *inclusivo*, significando que o ponto de fim está incluído na sequência
+# O formato de três pontos (...) cria um range *exclusivo*, significando que o ponto de fim é excluído da sequência
+
+(1..3).to_a         # Saída: [1, 2, 3]
+(1...3).to_a        # Saída: [1, 2]
+('a'..'d').to_a     # Saida: ["a", "b", "c", "d"]
+
+# Casos de uso
+age = 18
+puts "Maior de idade" if (18..100).include?(age)
+
+(1..5).each do |n|
+  puts "Número: #{n}"
+end
+```
 
 ### Casting
 
@@ -113,8 +154,8 @@ palavra1 + palavra2 + palavra3        # Resultado: "Hello, world!"
 ### Printing
 
 ```ruby
-puts("Hello")    # Hello\n (Adiciona quebra de linha no final do texto)
-print("World")   # World
+puts("Hel" + "lo")    # Hello\n (Adiciona quebra de linha no final do texto)
+print("World")        # World
 ```
 
 ### Numbers operators and methods
@@ -188,17 +229,14 @@ puts my_grid[0][1]  # Saída: 2
 - +: Concatenação de arrays
 - -: Diferença de arrays
 - <<: Adiciona um objeto ao final do array (append)
-- <=>: Comparação de arrays
 - ==: Verifica se dois arrays têm o mesmo comprimento e conteúdo
 - clear: Remove todos os elementos do array
 - compact: Retorna uma cópia do array com todos os elementos nil removidos
-- compact!: Remove os elementos nil do array original
 - delete: Remove todas as ocorrências de um determinado valor do array
 - delete_at: Remove o elemento em um determinado índice
 - each: Itera sobre cada elemento do array, passando-o para o bloco (Enumerable)
 - empty?: Retorna true se o array estiver vazio
 - flatten: Retorna um novo array que é uma versão unidimensional do array original (recursivamente)
-- flatten!: Modifica o array original para ser uma versão unidimensional
 - include?: Retorna true se o array contém um determinado objeto
 - join: Concatena todos os elementos em uma string, separados por um separador opcional
 - length, size: Retorna o número de elementos no array
@@ -207,9 +245,38 @@ puts my_grid[0][1]  # Saída: 2
 - shift: Remove e retorna o primeiro elemento do array
 - slice!: Remove e retorna o elemento ou subarray especificado
 - sort: Retorna um novo array com os elementos ordenados
-- sort!: Ordena os elementos no array original
 - uniq: Retorna um novo array com valores duplicados removidos
-- uniq!: Remove valores duplicados do array original
+
+### Hashes
+
+Coleções Indexadas Semelhante aos arrays, hashes são coleções indexadas de referências a objetos. No entanto, a diferença fundamental é o tipo de chave usada para indexação. Enquanto arrays usam números inteiros como chave, hashes podem usar qualquer objeto como chave. Também são conhecidos por outros nomes em programação, como "Dictionaries", "associative arrays" ou "maps".
+
+> Embora qualquer objeto possa ser uma chave, há uma preferência por usar **Symbols** como chaves de hash.
+
+```ruby
+# Relação chave/valor
+my_hash = {
+  "Andy" => "A",    # (key) String
+  :Stanley => "B",  # (key) Symbol
+  is_true: false,   # (key) Symbol
+  3 => 10.0,        # (key) Integer
+  other_hash: {     # (key) Symbol
+    foo: "bar"
+  }
+}
+
+# Acessando
+my_hash["Andy"]
+my_hash[:Stanley]
+my_hash[:is_true]
+my_hash[3]            # 3 é a chave e *não o index*
+
+puts my_hash # Saída: {"Andy" => "A", :Stanley => "B", :is_true => false, 3 => 10.0}
+
+# Métodos exclusivos
+my_hash.keys      # Saída: ["Andy", :Stanley, :is_true, 3, :other_hash]
+my_hash.values    # Saída: ["A", "B", false, 10.0, {:foo=>"bar"}]
+```
 
 ### Methods
 
@@ -219,6 +286,8 @@ Existem convenções de nomenclatura para tipos específicos de métodos:
 
 - Predicate methods (?): Métodos que atuam como consultas geralmente terminam com um ponto de interrogação, retornam um valor booleano
 - Bang methods (!): Métodos que podem modificar o objeto receptor frequentemente terminam com um ponto de exclamação, geralmente têm uma versão correspondente sem o "!" que retorna uma nova cópia modificada do objeto
+
+> Conteúdo sobre _blocks_, _procs_ e _lambda_ mais à frente.
 
 ```ruby
 # num2=100 define um valor padrão caso não tenha argumento
@@ -233,7 +302,7 @@ puts add_numbers(5)         # Saída: 105
 
 #### Diferentes formas de chamar métodos
 
-Em Ruby, a invocação de métodos e a definição de seus parâmetros oferecem flexibilidade. Veja as diferentes formas.
+Em Ruby, a invocação de métodos e a definição de seus parâmetros oferecem flexibilidade.
 
 Invocação de Métodos:
 
@@ -279,12 +348,13 @@ def block_param(&block)
   end
 
   # Forma implícita
-  # yield my_var
-  # yield my_var if block_given?   # Executa o bloco caso seja encontrado. "block_given?" é um helper
+  yield my_var
+  yield my_var if block_given?   # Executa o bloco caso seja encontrado. "block_given?" é um helper
 end
 
 # Invocando método
-# OBS: Em Ruby, os parênteses são geralmente opcionais na chamada de métodos. É importante notar que, em casos mais complexos, o uso de parênteses pode ajudar a evitar ambiguidades e tornar o código mais legível
+# OBS: Em Ruby, os parênteses são geralmente opcionais na chamada de métodos.
+# É importante notar que, em casos mais complexos, o uso de parênteses pode ajudar a evitar ambiguidades e tornar o código mais legível
 
 regular(1, 2)           # Saída: 3
 regular 1, 2            # Saída: 3
@@ -293,8 +363,6 @@ no_param()              # Saída: "Hello world"
 no_param                # Saída: "Hello world"
 
 default_value(1)        # Saída: 11
-default_value 1         # Saída: 11
-default_value(1, 2)     # Saída: 3
 default_value 1, 2      # Saída: 3
 
 args_param(1, 2, 3)     # Saída: 6
@@ -309,7 +377,7 @@ end
 
 ### If Statements
 
-> Em Ruby, **apenas** _nil_ e _false_ são considerados valores falsos (falsy). Todos os outros valores são considerados verdadeiros (truthy), incluindo a string "", o número 0, um array vazio [] e um hash vazio {}.
+> Em Ruby, **apenas** _nil_ e _false_ são considerados valores falsos (falsy). Todos os outros valores são considerados verdadeiros (truthy), incluindo uma string vazia "", o número 0, um array vazio [ ] e um hash vazio { }.
 
 ```ruby
 # Operadores lógicos: && (and), || (or) e ! (not)
@@ -388,26 +456,6 @@ case "A"
     else        # Cláusula padrão caso não tenha correspondência
       # code
 end
-```
-
-### Dictionaries
-
-```ruby
-# Relação chave/valor
-my_dictionary = {
-  "Andy" => "A",    # (key) String
-  :Stanley => "B",  # (key) Symbol
-  is_true: false,   # (key) Symbol
-  3 => 10.0,        # (key) Integer
-}
-
-# Acessando
-my_dictionary["Andy"]
-my_dictionary[:Stanley]
-my_dictionary[:is_true]
-my_dictionary[3]            # 3 é a chave e não o index
-
-puts my_dictionary # Saída: {"Andy" => "A", :Stanley => "B", :is_true => false, 3 => 10.0}
 ```
 
 ### While Loops
@@ -541,121 +589,6 @@ person1.run
 athlete1 = Athlete.new("Doe Jhon", "Soccer")
 puts athlete1.name  # Saída: "Doe Jhon"
 athlete1.run
-
-```
-
-## Parênteses, Colchetes e Chaves
-
-Em Ruby, **parênteses** é opcional, inclusive no momento de criar o método.
-
-**Colchetes** são utilizados para criar/acessar arrays.
-
-**Chaves** são utilizadas para criar hashs e closures (blocos). Também é utilizado para substituir o _do...end_ quando ele é apenas uma única linha.
-
-## Array e Hash
-
-> TODO: Remover
-
-### Array
-
-É uma coleção ordenada por qualquer objeto indexado por um inteiro. Cada elemento do array é referenciado e indexado por um índice.
-
-```ruby
-# Criando Array. Quantia de elementos não definido
-# Variáveis com nome snake_case
-array_a = []
-array_b = Array.new
-array_c = %w("Cada palavra se torna um elemento indexado")
-
-# Inserindo dados. Permite diferente tipos de dados
-array_a.push(777)
-array_a.push("ruby")
-array_a[2] = true
-
-# Acessando array
-array_a
-array_a[0]
-array_a.at(1)
-```
-
-### Hash
-
-É uma coleção de pares chave-valor. É similar ao array, porém, seus índices são definidos arbitráriamente. As chaves devem ser String ou Symbol.
-
-```ruby
-# Criando hash
-hash_a = {
-    "chave_a" => "valor",
-    "chave_b" => 123,
-    "chave_c" => false
-}
-
-# Symbol (Conteúdo mais à frente)
-hash_b = {
-    :chave_a => "valor",
-    :chave_b => 123,
-    :chave_c => false
-}
-
-# Retorna a 'key' como symbol
-hash_c = {
-    chave_a: "valor",
-    chave_b: 123,
-    chave_c: false
-}
-
-# Acessando hash
-hash_a
-hash_a["chave_a"]
-hash_c[:chave_a]
-```
-
-## Métodos
-
-Métodos são blocos de código que realizam uma tarefa específica e podem ser reutilizados em diferentes partes de um programa.
-
-Um método pode retornar um valor usando a palavra-chave _return_. Se _return_ não for usado explicitamente, o método retorna o valor da última expressão avaliada.
-
-Parâmetros são as variáveis que a função espera receber. Argumentos são os valores passados à essas variáveis.
-
-```ruby
-# Criando método
-def retorna_cinco # Parâmetros são opcionais
-    3 + 2 # Retorno implícito
-end
-
-def hello(txt)
-    puts "hello #{txt}"
-end
-
-def world txt
-    puts "hello " + txt
-end
-
-def saudacao(nome = "Visitante") # Parâmetro com valor padrão
-    puts "Olá, #{nome}!"
-end
-
-def somar(*args) # Quantia variável de parâmetros
-    total = 0
-
-    args.each do |num|
-        total += num
-    end
-
-    return total
-end
-
-# Chamando método
-puts retorna_cinco # É possível chamar métodos sem a notação "()"
-hello("world")
-hello # ERROR - ArgumentError / Nenhum argumento foi passado
-world "world"
-saudacao
-saudacao("John Doe")
-puts somar(1, 2, 3)
-
-# OBS: Método com blocks mais à frente
 ```
 
 ## Closures
@@ -726,29 +659,6 @@ lambda_b = -> (x) {puts "Hello! " + x}
 # Chamando lambda
 lambda_a.call
 lambda_b.call("GeeksforGeeks")
-```
-
-## Recebendo blocks como argumento
-
-### yield
-
-A palavra-chave yield para a execução do método e passa o controle para o bloco que foi passado como parâmetro pelo método. Na prática, serve para inserir blocos de código dentro dum método.
-
-```ruby
-# Criando função
-def minha_funcao
-    puts "a"
-    yield
-    # yield if block_given? # Caso não seja inserido nenhum bloco, não haverá erro
-    puts "c"
-end
-
-# Inserindo block
-# minha_funcao { puts "b" }
-minha_funcao do
-    puts "b"
-    # ...
-end
 ```
 
 ## Classes
@@ -1047,32 +957,6 @@ x.hello # ERROR!
 y.hello # Saída: "Hello"
 ```
 
-## Symbols x Strings
-
-Simbolo é todo objeto iniciado por dois pontos (:) seguido por uma palavra qualquer. Texto é uma string contida entre aspas simples ou duplas.
-
-O método **\*.object_id** retorna o _id_ único do objeto, inclusive strings e inteiros. Por mais que o _conteúdo_ da string, por exemplo, seja o mesmo, o object*id será diferente. Porém, o **object_id** de um \_symbol* será o mesmo. Ou seja, a string é repetida na memória quando declarada com o mesmo conteúdo, mas o symbol não.
-
-> OBS: Symbols que requerem caracteres especiais (inclusive espaços), utilize aspas. Ex.: :'pt-BR'
-
-```ruby
-# Symbol
-:my_text.class      # Saída: String
-:my_text.object_id # Saída: 984808
-:my_text.object_id # Saída: 984808
-:my_text.object_id # Saída: 984808
-
-# Texto
-"my_text".class     # Saída: Symbol
-"my_text".object_id # Saída: 835345435
-"my_text".object_id # Saída: 825124463
-"my_text".object_id # Saída: 865434534
-```
-
 ## Gemas
-
-> TODO
-
-## Como instalar
 
 > TODO
