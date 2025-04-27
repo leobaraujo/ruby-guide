@@ -566,7 +566,7 @@ lucky_nums.each do |lucky_num|
 end
 ```
 
-### Exception Catching
+## Exception Catching
 
 O mecanismo principal para capturar exceções em Ruby é a estrutura `begin`, `rescue` e `end`.
 
@@ -592,18 +592,31 @@ ensure
   # Código que SEMPRE será executado
 end
 
-# Lança um 'RuntimeError' com a mensagem "Porque sim"
-raise "Porque sim"
+# Lança um 'RuntimeError' com a mensagem "Minha mensagem de erro"
+raise "Minha mensagem de erro"
 ```
 
-### Classes & Objects
+## Classes e Objetos
 
-Em Ruby, **tudo** o que você manipula é um objeto. Isso inclui até mesmo tipos de dados básicos como `strings`, `números`, e os valores booleanos `true` e `false`.
+Em Ruby, **tudo** o que você manipula é um objeto. Isso inclui até mesmo tipos de dados básicos como strings, números e os valores booleanos.
+
+A própria classe em Ruby é um objeto, sendo uma instância da classe `Class`. A classe `Object` é a classe pai de todas as outras classes.
+
+Os nomes de classes e módulos devem, por convenção, seguir o padrão **CamelCase**.
 
 ```ruby
 class Book
-  # Helper que cria getters e setter para os atributos da classe
+  # Helper que cria getter para os atributos
+  # attr_reader :title, :author
+
+  # Helper que cria setter para os atributos
+  # attr_writer :title, :author
+
+  # Helper que cria getters e setter para os atributos
   attr_accessor :title, :author
+
+  # Definindo constante
+  VERSION = "1.0.0"
 
   # Método construtor da classe
   def initialize(title, author)
@@ -626,17 +639,26 @@ class Book
   def title
     @title
   end
+
+  # Define um escopo privado (Encapsulamento)
+  private
+
+  def hello # Não é acessível fora da classe
+    puts "world"
+  end
 end
 
 book1 = Book.new("Harry Potter", "JK Rowling")
 # book1.title = "Harry Potter"
 # book1.author = "JK Rowling"
 book1.readBook      # Saída: "Reading Harry Potter by JK Rowling"
-
 puts book1.title    # Saída: "Harry Potter"
+
+# Acessando constante de classe com (::)
+puts Book::VERSION
 ```
 
-#### Inheritance (Herança)
+### Herança e Polimorfismo
 
 ```ruby
 class Person
@@ -660,7 +682,7 @@ class Athlete < Person
     super(name)     # Encaminha os parâmetros para a superclasse
   end
 
-  # Polymorphism usando herança
+  # Polimorfismo
   def run
     puts "My top speed is 40km/h"
   end
@@ -672,6 +694,69 @@ person1.run
 athlete1 = Athlete.new("Doe Jhon", "Soccer")
 puts athlete1.name  # Saída: "Doe Jhon"
 athlete1.run
+```
+
+### Variáveis de instância
+
+> As variáveis de instância são **privadas** para o objeto.
+
+### Variáveis de classe
+
+Pertencem à classe como um todo e são compartilhadas por todas as instâncias da classe.
+
+```ruby
+class Pessoa
+  @@contador = 0  # Variável de classe
+
+  def initialize(nome)
+    @nome = nome  # Variável de instância
+    @@contador += 1
+  end
+
+  def self.contador
+    @@contador
+  end
+end
+
+pessoa1 = Pessoa.new("João")
+pessoa2 = Pessoa.new("Maria")
+
+puts Pessoa.contador  # Saída: 2
+```
+
+### Variáveis global
+
+> TODO
+
+### Monkey Patch
+
+> Afeta todas as instâncias da classe.
+
+Permite o desenvolvedor a modificar uma classe já existente em momento de execução através das seguintes formas:
+
+- Criando um novo método
+- Sobreescrevendo um método existente
+
+> Também é possível modificar uma classe com o método **class_eval**. Para modificar métodos de um objeto, utilize **instance_eval**.
+
+```ruby
+# Criando
+class String
+    def novo_metodo
+        puts "Sou um novo método!"
+    end
+end
+
+"teste".novo_metodo # Saída: "Sou um novo método!"
+
+# Sobreescrita
+class String
+    def novo_metodo
+        puts "Olá ${self}"
+    end
+end
+
+"teste".novo_metodo # Saída: "Olá teste"
 ```
 
 ## Closures
@@ -748,189 +833,6 @@ lambda_b.call("GeeksforGeeks")
 
 > TODO
 
-## Classes
-
-Classes são modelos de objetos que irão receber características próprias.
-
-Em Ruby, tudo é objeto, inclusive números! Para saber a classe do objeto, utilize o método **.class**.
-
-> NOTA: Utilize 'require' para importar uma classe para o arquivo atual.
-
-```ruby
-# Criando classe (Classes com nome PascalCase)
-class Pessoa
-    def falar(txt)
-        puts "Fulano disse: #{txt}"
-    end
-end
-
-# Instânciando classe
-pss = Pessoa.new
-pss.falar "Lorem Ipsum"
-
-# Herança
-class Atleta < Pessoa
-    def correr
-        puts "Fulano correu!"
-    end
-end
-
-att = Atleta.new
-att.falar "Lorem Ipsum"
-att.correr
-```
-
-### Escopo "privado / private"
-
-Em Ruby, os atributos e métodos de uma classe fazem parte de um escopo.
-
-```ruby
-class Pessoa
-    def falar(txt)
-        respirar
-        puts "Fulano disse: #{txt}."
-    end
-
-    private
-      def respirar
-        puts "Fulano respirou."
-      end
-end
-```
-
-### Self
-
-> Em Ruby, a palavra-chave _self_ tem um funcionamento semelhante ao **this** em outras linguagens de programação. Porém, pode se referir tanto à instância quanto à classe.
-
-Self é uma palavra reservada que dá acesso ao objeto corrente. Por exemplo, ao instanciar uma classe chamada Pessoa através da variável _ps_, estou acessando a classe (objeto corrente) através dessa variável.
-
-Quando utilizamos o _self_ fora duma classe, acessamos o _namespace_ global que é o **main**.
-
-```ruby
-puts self   # Saída: main
-
-class Pessoa
-    # Helper que gera o getter e setter
-    attr_accessor :nome
-
-    # Método construtor
-    def initialize(nom)
-        self.nome = nome    # Self refere-se à instância atual
-    end
-
-    def saudacao
-        puts "Olá, meuy nome é ${self.nome}"
-    end
-
-    def self.natureza
-        puts "Método de classe"
-    end
-end
-
-Pessoa.natureza # Saída: "Método de classe"
-ps = Pessoa.new("João")
-ps.saudacao       # Saída: "Olá, meuy nome é João"
-```
-
-#### Variáveis de instância
-
-Em Ruby, o '@' (ou self) antes do nome de uma variável indica que ela é uma variável de instância. Variáveis de instância são associadas a uma instância de uma classe e podem ser acessadas em qualquer método dessa instância. Elas são privadas, ou seja, requer getter e setter para ser acessada fora da classe.
-
-```ruby
-class Pessoa
-    # Helper gerador de getter/setter
-    attr_accessor :idade
-
-    # Método construtor (construct)
-    def initialize(nome, idade)
-        @nome = nome
-        self.idade = idade
-    end
-
-    # Getter para @nome
-    def nome
-        @nome
-    end
-
-    # Setter para @nome
-    # Atenção à sintaxe
-    def nome=(novo_nome)
-        @nome = novo_nome
-    end
-
-  def apresentar
-    puts "Olá, meu nome é #{@nome} e tenho #{idade} anos."
-  end
-end
-
-pessoa = Pessoa.new("João", 30)
-pessoa.apresentar  # Saída: "Olá, meu nome é João e tenho 30 anos."
-
-pessoa.nome = "John"
-puts pessoa.nome
-```
-
-### Variáveis de classe
-
-Pertencem à classe como um todo e são compartilhadas por todas as instâncias da classe.
-
-> Em Java, por exemplo, seriam métodos estáticos.
-
-```ruby
-class Pessoa
-  @@contador = 0  # Variável de classe
-
-  def initialize(nome)
-    @nome = nome  # Variável de instância
-    @@contador += 1
-  end
-
-  def self.contador
-    @@contador
-  end
-end
-
-pessoa1 = Pessoa.new("João")
-pessoa2 = Pessoa.new("Maria")
-
-puts Pessoa.contador  # Saída: 2
-```
-
-### Variável global
-
-> TODO: $my_var
-
-### Monkey Patch
-
-> Afeta todas as instâncias da classe.
-
-Permite o desenvolvedor a modificar uma classe já existente em momento de execução através das seguintes formas:
-
-- Criando um novo método
-- Sobreescrevendo um método existente
-
-> Também é possível modificar uma classe com o método **class_eval**. Para modificar métodos de um objeto, utilize **instance_eval**.
-
-```ruby
-# Criando
-class String
-    def novo_metodo
-        puts "Sou um novo método!"
-    end
-end
-
-"teste".novo_metodo # Saída: "Sou um novo método!"
-
-# Sobreescrita
-class String
-    def novo_metodo
-        puts "Olá ${self}"
-    end
-end
-
-"teste".novo_metodo # Saída: "Olá teste"
-```
-
 ## Módulo
 
 Módulo é uma coleção de métodos e constantes. É possível adicionar um módulo à uma classe com **include** ou **require**.
@@ -962,7 +864,7 @@ Sobre.subtrair(2, 1)    # Saída: 1
 Sobre::subtrair(3, 1)   # Saída: 2
 ```
 
-## Mixin
+### Mixin
 
 Ruby não suporta herança múltipla diretamente, mas **módulos** Ruby podem ter outros usos maravilhosos. Eles praticamente eliminam a necessidade de herança múltipla, proporcionando um mecanismo chamado Mixin.
 
@@ -1044,10 +946,10 @@ x.hello # ERROR!
 y.hello # Saída: "Hello"
 ```
 
-## Variáveis especiais (global magic variables)
+## Variáveis especiais (Global Magic Variables)
 
 > TODO
 
-## Gemas
+## Gems
 
 > TODO
