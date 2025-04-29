@@ -328,7 +328,7 @@ Definição de Parâmetros em Métodos:
 - Parâmetros regulares: São definidos dentro dos parênteses após o nome do método na definição
 - Parâmetros com valores padrão: Você pode definir valores padrão para os parâmetros. Se um argumento não for fornecido na chamada do método, o valor padrão será usado
 - Parâmetros variáveis (Array parameter): Um parâmetro precedido por um asterisco \* permite que o método receba um número variável de argumentos, que serão agrupados em um array
-- Parâmetro de bloco (Block parameter): Um método pode receber um bloco de código como um argumento implícito (usando yield dentro do método) ou explícito (usando &nome_do_bloco na definição do método)
+- Parâmetro de bloco (Block parameter): Um método pode receber um bloco de código como um argumento **implícito** (usando yield dentro do método) ou explícito (usando &nome_do_bloco na definição do método)
 
 ```ruby
 # Criando métodos
@@ -362,6 +362,7 @@ def block_param(&block)
   end
 
   # Forma implícita
+  # OBS: Não requer a definição do parâmetro &block
   yield my_var
   yield my_var if block_given?   # Executa o bloco caso seja encontrado. "block_given?" é um helper
 end
@@ -698,11 +699,20 @@ athlete1.run
 
 ### Variáveis de instância
 
-> As variáveis de instância são **privadas** para o objeto.
+Armazena dados **específicos do objeto** e só pode ser acessada dentro da instância onde foi definida. Requer _getter_ e _setter_ uma vez que são **privados**.
+
+```ruby
+# Exemplo completo logo a cima na classe "Book"
+def initialize(title, author)
+  # @ sinaliza que a variável é uma 'Variável de instância' assim como 'self'
+  @title = title
+  self.author = author
+end
+```
 
 ### Variáveis de classe
 
-Pertencem à classe como um todo e são compartilhadas por todas as instâncias da classe.
+Variáveis de classe em Ruby começam com `@@` e são **compartilhadas entre todas as instâncias** da mesma classe mantendo um valor comum.
 
 ```ruby
 class Pessoa
@@ -713,7 +723,12 @@ class Pessoa
     @@contador += 1
   end
 
-  def self.contador
+  # 'self.' determina que o método será acessível somente pela classe e não pelo objeto
+  def self.modelo_contador
+    @@contador
+  end
+
+  def instancia_contador
     @@contador
   end
 end
@@ -721,23 +736,50 @@ end
 pessoa1 = Pessoa.new("João")
 pessoa2 = Pessoa.new("Maria")
 
-puts Pessoa.contador  # Saída: 2
+puts pessoa1.instancia_contador     # Saída: 2
+puts pessoa2::instancia_contador    # Saída: 2
+
+# Também pode ser acessível com (::)
+puts Pessoa.modelo_contador         # Saída: 2
+puts Pessoa::modelo_contador        # Saída: 2
 ```
 
 ### Variáveis global
 
-> TODO
+Começam com `$` e podem ser acessadas e modificadas de qualquer lugar do programa.
+
+> Podem ser compartilhadas entre diferentes arquivos e módulos, classes, etc., desde que o código esteja sendo executado no mesmo processo.
+
+```ruby
+$mensagem = "Olá, mundo!"
+foo = "Bar"
+
+class Saudacao
+  def mostrar_global
+    puts $mensagem
+  end
+
+  def mostar_nao_global
+    puts foo
+  end
+end
+
+saudacao = Saudacao.new
+saudacao.mostrar_global       # Saída: "Olá, mundo!"
+saudacao.mostar_nao_global    # Error: NameError (undefined local variable or method)
+```
 
 ### Monkey Patch
 
-> Afeta todas as instâncias da classe.
+Permite o desenvolvedor a modificar uma classe **já existente** em momento de execução adicionando ou sobreescrevendo métodos.
 
-Permite o desenvolvedor a modificar uma classe já existente em momento de execução através das seguintes formas:
+Comumente utilizado para:
 
-- Criando um novo método
-- Sobreescrevendo um método existente
+- Adicionar funcionalidades a classes que você não criou
+- Corrigir ou sobrescrever comportamentos de bibliotecas
+- Estender classes de forma rápida
 
-> Também é possível modificar uma classe com o método **class_eval**. Para modificar métodos de um objeto, utilize **instance_eval**.
+> OBS: Pode quebrar atualizações futuras de gems ou do Ruby.
 
 ```ruby
 # Criando
@@ -759,50 +801,37 @@ end
 "teste".novo_metodo # Saída: "Olá teste"
 ```
 
-## Closures
+### class_eval e instance_eval
 
-Closure é uma função ou um bloco de código com variáveis ​​que são vinculadas ao ambiente em que o closure foi chamado. Ou em outras palavras, closure pode ser tratado como uma variável que pode ser atribuída a outra variável ou pode ser passada para qualquer função como um argumento.
+> TODO
 
-Closure é uma funcionalidade que permite escrever um pedaço de código que pode ser:
+## Closures e Blocks
 
-- Utilizado como um valor (podendo ser atribuído, passado como parâmetro, etc.)
-- Pode ser executado em qualquer lugar
-- Referenciam variáveis no contexto onde são criados
+Em Ruby, os blocos (Blocks) podem funcionar como closures. Isso significa que eles "capturam" o ambiente (variáveis locais) onde foram definidos e podem acessar essas variáveis mesmo quando executados em um contexto diferente.
 
-### Blocks, Procs e Lambda
+Ruby blocks "**são pequenas funções anônimas** que podem ser passadas nos métodos". Podemos identificar quando vemos ou escrevemos no código comandos dentro dos `do...end` ou entre chaves `{}` e os argumentos vão dentro de pipes `|args|`. São frequentemente utilizados em métodos **iteradores**.
 
-Procs e Lambdas são um tipo de função anônima que geralmente utilizam variáveis do escopo pai e que podem ser atribuídas a variáveis, o que define de forma simples o conceito de Closure e executam blocos de código (Blocks).
-
-#### Blocks
-
-Ruby blocks, "são pequenas funções anônimas que podem ser passadas nos métodos". Podemos identificar Ruby Blocks quando vemos ou escrevemos no código comandos dentro dos **do...end** ou entre chaves **{block}** e os argumentos vão dentro de pipes **|args|**. Métodos famosos como o _.each_ e _.times_ são bons exemplos de Blocks.
+> Métodos podem aceitar blocks como parâmetro.
 
 ```ruby
 # Sintaxe "do...end"
-#  block_name do
-#    #statement-1
-#    #statement-2
-# end
-
 [1, 2, 3, 4, 5].each do |num|
-    p num # p = puts
+    puts num
 end
 
 # Sintaxe {} - Bloco inline
-#  block_name { #statements_to_be_executed }
-
-meu_block { puts "Hello, world!" }
+[1, 2, 3, 4, 5].each {|num| puts num}
 ```
 
-#### Procs
+### Procs
 
-Uma Proc é associada a uma variável e executada com o método **.call**. As Procs tem algumas particularidades, a mais notável é o fato dos argumentos **não** interferirem na execução da mesma.
+Um Proc é apenas um objeto que você pode usar para **armazenar blocks** e passá-los como variáveis.
 
-> Procs preenche os argumentos ausentes com _nil_ e um único argumento de array é desconstruído se o proc tiver vários argumentos.
+As Procs tem algumas particularidades, a mais notável é o fato dos argumentos **não** interferirem na execução da mesma. Procs preenche os argumentos ausentes com `nil` e um **único** argumento de array é desconstruído se o proc tiver vários argumentos.
 
 ```ruby
 # Criando proc
-a = Proc.new {|x, y| "x = #{x}, y = #{y}" }
+a = Proc.new { |x, y| "x = #{x}, y = #{y}" }
 b = Proc.new { "Hello, world!" }
 
 # Executando proc
@@ -811,22 +840,36 @@ puts a.call([2, 1])     # Saída: x = 2, y = 1
 puts a.call(3, 4, 8)    # Saída: x = 3, y = 4
 puts a.call(9)          # Saída: x = 9, y =
 puts a.call             # Saída: x = , y =
+
+# Também é possível executar um Proc com colchetes []
+puts a[1, 2]            # Saída: x = 1, y = 2
 ```
 
-#### Lambda
+### Lambda
 
-Lambda e Procs são bem parecidos. Além disso, podemos dizer que uma lambda é uma forma de definir um bloco e seus parâmetros com uma sintaxe especial. A lambda é como um método comum porque impõe o número de parâmetros quando é chamado e também retorna como um método normal (trata a palavra-chave _return_ da mesma forma que os métodos).
+Lambda e Procs são bem parecidos (Não existe uma classe lambda especial). Além disso, podemos dizer que uma lambda é uma forma de definir um bloco e seus parâmetros com uma sintaxe especial.
 
-Se você passar um parâmetro para uma lambda que não o espera, você receberá um ArgumentError.
+A lambda é como um método comum porque impõe o número de parâmetros quando é chamado e também retorna como um método normal (trata a palavra-chave `return` da mesma forma que os métodos).
+
+A maior diferença entre Proc e Lambda se dá pela forma que tratam os argumentos. Se você passar um parâmetro para uma lambda que não o espera, você receberá um `ArgumentError`.
 
 ```ruby
 # Criando lambda
-lambda_a = -> {puts "Hey"}
-lambda_b = -> (x) {puts "Hello! " + x}
+lambda_a = lambda {puts "Hey"}
+lambda_b = -> (x) {puts "Hello, " + x}
 
-# Chamando lambda
-lambda_a.call
-lambda_b.call("GeeksforGeeks")
+# Existem várias maneiras de chamar expressões lambdas
+# .call
+lambda_b.call("world")   # Saída: "Hello, world"
+
+# .()
+lambda_b.("world")       # Saída: "Hello, world"
+
+# []
+lambda_b["world"]        # Saída: "Hello, world"
+
+# .===
+lambda_b.===("world")    # Saída: "Hello, world"
 ```
 
 ## Catch/Throw
