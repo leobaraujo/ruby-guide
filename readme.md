@@ -1,3 +1,11 @@
+TODO:
+
+- [ ] Revisão e adição de imagens
+- [ ] Reestruturação da ordem do conteúdo
+- [ ] Adição de "Table of Contents"
+- [ ] Projetos
+- [ ] Busca por novas informações
+
 # Ruby
 
 > Versão de estudo: 3.1.1 ([Documentação](https://ruby-doc.org/core-3.1.1/))
@@ -661,6 +669,8 @@ puts Book::VERSION
 
 ### Herança e Polimorfismo
 
+> Ruby não suporta herança múltipla diretamente (Conteúdo sobre "mixin" mais adiante.).
+
 ```ruby
 class Person
   attr_accessor :name
@@ -874,17 +884,77 @@ lambda_b.===("world")    # Saída: "Hello, world"
 
 ## Catch/Throw
 
-> TODO
+Catch e Throw são usados para **controle de fluxo não local**, ou seja, para sair de construções aninhadas profundas durante o processamento.
+
+A instrução `catch` define um bloco que é rotulado com um nome fornecido, que pode ser um `Symbol` ou uma `String`. O bloco é executado normalmente até que um throw seja encontrado.
+
+A instrução `throw` transfere o controle para o bloco catch que está esperando pelo Symbol ou String especificado. Se não houver um bloco catch esperando pelo Symbol (ou String) especificado pelo throw, um `NameError` é gerado. A instrução throw pode receber **um parâmetro opcional adicional**. Este valor é retornado como o valor do bloco catch. Se nenhum valor for fornecido, o valor de retorno padrão é `nil`.
+
+Use catch/throw quando você quer interromper a execução de um bloco ou estrutura aninhada inteira sem precisar encadear vários `if` ou `return`.
+
+> É importante notar que o `throw` **não** precisa aparecer dentro do escopo estático do catch.
+
+```ruby
+# throw dentro do bloco catch
+def busca_em_listas(listas, alvo)
+  catch(:encontrado) do
+    listas.each_with_index do |lista, i|
+      lista.each_with_index do |item, j|
+        if item == alvo
+          puts "Encontrado em listas[#{i}][#{j}]"
+          throw(:encontrado)
+        end
+      end
+    end
+    puts "Item não encontrado"
+  end
+end
+
+listas = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+busca_em_listas(listas, 5)      # Saída: "Encontrado em listas[1][1]"
+
+# throw fora do bloco catch
+def verificar_usuario(usuario)
+  throw :interromper_fluxo, "Usuário inválido: #{usuario[:nome]}" if usuario[:ativo] == false
+end
+
+def processar_usuarios
+  catch(:interromper_fluxo) do
+    usuarios = [
+      { nome: "Ana", ativo: true },
+      { nome: "Carlos", ativo: false },
+      { nome: "João", ativo: true }
+    ]
+
+    usuarios.each do |usuario|
+      verificar_usuario(usuario) # O throw está aqui, em outro método
+      puts "Processando #{usuario[:nome]}"
+    end
+
+    puts "Todos os usuários foram processados."
+  end
+end
+
+resultado = processar_usuarios
+puts resultado    # Saída: "Usuário inválido: Carlos"
+```
 
 ## Módulo
 
-Módulo é uma coleção de métodos e constantes. É possível adicionar um módulo à uma classe com **include** ou **require**.
+Módulos definem uma coleção de métodos, constantes, definições de classes ou outros módulos.
 
-Quando você _inclui_ um módulo em uma classe, os métodos do módulo se tornam métodos de _instância da classe_. Quando você _estende_ um módulo em uma classe, os métodos do módulo se tornam _métodos de classe_.
+Principais casos de uso:
 
-Se o módulo define métodos como _métodos de módulo_ (usando **self**), você pode chamá-los diretamente usando o operador de resolução de escopo (::) ou ponto (.).
+- Atuar como "namespaces"
+- Compartilhar funcionalidades entre classes (Mixins)
 
-> NOTA: É uma convenção utilizar SCREAMING_SNAKE_CASE no nome das constantes.
+É possível adicionar um módulo a uma classe (ou a outro módulo) com `include` ou `extend`. Quando você _inclui_ um módulo em uma classe, os métodos do módulo se tornam **métodos de instância da classe**. Quando você _estende_ uma classe com um módulo, os métodos do módulo se tornam **métodos de classe** da classe.
+
+Se o módulo define métodos como _métodos de módulo_ (usando `self`), você pode chamá-los diretamente usando o operador de resolução de escopo (`::`) ou ponto (`.`).
+
+Assim como classes, os **métodos** dentro de módulos podem ter visibilidade definida, como `protected` e `private`.
+
+O uso de `::` para chamada de método só funciona diretamente com métodos definidos com `self` dentro do módulo se ele estiver carregado como um módulo de _namespace_ (e não como mixin, por exemplo).
 
 ```ruby
 # Criando módulo
@@ -903,13 +973,18 @@ end
 
 # Acessando módulo
 Sobre::VERSAO           # Saída: "3.1.1"
+Sobre.somar 1, 2        # Erro: NoMethodError
 Sobre.subtrair(2, 1)    # Saída: 1
 Sobre::subtrair(3, 1)   # Saída: 2
 ```
 
 ### Mixin
 
-Ruby não suporta herança múltipla diretamente, mas **módulos** Ruby podem ter outros usos maravilhosos. Eles praticamente eliminam a necessidade de herança múltipla, proporcionando um mecanismo chamado Mixin.
+Mixins são um mecanismo em Ruby que permite **compartilhar funcionalidades** (como métodos e constantes) entre classes sem recorrer à **herança direta**. Eles são implementados através do uso de Módulos.
+
+O principal benefício dos mixins é **evitar a necessidade de herança múltipla**, fornecendo uma forma flexível de reutilização de código entre classes.
+
+Internamente, o Ruby insere o módulo na cadeia de herança da classe como uma entidade intermediária (na verdade, como uma classe anônima chamada _proxy class_ ou _inclusion class_), permitindo que os métodos do módulo sejam resolvidos como se fossem herdados
 
 ```ruby
 # Criando módulos
@@ -990,6 +1065,14 @@ y.hello # Saída: "Hello"
 ```
 
 ## Variáveis especiais (Global Magic Variables)
+
+> TODO
+
+## Files and Serialization
+
+> TODO
+
+## Debugging
 
 > TODO
 
