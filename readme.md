@@ -1013,11 +1013,13 @@ mixin.calcular
 MeuMixin.enviar_email
 ```
 
-## Singleton Pattern x Singleton Class
+## Singleton Pattern
 
-Singleton Pattern é um padrão de projeto (_Design Pattern_) que garante a _existência de apenas uma instância de uma classe_ mantendo um ponto global de acesso ao seu objeto.
+Singleton Pattern é um padrão de projeto (_Design Pattern_) que garante a existência de apenas uma instância de uma classe especificada durante a vida útil de um programa. Mantêm um ponto global de acesso ao seu objeto.
 
-Em Ruby, o padrão Singleton _parece_ uma classe estática. É comumente utilizado em classes que instanciam Banco de Dados e geram Logs.
+Em Ruby, a biblioteca `singleton` torna a implementação deste padrão simples. Para usá-la, você deve **inclui-lo** na classe que deseja que seja um singleton. Incluir este módulo torna o construtor padrão (`new`) da classe **privado**. Em vez de chamar new, os usuários da classe devem chamar o método `instance`.
+
+Os principais casos de uso para este padrão é para geração de Logs e acesso ao Banco de Dados.
 
 ```ruby
 require "singleton"
@@ -1030,15 +1032,15 @@ class Foobar
     end
 end
 
-foo = Foobar.new    # ERROR!
+foo = Foobar.new    # ERROR: 'NoMethodError'
 Foobar.instance.oi  # Saída: "Oi"
 ```
 
-Singleton Class (também chamada de Eigenclass ou Metaclass) é uma classe especial que é criada automaticamente para um objeto específico. Essa classe é usada para armazenar métodos que são exclusivos para aquele objeto, ou seja, métodos que não são compartilhados com outras instâncias da mesma classe.
+### Singleton Class
 
-É a mesma coisa que realizar o _object.instance_eval do_.
+Singleton Class (também chamada de Eigenclass ou Metaclass) é uma classe especial que é criada automaticamente para um **OBJETO** específico. Essa classe é usada para armazenar métodos que são exclusivos para aquele objeto, ou seja, métodos que não são compartilhados com outras instâncias da mesma classe.
 
-> Ruby Object Model
+É o mesmo que executar `object.instance_eval`.
 
 ```ruby
 class Teste
@@ -1066,16 +1068,81 @@ y.hello # Saída: "Hello"
 
 ## Variáveis especiais (Global Magic Variables)
 
-> TODO
+São **variáveis predefinidas** que possuem um significado especial e estão **disponíveis globalmente em todo o programa**. Muitas delas são prefixadas com o sinal de dólar (`$`) e têm nomes de duas letras onde a segunda é um sinal de pontuação. Por razões "históricas", muitos desses nomes de variáveis vêm do Perl.
 
-## Files and Serialization
+A biblioteca `English` pode ser incluída para fornecer nomes mais descritivos para essas variáveis globais.
 
-> TODO
+> O uso dessas variáveis globais **não** é recomendado em bibliotecas, pois elas afetam o comportamento de todo o programa.
 
-## Debugging
+Você pode conferir a lista de variáveis especiais [clicando aqui](https://ruby-doc.org/docs/ruby-doc-bundle/Manual/man-1.4/variable.html).
 
-> TODO
+## Arquivos e Serialização
+
+Arquivos são essencialmente coleções de bits e bytes que podem ser lidos, modificados e salvos. É útil pensar neles como uma longa string ou fluxo (stream) de bytes, que seu script Ruby pode ler de cima para baixo, realizando operações ao longo do caminho.
+
+A classe `File` e a classe `Dir` são usadas para manipular arquivos e diretórios. Um objeto arquivo é um tipo de objeto `IO`.
+
+Serialização é o processo de converter seus dados (como objetos e classes) em um formato que pode ser armazenado. Essencialmente, significa converter seus dados em um formato armazenável como uma `string`.
+
+Ruby permite converter um objeto em um fluxo (stream) de bytes visando o armazenamento. Este processo é denominado **marshaling**. O módulo `Marshal` é usado para serializar e desserializar objetos.
+
+> NOTA: _Rails_ utiliza o processo de marshaling para armazenar dados de sessão de usuários.
+
+```ruby
+# Verificar se arquivo existe
+puts File.exist?("exemplo.txt")  # true ou false
+
+# Ler um arquivo
+File.open("exemplo.txt", "r") do |file|
+  file.each_line do |linha|
+    puts linha
+  end
+end
+
+# Escrever em um arquivo
+File.open("exemplo.txt", "w") do |file|
+  file.puts "Olá, mundo!"
+end
+
+# Listar arquivos de um diretório
+Dir.entries(".").each do |entry|
+  puts entry
+end
+
+# Criar e remover diretório
+Dir.mkdir("novo_diretorio") unless Dir.exist?("novo_diretorio")
+Dir.rmdir("novo_diretorio") if Dir.exist?("novo_diretorio")
+
+```
+
+### Path
+
+A biblioteca `Pathname` (que precisa ser requerida: `require "pathname"`) fornece uma maneira orientada a objetos de trabalhar com caminhos de arquivo. Um objeto Pathname representa o nome absoluto ou relativo de um arquivo. Ele tem dois usos principais:
+
+- **Manipulação de caminhos**: Permite manipular partes de um caminho, construir novos caminhos (usando o operador +) e verificar propriedades como se é um caminho absoluto (absolute?) ou obter o caminho real (realpath).
+- **Fachada para métodos de Dir, File e FileTest**: Um objeto Pathname pode agir como um proxy para chamar métodos de status de arquivo/diretório, como file?, directory?, executable?, size, read, readlines.
 
 ## Gems
 
-> TODO
+[RubyGems](https://rubygems.org/) é um utilitário de pacote (gem) e um gerenciador de pacotes para Ruby. Ele serve como um framework padronizado de empacotamento e instalação para bibliotecas e aplicações Ruby.
+
+Se o seu código utiliza uma gem, essa gem é chamada de **dependência**.
+
+O **gemspec** é um arquivo de metadados que fornece informações chave sobre a gem, como nome, versão, autor, arquivos a serem incluídos, caminhos de carga, e dependências. Gems podem incluir extensões nativas (código C).
+
+O comando `bundle exec` é usado para garantir que os executáveis sejam executados no contexto das gems definidas no Gemfile.
+
+Principais gems:
+
+- rails: Framework web completo MVC
+- grape: Cliente HTTP simples (Pode ser utilizado junto do Rails)
+- devise: Autenticação flexível de usuários
+- omniauth: Autenticação via provedores externos (OAuth)
+- capybara: Testes de integração/simulação de navegador
+- faker: Geração de dados fictícios
+- pg: Driver PostgreSQL
+- sqlite3: Driver SQLite (ambiente local/dev)
+- kaminari: Paginação de resultados
+- dotenv-rails: Carrega variáveis de ambiente via .env
+- figaro: Carrega variáveis de ambiente via .yml
+- rubocop: Linter e formatador de código Ruby
