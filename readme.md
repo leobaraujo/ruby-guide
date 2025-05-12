@@ -407,7 +407,7 @@ end
 # Operadores relacionais: ==, !=, >, <, >= e <=
 
 # if...else statement
-if expressão_a_ser_avaliada == true and 1 < 2
+if expressão_avaliada == true and 1 < 2
   # code
 elsif true or false
   # code
@@ -419,6 +419,12 @@ end
 
 # if modifier (code if condition)
 puts "Hello, world!" if true
+
+# 'then' é uma palavra-chave reservada e *opcional*
+if 1 > 2 then puts "False"
+elsif 2 > 1 then puts "True"
+else puts "Hello, world"
+end
 ```
 
 Importante notar que _if_ em Ruby **é uma expressão**, não apenas uma statement, o que significa que ela retorna um valor. O valor retornado é o valor da última expressão avaliada dentro do bloco de código que foi executado.
@@ -491,8 +497,6 @@ Palavras-chave que permitem alterar o fluxo normal através de um loop while:
 - next: Pula para o final da iteração atual, começando efetivamente a próxima iteração
 - redo: Repete a iteração do loop desde o início, mas sem reavaliar a condição
 - retry: Reinicia o loop, reavaliando a condição
-
-> TODO: Pesquisar sobre "Uso de Ranges em condições booleanas".
 
 ```ruby
 # OBS: "do" é opcional
@@ -813,7 +817,57 @@ end
 
 ### class_eval e instance_eval
 
-> TODO
+Ambos `class_eval` e `instance_eval` são variações do método `eval`. O método eval permite analisar e executar uma string cujo conteúdo é código Ruby legal. Um objeto `Binding` pode ser usado **opcionalmente** para especificar o ambiente de avaliação, encapsulando variáveis, métodos, o valor de `self`.
+
+Diferenças:
+
+- `instance_eval`: Encontrado na classe `Object`, permite que você avalie uma string contendo código fonte Ruby ou um bloco de código dentro do contexto do objeto receptor
+- `class_eval`: Encontrado na classe `Module`, permite que você avalie uma string ou um bloco de código no **contexto de um módulo**.
+
+> Utilizado em _metaprogramação_.
+
+```ruby
+# Exemplo 1: Acessando variável de instância sem método setter/getter
+class Pessoa
+  def initialize(nome)
+    @nome = nome
+  end
+end
+
+p = Pessoa.new("João")
+p.instance_eval do
+ @nome = "Joaquim"
+end
+puts p.instance_eval { @nome }  # Saída: "Joaquim"
+
+# Exemplo 2: Definir métodos dinamicamente em um objeto específico
+obj = Object.new
+
+obj.instance_eval do
+  def saudacao
+    "Olá, mundo!"
+  end
+end
+
+puts obj.saudacao  # Saída: "Olá, mundo!"
+```
+
+```ruby
+# Exemplo 1: Adicionando método a uma classe existente
+class Pessoa; end
+
+Pessoa.class_eval do
+  def saudacao
+    "Olá!"
+  end
+end
+
+p1 = Pessoa.new
+p2 = Pessoa.new
+
+puts p1.saudacao       # Saída: "Olá!"
+puts p2.saudacao       # Saída: "Olá!"
+```
 
 ## Closures e Blocks
 
