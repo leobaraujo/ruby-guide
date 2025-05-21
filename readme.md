@@ -178,6 +178,8 @@ palavra1 + palavra2 + palavra3        # Resultado: "Hello, world!"
 ```ruby
 puts("Hel" + "lo")    # Hello\n (Adiciona quebra de linha no final do texto)
 print("World")        # World
+
+print(`clear`)        # Limpa o terminal
 ```
 
 ### Numbers operators and methods
@@ -414,7 +416,7 @@ elsif true or false
 elsif true and not false
   # code
 else
-  # code
+  exit 0    # Encerra a execução do processo. 0 = sem erro, 1 = saída com erro
 end
 
 # if modifier (code if condition)
@@ -531,6 +533,8 @@ puts count += 1 until count == 5
 ### Loop do
 
 É uma construção de **loop infinito**, usada quando você quer executar algo continuamente até usar um `break` **explicitamente**.
+
+Similar ao **do while loop** noutras linguagens de programação.
 
 ```ruby
 i = 0
