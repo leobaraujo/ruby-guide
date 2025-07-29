@@ -553,33 +553,87 @@ Um loop for é uma estrutura de loop utilizada para **iterar através de uma col
 > `break`, `redo`, `next` e `retry` são palavras-chave de controle de fluxo que podem ser utilizadas.
 
 ```ruby
-for num in 0..5
-  puts num
-end
-
-5.times do |num|
-  puts num
-end
-
+# Array
 lucky_nums = [1, 2, 3, 4, 5]
+
 for lucky_num in lucky_nums
   puts lucky_num
 end
+
+# Hash
+person = { name: "John Doe", age: 20, genre: "M" }
+
+for key, value in person
+  puts "#{key}: #{value}"
+end
+
+# Range
+for num in 0..5
+  puts num
+end
 ```
 
-#### For Loop X Each
+### Times
+
+O laço de repetição _times_ em Ruby é um método da classe `Integer`, usado para executar um bloco de código um **número específico de vezes**. Ele é ideal quando se sabe de antemão quantas repetições são necessárias.
+
+> OBS: Começa pelo índice zero (0).
+
+```ruby
+# Integer
+5.times do |num|
+  puts num
+end
+```
+
+### For Loop X Each
 
 A única diferença entre um `for loop` e sua forma equivalente `each`, está no **escopo das variáveis locais**.
 
 Os loops for são estruturas embutidas na linguagem e não introduzem um novo escopo. Isso significa que variáveis locais existentes antes do loop for podem ser usadas dentro dele, e quaisquer novas variáveis locais criadas dentro do corpo do loop for estarão disponíveis após a sua a sua execução.
 
-Isso contrasta com os blocos (como aqueles usados com `each`), onde as variáveis locais criadas dentro do bloco geralmente **não** são acessíveis fora do bloco
+Isso contrasta com os blocos (como aqueles usados com `each`), onde as variáveis locais criadas dentro do bloco geralmente **não** são acessíveis fora do bloco.
+
+> Operações realizadas dentro do bloco each **não** modificam a coleção original a menos que você use métodos destrutivos (com `!`).
 
 ```ruby
+# Array
 lucky_nums = [1, 2, 3, 4, 5]
 
 lucky_nums.each do |lucky_num|
   puts lucky_num
+end
+
+# Hash
+person = { name: "John Doe", age: 20, genre: "M" }
+
+person.each do |key, value|
+  puts "#{key}: #{value}"
+end
+```
+
+### Each X Map (Collect)
+
+O método `each` é fundamental para iterar sobre cada elemento de uma coleção e executar um bloco de código para cada um deles. Ele é usado quando você precisa realizar uma ação ou um efeito colateral (como imprimir valores, atualizar um banco de dados, etc.) para cada item.
+
+O método `map` (também chamado de `collect`) é projetado especificamente para transformar cada elemento de uma coleção e **retornar uma nova coleção** (um novo array) contendo os resultados dessas transformações.
+
+#### Efeito colateral (Side effect)
+
+É qualquer alteração fora do escopo de uma função ou expressão. São essencialmente diferentes de **funções puras**, que não têm efeitos colaterais, são previsíveis: dado o mesmo input, sempre retornam o mesmo output e não afetam nada mais no sistema.
+
+Exemplos de efeitos colaterais comuns:
+
+- Modificar uma variável global ou externa.
+- Alterar o conteúdo de uma estrutura de dados passada por referência.
+- Escrever em arquivos ou no banco de dados.
+- Imprimir no console (como _puts_ em Ruby).
+- Fazer chamadas de rede (API).
+
+```ruby
+# Função com efeito colateral
+def adicionar_nome(lista, nome)
+  lista << nome   # Modifica a lista original (efeito colateral)
 end
 ```
 
