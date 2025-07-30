@@ -5,6 +5,7 @@ TODO:
 - [ ] Adição de "Table of Contents"
 - [ ] Projetos
 - [ ] Busca por novas informações
+  - [ ] Simbolo como atalho em iterações
 
 # Ruby
 
@@ -259,11 +260,12 @@ puts my_grid[0][1]  # Saída: 2
 - delete: Remove todas as ocorrências de um determinado valor do array
 - delete_at: Remove o elemento em um determinado índice
 - each: Itera sobre cada elemento do array, passando-o para o bloco (Enumerable)
+- inject: Similar ao "reduce()" em outras linguagens de programação. Acumula um valor ao iterar sobre os elementos, aplicando um bloco de operação entre o acumulador e cada elemento
 - empty?: Retorna true se o array estiver vazio
 - flatten: Retorna um novo array que é uma versão unidimensional do array original (recursivamente)
 - include?: Retorna true se o array contém um determinado objeto
 - join: Concatena todos os elementos em uma string, separados por um separador opcional
-- length, size: Retorna o número de elementos no array
+- size: Retorna o número de elementos no array
 - push: Adiciona um ou mais elementos ao final do array
 - pop: Remove e retorna o último elemento do array
 - shift: Remove e retorna o primeiro elemento do array
@@ -354,6 +356,7 @@ def default_value(x, y = 10)
   x + y
 end
 
+# OBS: Sobrecarga de métodos
 def args_param(*args)
   sum = 0
   args.each { |num| sum += num }
@@ -676,6 +679,14 @@ A própria classe em Ruby é um objeto, sendo uma instância da classe `Class`. 
 Os nomes de classes e módulos devem, por convenção, seguir o padrão **CamelCase**.
 
 ```ruby
+class Person
+  # Por padrão, todos os atributos de classe são privado
+  @name
+end
+
+p = Person.new
+p.name = "Fulano"   # Error: Undefined method 'name='
+
 class Book
   # Helper que cria getter para os atributos
   # attr_reader :title, :author
@@ -697,7 +708,7 @@ class Book
   end
 
   def readBook()
-    puts "Reading #{self.title} by #{self.author}"
+    puts "Reading #{self.title} by #{@author}"
   end
 
   # Criando getter e setter *manualmente*
@@ -1123,6 +1134,28 @@ mixin = MeuMixin.new
 mixin.calcular
 
 MeuMixin.enviar_email
+```
+
+### Classe abstrata e Interfaces
+
+Ruby **não** possui classes abstratas (_abstract classes_) e _interfaces_ como em linguagens como Java ou C#, no entanto, o uso de módulos e convenções pode suprir essa necessidade em muitos casos.
+
+Módulos em Ruby podem ser usados para forçar a implementação de métodos em classes que os incluem, simulando algo parecido com interfaces ou classes abstratas.
+
+```ruby
+module Forma
+  def area
+    raise NotImplementedError, "Você deve implementar o método area"
+  end
+end
+
+class Circulo
+  include Forma
+
+  def area
+    3.14 * 2 * 2
+  end
+end
 ```
 
 ## Singleton Pattern
