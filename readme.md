@@ -6,6 +6,7 @@ TODO:
 - [ ] Projetos
 - [ ] Busca por novas informações
   - [ ] Simbolo como atalho em iterações
+  - [ ] Adicionar lista de "helpers"
 
 # Ruby
 
@@ -50,6 +51,8 @@ ruby meu_script.rb
 - REPL (Read-Eval-Print-Loop): Permite que você digite código Ruby em um prompt e veja os resultados imediatamente
 - - IRB (Interactive Ruby Shell): Ferramenta **padrão** do Ruby para executar códigos no prompt
 - - PRY: É uma [Ruby Gem](https://rubygems.org/gems/pry) parecido com o IRB, porém, há recursos adicionais como: Destaque de sintaxe, preenchimento automático, depuração, entre outros
+
+> OBS: É possível adicionar arquivos ruby dentro do ambiente IRB. Por exemplo, se o IRB estiver sendo executado na pasta _/my_app_ que contém o arquivo _my_code.rb_, ao executar a instrução `require_relative 'my_code'` o conteúdo de _my_code_ será carregado no ambiente IRB.
 
 ## Syntax
 
@@ -768,6 +771,7 @@ class Athlete < Person
 
   # Polimorfismo
   def run
+    # super         # Também é possível chamar o método "super" noutro método que a classe pai tenha
     puts "My top speed is 40km/h"
   end
 end
