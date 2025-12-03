@@ -117,6 +117,43 @@ O método **\*.object_id** retorna o _id_ único do objeto, inclusive de strings
 "my_text".object_id     # Saída: 925124465
 ```
 
+##### gsub e Heredoc
+
+**gsub** é um método da classe String que permite substituir partes de uma string com base em um padrão. O nome vem de global substitute.
+
+```ruby
+# Simples
+texto = "Olá mundo mundo".gsub("mundo", "Ruby")
+puts texto        # Saída: "Olá Ruby Ruby"
+
+# Regex
+texto = "123-456-789".gsub(/\d/, "X")
+puts texto        # Saída: "XXX-XXX-XXX"
+
+# Bloco
+texto = "ruby123".gsub(/\d/) { |match| (match.to_i * 2).to_s }
+puts texto        # Saída: "ruby246"
+```
+
+**Heredoc** é uma forma de criar strings multilinha de maneira limpa e organizada, especialmente útil para textos longos. Funciona usando `<<-IDENTIFICADOR` ou `<<~IDENTIFICADOR` seguido do texto e depois o mesmo identificador para encerrar.
+
+```ruby
+# '-' Não altera a indentação do conteúdo
+texto = <<-TXT
+Linha 1
+Linha 2
+Linha 3
+TXT
+
+# '~' Altera a indentação do conteúdo
+# NOTA: Remove apenas os espaços em branco da menor indentação comum de todas as linhas
+texto = <<~TXT
+    Linha 1
+    Linha 2
+    Linha 3
+TXT
+```
+
 #### Range
 
 Um range (intervalo) representa uma sequência de valores ou um intervalo, você pode pensar neles como listas ordenadas. Tem um ponto de início e um ponto de fim. Eles podem ser criados usando literais `..` e `...` ou o método `Range.new`.
@@ -1270,6 +1307,31 @@ A biblioteca `Pathname` (que precisa ser requerida: `require "pathname"`) fornec
 
 - **Manipulação de caminhos**: Permite manipular partes de um caminho, construir novos caminhos (usando o operador +) e verificar propriedades como se é um caminho absoluto (absolute?) ou obter o caminho real (realpath).
 - **Fachada para métodos de Dir, File e FileTest**: Um objeto Pathname pode agir como um proxy para chamar métodos de status de arquivo/diretório, como file?, directory?, executable?, size, read, readlines.
+
+## Estrutura de pastas padrão (Recomendado)
+
+Uma estrutura de diretórios considerada idiomática para projetos Ruby “puros” — aqueles que não utilizam frameworks como Rails — segue convenções amplamente adotadas pela comunidade Ruby para garantir modularidade, carregamento consistente de arquivos e compatibilidade com Bundler, Rubygems e ferramentas de automação.
+
+A arquitetura Service-Oriented Architecture (SOA) é comumente utilizada pela comunidade em projetos ruby "puro".
+
+```
+my_project/
+├── db/
+│   └── ... (arquivos relacionados ao banco de dados)
+├── bin/
+│   └── ... (scripts)
+├── lib/
+│   ├── my_project/
+│   │   ├── commands/
+│   │   ├── services/
+│   │   ├── models/
+│   │   ├── version.rb
+│   │   └── ... (outros arquivos e módulos)
+│   └── my_project.rb
+├── spec/ (ou test/)
+├── Gemfile
+└── README.md
+```
 
 ## Gems
 
