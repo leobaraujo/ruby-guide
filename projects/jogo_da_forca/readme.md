@@ -12,6 +12,6 @@ Regras:
 - A **vitória** acontece quando todas as letras são adivinhadas antes do boneco ser completado;
 - O **sistema de pontuação** funciona assim: a cada palavra acertada, soma-se +1 ponto. Em caso de derrota, a pontuação é zerada.
 
-![Imagem](../../../assets/images/jogo_da_forca.png)
+![Imagem](../../assets/images/jogo_da_forca.png)
 
 > Para iniciar o jogo, utilize `./bin/start.rb` no terminal.
