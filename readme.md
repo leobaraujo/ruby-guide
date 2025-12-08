@@ -2,11 +2,52 @@ TODO:
 
 - [ ] Revisão e adição de imagens
 - [ ] Reestruturação da ordem do conteúdo
-- [ ] Adição de "Table of Contents"
-- [ ] Projetos
 - [ ] Busca por novas informações
   - [ ] Simbolo como atalho em iterações
   - [ ] Adicionar lista de "helpers"
+
+# Table of Contents
+
+- [Ruby — Versão de estudo: 3.1.1](#ruby--versão-de-estudo-311)
+- [História](#história)
+- [Características](#características)
+- [Preparando o ambiente](#preparando-o-ambiente)
+- [REPL: IRB e PRY](#repl-irb-e-pry)
+- [Syntax Ruby Style Guide](#syntax-ruby-style-guide)
+  - [Comments](#comments)
+  - [Variables & Data Types](#variables--data-types)
+    - [Symbols x Strings](#symbols-x-strings)
+    - [Casting](#casting)
+    - [Constants](#constants)
+  - [Strings / Interpolation / Concat / Printing](#strings--interpolation--concat--printing)
+  - [Numbers, Operators and Methods](#numbers-operators-and-methods)
+  - [User Input](#user-input)
+  - [Arrays](#arrays)
+    - [2d Arrays](#2d-arrays)
+    - [Principais métodos](#principais-métodos)
+  - [Hashes](#hashes)
+  - [Methods](#methods)
+  - [Flow Control](#flow-control)
+    - [If Statements](#if-statements)
+    - [Unless Statement](#unless-statement)
+    - [Ternary Operator](#ternary-operator)
+    - [Switch Statements (case)](#switch-statements-case)
+    - [While Loop](#while-loop)
+    - [Until Loop](#until-loop)
+    - [Loop do](#loop-do)
+    - [For Loop](#for-loop)
+    - [Loops times / each / map (collect)](#loops-times--each--map-collect)
+  - [Exception Handling](#exception-handling)
+  - [Classes e Objetos](#classes-e-objetos)
+    - [Variáveis de instância](#variáveis-de-instância)
+    - [Variáveis de classe](#variáveis-de-classe)
+    - [Variáveis globais](#variáveis-globais)
+    - [Monkey Patch](#monkey-patch)
+    - [class_eval e instance_eval](#class_eval-e-instance_eval)
+  - [Metaprogramação: class_eval / instance_eval](#metaprogramação-class_eval--instance_eval)
+  - [Closures & Blocks](#closures--blocks)
+    - [Procs](#procs)
+    - [Lambdas](#lambdas)
 
 # Ruby
 
@@ -95,7 +136,7 @@ is_false = false
 vazio = nil
 ```
 
-#### Symbols x Strings
+#### Symbols & Strings
 
 _Symbol_ é todo objeto prefixado por dois pontos (:) e seguido por uma palavra qualquer.
 
@@ -117,7 +158,7 @@ O método **\*.object_id** retorna o _id_ único do objeto, inclusive de strings
 "my_text".object_id     # Saída: 925124465
 ```
 
-##### gsub e Heredoc
+##### gsub & Heredoc
 
 **gsub** é um método da classe String que permite substituir partes de uma string com base em um padrão. O nome vem de global substitute.
 
@@ -398,9 +439,8 @@ end
 
 # OBS: Sobrecarga de métodos
 def args_param(*args)
-  sum = 0
-  args.each { |num| sum += num }
-  return sum
+  # Soma todos os valores
+  args.inject(0) { |acc, val| acc + val }
 end
 
 def block_param(&block)
@@ -418,6 +458,10 @@ def block_param(&block)
   # OBS: Não requer a definição do parâmetro &block
   yield my_var
   yield my_var if block_given?   # Executa o bloco caso seja encontrado. "block_given?" é um helper
+end
+
+def deconstruct_param((x, y))
+  x + y
 end
 
 # Invocando método
@@ -441,6 +485,9 @@ block_param do
   texto = "Bloco executado com sucesso"
   puts texto
 end
+
+puts deconstruct_param [5, 5]       # Saída: 10
+puts deconstruct_param [5, 5, 5]    # Saída: 10
 ```
 
 ### If Statements
@@ -448,15 +495,15 @@ end
 > Em Ruby, **apenas** _nil_ e _false_ são considerados valores falsos (falsy). Todos os outros valores são considerados verdadeiros (truthy), incluindo uma string vazia "", o número 0, um array vazio [ ] e um hash vazio { }.
 
 ```ruby
-# Operadores lógicos: && (and), || (or) e ! (not)
+# Operadores lógicos de alta precedência: &&, || e !
 # Operadores relacionais: ==, !=, >, <, >= e <=
 
 # if...else statement
-if expressão_avaliada == true and 1 < 2
+if expressao_avaliada == true && 1 < 2
   # code
-elsif true or false
+elsif true || false
   # code
-elsif true and not false
+elsif true && !false
   # code
 else
   exit 0    # Encerra a execução do processo. 0 = sem erro, 1 = saída com erro
@@ -470,6 +517,11 @@ if 1 > 2 then puts "False"
 elsif 2 > 1 then puts "True"
 else puts "Hello, world"
 end
+
+# Operadores lógicos de baixa precedência: and, or e not
+# NOTA: Use somente para controle de fluxo, NÃO para lógica dentro de expressões
+log = abrir_arquivo("x.log") or abort("Falha ao abrir arquivo")
+usuario = autenticar(token) or return erro(401)
 ```
 
 Importante notar que _if_ em Ruby **é uma expressão**, não apenas uma statement, o que significa que ela retorna um valor. O valor retornado é o valor da última expressão avaliada dentro do bloco de código que foi executado.
@@ -764,10 +816,9 @@ class Book
 
   # Define um escopo privado (Encapsulamento)
   private
-
-  def hello # Não é acessível fora da classe
-    puts "world"
-  end
+    def hello # Não é acessível fora da classe
+      puts "world"
+    end
 end
 
 book1 = Book.new("Harry Potter", "JK Rowling")
