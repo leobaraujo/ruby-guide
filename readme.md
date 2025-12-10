@@ -8,15 +8,16 @@ TODO:
 
 # Table of Contents
 
-- [Ruby — Versão de estudo: 3.1.1](#ruby--versão-de-estudo-311)
 - [História](#história)
 - [Características](#características)
 - [Preparando o ambiente](#preparando-o-ambiente)
 - [REPL: IRB e PRY](#repl-irb-e-pry)
-- [Syntax Ruby Style Guide](#syntax-ruby-style-guide)
+- [Syntax](#syntax)
   - [Comments](#comments)
   - [Variables & Data Types](#variables--data-types)
-    - [Symbols x Strings](#symbols-x-strings)
+    - [Symbols & Strings](#symbols--strings)
+      - [Gsub & heredoc](#gsub--heredoc)
+    - [Range](#range)
     - [Casting](#casting)
     - [Constants](#constants)
   - [Strings / Interpolation / Concat / Printing](#strings--interpolation--concat--printing)
@@ -69,6 +70,10 @@ Inicialmente, Ruby não era uma linguagem bem documentada, pois Matz preferia es
 - Gerenciamento de Pacotes com [RubyGems](https://rubygems.org/?locale=pt-BR)
 - Extensão do arquivo: **.rb**
 
+### Ruby Style Guide
+
+Um guia sobre como escrever seu código Ruby [Link](https://github.com/rubocop/ruby-style-guide).
+
 ## Preparando o ambiente
 
 Observações:
@@ -95,11 +100,7 @@ ruby meu_script.rb
 
 > OBS: É possível adicionar arquivos ruby dentro do ambiente IRB. Por exemplo, se o IRB estiver sendo executado na pasta _/my_app_ que contém o arquivo _my_code.rb_, ao executar a instrução `require_relative 'my_code'` o conteúdo de _my_code_ será carregado no ambiente IRB.
 
-## Syntax
-
-Ruby Style Guide: Um guia sobre como escrever seu código Ruby [Link](https://github.com/rubocop/ruby-style-guide).
-
-### Comments
+## Comentários
 
 ```ruby
 # Comentário de única linha
@@ -111,7 +112,7 @@ Ruby Style Guide: Um guia sobre como escrever seu código Ruby [Link](https://gi
 =end
 ```
 
-### Variables & Data Types
+## Variáveis e Tipos de Dados
 
 Os nomes de variáveis locais devem começar com uma letra minúscula ou um sublinhado \_. Variáveis de instância começam com @ e variáveis de classe com @@. Variáveis globais começam com $. É uma conveção utilizar **snake_case** para nomes de variáveis e métodos (funções). Ex.: minha_variavel.
 
@@ -136,7 +137,7 @@ is_false = false
 vazio = nil
 ```
 
-#### Symbols & Strings
+### Símbolos e Strings
 
 _Symbol_ é todo objeto prefixado por dois pontos (:) e seguido por uma palavra qualquer.
 
@@ -158,7 +159,7 @@ O método **\*.object_id** retorna o _id_ único do objeto, inclusive de strings
 "my_text".object_id     # Saída: 925124465
 ```
 
-##### gsub & Heredoc
+#### gsub & heredoc
 
 **gsub** é um método da classe String que permite substituir partes de uma string com base em um padrão. O nome vem de global substitute.
 
@@ -195,7 +196,17 @@ texto = <<~TXT
 TXT
 ```
 
-#### Range
+#### Concatenação (Interpolação)
+
+```ruby
+palavra1 + palavra2 + palavra3        # Resultado: "Hello, world!"
+"A primeira palavra é: #{palavra1}"   # Resultado: "A primeira palavra é: Hello"
+"1" + 2                               # Resultado: *TypeError*
+"1, 2, #{3}"                          # Resultado: "1, 2, 3"
+```
+
+
+### Intervalos (Range)
 
 Um range (intervalo) representa uma sequência de valores ou um intervalo, você pode pensar neles como listas ordenadas. Tem um ponto de início e um ponto de fim. Eles podem ser criados usando literais `..` e `...` ou o método `Range.new`.
 
@@ -216,7 +227,7 @@ puts "Maior de idade" if (18..100).include?(age)
 end
 ```
 
-### Casting
+### Conversão de Tipos (Casting)
 
 ```ruby
 3.14.to_i()           # Float para Integer
@@ -232,7 +243,7 @@ array = [[:a, 1], [:b, 2], [:c, 3]]
 hash = array.to_h()   # 2d Array para hash
 ```
 
-### Constants
+### Constantes
 
 Uma constante em Ruby é qualquer nome de variável que **começa com letra maiúscula**. Permite **reatribuição**, mas exibe um warning.
 
@@ -246,25 +257,7 @@ PI = "Hello world"    # warning: already initialized constant PI
 puts PI               # Saída: "Hello world"
 ```
 
-### Concat (Interpolation)
-
-```ruby
-palavra1 + palavra2 + palavra3        # Resultado: "Hello, world!"
-"A primeira palavra é: #{palavra1}"   # Resultado: "A primeira palavra é: Hello"
-"1" + 2                               # Resultado: *TypeError*
-"1, 2, #{3}"                          # Resultado: "1, 2, 3"
-```
-
-### Printing
-
-```ruby
-puts("Hel" + "lo")    # Hello\n (Adiciona quebra de linha no final do texto)
-print("World")        # World
-
-print(`clear`)        # Limpa o terminal
-```
-
-### Numbers operators and methods
+### Operadores e Métodos Numéricos
 
 ```ruby
 # Operadores aritméticos: +, -, *, / e %
@@ -286,14 +279,23 @@ Math.sqrt(100)  # 10
 Math.log(0)     # -Infinity
 ```
 
-### User Input
+## Impressão (Output)
+
+```ruby
+puts("Hel" + "lo")    # Hello\n (Adiciona quebra de linha no final do texto)
+print("World")        # World
+
+print(`clear`)        # Limpa o terminal
+```
+
+### Entrada do Usuário (Input)
 
 ```ruby
 name = gets()         # Espera pelo input do usuário. Armazena o "enter" após o input
 name = gets.chomp()   # Não armazena o "enter" ao finalizar o input
 ```
 
-### Arrays
+## Arrays
 
 São coleções ordenadas e indexadas por inteiros de qualquer objeto. São objetos da classe Array.
 
@@ -319,7 +321,7 @@ array_a[1, 3]         # [8.1, true, "cinco"] (start, count)
 array_a[1..3]         # [8.1, true, "cinco"] (start..end)
 ```
 
-#### 2d Arrays
+### Arrays 2D
 
 ```ruby
 my_grid = [[1, 2], [3, 4]]
@@ -330,7 +332,7 @@ puts my_grid[0][0]  # Saída: 5
 puts my_grid[0][1]  # Saída: 2
 ```
 
-#### Principais métodos
+### Métodos
 
 - +: Concatenação de arrays
 - -: Diferença de arrays
@@ -385,7 +387,7 @@ my_hash.keys      # Saída: ["Andy", :Stanley, :is_true, 3, :other_hash]
 my_hash.values    # Saída: ["A", "B", false, 10.0, {:foo=>"bar"}]
 ```
 
-### Methods
+## Métodos
 
 Um método pode retornar um valor implicitamente (o resultado da última expressão avaliada) ou explicitamente usando a palavra-chave return. Ou seja, ele **sempre** retorna algo.
 
@@ -407,7 +409,7 @@ puts add_numbers(5, 10)     # Saída: 15
 puts add_numbers(5)         # Saída: 105
 ```
 
-#### Diferentes formas de chamar métodos
+### Diferentes formas de chamar métodos
 
 Em Ruby, a invocação de métodos e a definição de seus parâmetros oferecem flexibilidade.
 
@@ -732,7 +734,7 @@ def adicionar_nome(lista, nome)
 end
 ```
 
-## Exception Catching
+## Tratamento de Exceções
 
 O mecanismo principal para capturar exceções em Ruby é a estrutura `begin`, `rescue` e `end`.
 
@@ -872,7 +874,7 @@ puts athlete1.name  # Saída: "Doe Jhon"
 athlete1.run
 ```
 
-### Variáveis de instância
+### Variáveis de Instância
 
 Armazena dados **específicos do objeto** e só pode ser acessada dentro da instância onde foi definida. Requer _getter_ e _setter_ uma vez que são **privados**.
 
@@ -885,7 +887,7 @@ def initialize(title, author)
 end
 ```
 
-### Variáveis de classe
+### Variáveis de Classe
 
 Variáveis de classe em Ruby começam com `@@` e são **compartilhadas entre todas as instâncias** da mesma classe mantendo um valor comum.
 
@@ -919,7 +921,7 @@ puts Pessoa.modelo_contador         # Saída: 2
 puts Pessoa::modelo_contador        # Saída: 2
 ```
 
-### Variáveis global
+### Variáveis Globais
 
 Começam com `$` e podem ser acessadas e modificadas de qualquer lugar do programa.
 
@@ -1154,7 +1156,7 @@ resultado = processar_usuarios
 puts resultado    # Saída: "Usuário inválido: Carlos"
 ```
 
-## Módulo
+## Módulos
 
 Módulos definem uma coleção de métodos, constantes, definições de classes ou outros módulos.
 
@@ -1228,7 +1230,7 @@ mixin.calcular
 MeuMixin.enviar_email
 ```
 
-### Classe abstrata e Interfaces
+### Classe Abstrata e Interfaces
 
 Ruby **não** possui classes abstratas (_abstract classes_) e _interfaces_ como em linguagens como Java ou C#, no entanto, o uso de módulos e convenções pode suprir essa necessidade em muitos casos.
 
@@ -1303,7 +1305,7 @@ x.hello # ERROR!
 y.hello # Saída: "Hello"
 ```
 
-## Variáveis especiais (Global Magic Variables)
+## Variáveis Especiais (Global Magic Variables)
 
 São **variáveis predefinidas** que possuem um significado especial e estão **disponíveis globalmente em todo o programa**. Muitas delas são prefixadas com o sinal de dólar (`$`) e têm nomes de duas letras onde a segunda é um sinal de pontuação. Por razões "históricas", muitos desses nomes de variáveis vêm do Perl.
 
@@ -1359,7 +1361,7 @@ A biblioteca `Pathname` (que precisa ser requerida: `require "pathname"`) fornec
 - **Manipulação de caminhos**: Permite manipular partes de um caminho, construir novos caminhos (usando o operador +) e verificar propriedades como se é um caminho absoluto (absolute?) ou obter o caminho real (realpath).
 - **Fachada para métodos de Dir, File e FileTest**: Um objeto Pathname pode agir como um proxy para chamar métodos de status de arquivo/diretório, como file?, directory?, executable?, size, read, readlines.
 
-## Estrutura de pastas padrão (Recomendado)
+## Estrutura de Pastas Padrão (Recomendado)
 
 Uma estrutura de diretórios considerada idiomática para projetos Ruby “puros” — aqueles que não utilizam frameworks como Rails — segue convenções amplamente adotadas pela comunidade Ruby para garantir modularidade, carregamento consistente de arquivos e compatibilidade com Bundler, Rubygems e ferramentas de automação.
 
@@ -1384,7 +1386,7 @@ my_project/
 └── README.md
 ```
 
-## Gems
+## Ruby Gems
 
 [RubyGems](https://rubygems.org/) é um utilitário de pacote (gem) e um gerenciador de pacotes para Ruby. Ele serve como um framework padronizado de empacotamento e instalação para bibliotecas e aplicações Ruby.
 
