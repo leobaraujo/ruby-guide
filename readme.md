@@ -120,21 +120,24 @@ Os nomes de variáveis locais devem começar com uma letra minúscula ou um subl
 
 ```ruby
 # Números
-inteiro = 1     # Integer
-decimal = 3.14  # Float
+inteiro = 1         # Integer
+decimal = 3.14      # Float
 
 # Strings
 palavra1 = 'Hello'
 palavra2 = ", "
 palavra3 = %q{world!}
 
+# Symbol
+palavra4 = :hello_world
+palavra5 = :"Hello world!"
+
 # Boolean
-is_true = true
-is_false = false
+is_true = true      # TrueClass
+is_false = false    # FalseClass
 
 # Vazio
-# OBS: Em Ruby, nil é um objeto (a instância singleton da classe NilClass)
-vazio = nil
+vazio = nil         # NilClass
 ```
 
 ### Símbolos e Strings
@@ -162,6 +165,8 @@ O método **\*.object_id** retorna o _id_ único do objeto, inclusive de strings
 #### gsub & heredoc
 
 **gsub** é um método da classe String que permite substituir partes de uma string com base em um padrão. O nome vem de global substitute.
+
+> A diferença entre `sub` e `gsub` é que o método `sub` substitui apenas a primeira ocorrência do padrão encontrado na string.
 
 ```ruby
 # Simples
@@ -196,6 +201,23 @@ texto = <<~TXT
 TXT
 ```
 
+#### chomp & strip
+
+Os métodos `chomp()` e `strip()` são **string method**.
+
+```ruby
+my_string = " Hello world\n"
+
+# Quando utilizado sem argumentos remove a quebra de linha final (\n, \r ou \r\n)
+my_string.chomp()              # Saída: " Hello world"
+
+# Modifica a string original (!)
+my_string.chomp!(" world")     # Saída: " Hello"
+
+# Remove espaços em branco (e nulos) do início e do fim
+my_string.strip()              # Saída: "a b c"
+```
+
 #### Concatenação (Interpolação)
 
 ```ruby
@@ -204,7 +226,6 @@ palavra1 + palavra2 + palavra3        # Resultado: "Hello, world!"
 "1" + 2                               # Resultado: *TypeError*
 "1, 2, #{3}"                          # Resultado: "1, 2, 3"
 ```
-
 
 ### Intervalos (Range)
 
@@ -235,6 +256,7 @@ end
 3.0.to_s()            # Float para String
 "4".to_i()            # String para Integer
 "4.2".to_f()          # String para Float
+"foo".to_sym()        # String para Symbol
 
 range = 1..5
 array = range.to_a()  # Range para Array
@@ -270,6 +292,24 @@ puts PI               # Saída: "Hello world"
 num = 10
 num += 100  # Resultado: 110
 
+# Operador condicional: ||=
+# NOTA: Se x for truthy (qualquer coisa exceto nil ou false), mantém x como está (sem atribuir)
+x ||= y       # É o mesmo que `x = x || y`
+a ||= 5       # Valor: 5
+a ||= 10      # Valor: 5
+
+# Spaceship operator: <=>
+# NOTA: É um comparador geral utilizado pelo Ruby para implementar ordenação e comparação em várias classes (como Comparable). Ele retorna sempre um dos três valores: -1, 0 e 1
+# Comparação básica de números
+1 <=> 2   # Saída: -1
+2 <=> 2   # Saída: 0
+3 <=> 2   # Saída: 1
+
+# Comparação de strings (ordem lexográfica)
+"abc" <=> "abd"           # Saída: -1
+"ruby" <=> "ruby"         # Saída: 0
+"zebra" <=> "apple"       # Saída: 1
+
 # Métodos
 -10.abs()       # 10 (+)
 36.6.round()    # 37
@@ -277,22 +317,6 @@ num += 100  # Resultado: 110
 # Classe Math
 Math.sqrt(100)  # 10
 Math.log(0)     # -Infinity
-```
-
-## Impressão (Output)
-
-```ruby
-puts("Hel" + "lo")    # Hello\n (Adiciona quebra de linha no final do texto)
-print("World")        # World
-
-print(`clear`)        # Limpa o terminal
-```
-
-### Entrada do Usuário (Input)
-
-```ruby
-name = gets()         # Espera pelo input do usuário. Armazena o "enter" após o input
-name = gets.chomp()   # Não armazena o "enter" ao finalizar o input
 ```
 
 ## Arrays
@@ -336,6 +360,7 @@ puts my_grid[0][1]  # Saída: 2
 
 - +: Concatenação de arrays
 - -: Diferença de arrays
+- &: Retorna a interseção entre arrays
 - <<: Adiciona um objeto ao final do array (append)
 - ==: Verifica se dois arrays têm o mesmo comprimento e conteúdo
 - clear: Remove todos os elementos do array
@@ -343,10 +368,12 @@ puts my_grid[0][1]  # Saída: 2
 - delete: Remove todas as ocorrências de um determinado valor do array
 - delete_at: Remove o elemento em um determinado índice
 - each: Itera sobre cada elemento do array, passando-o para o bloco (Enumerable)
-- inject: Similar ao "reduce()" em outras linguagens de programação. Acumula um valor ao iterar sobre os elementos, aplicando um bloco de operação entre o acumulador e cada elemento
+- inject: Acumula um valor ao iterar sobre os elementos, aplicando um bloco de operação entre o acumulador e cada elemento
 - empty?: Retorna true se o array estiver vazio
 - flatten: Retorna um novo array que é uma versão unidimensional do array original (recursivamente)
 - include?: Retorna true se o array contém um determinado objeto
+- find / detect: Buscar o primeiro elemento em uma coleção que satisfaça uma condição (bloco)
+- dig: Permite acessar valores aninhados de forma segura
 - join: Concatena todos os elementos em uma string, separados por um separador opcional
 - size: Retorna o número de elementos no array
 - push: Adiciona um ou mais elementos ao final do array
@@ -379,12 +406,29 @@ my_hash["Andy"]
 my_hash[:Stanley]
 my_hash[:is_true]
 my_hash[3]            # 3 é a chave e *não o index*
+my_hash.dig(:other_hash, :foo)  # Saída:  "bar"
 
-puts my_hash # Saída: {"Andy" => "A", :Stanley => "B", :is_true => false, 3 => 10.0}
+puts my_hash          # Saída: {"Andy" => "A", :Stanley => "B", :is_true => false, 3 => 10.0}
 
 # Métodos exclusivos
 my_hash.keys      # Saída: ["Andy", :Stanley, :is_true, 3, :other_hash]
 my_hash.values    # Saída: ["A", "B", false, 10.0, {:foo=>"bar"}]
+```
+
+## Impressão (Output)
+
+```ruby
+puts("Hel" + "lo")    # Hello\n (Adiciona quebra de linha no final do texto)
+print("World")        # World
+
+print(`clear`)        # Limpa o terminal
+```
+
+### Entrada do Usuário (Input)
+
+```ruby
+name = gets()         # Espera pelo input do usuário. Armazena o "enter" após o input
+name = gets.chomp()   # Não armazena o "enter" (\n, \r ou \r\n) no final da string ao finalizar o input
 ```
 
 ## Métodos
@@ -492,6 +536,8 @@ puts deconstruct_param [5, 5]       # Saída: 10
 puts deconstruct_param [5, 5, 5]    # Saída: 10
 ```
 
+## Estruturas de controle
+
 ### If Statements
 
 > Em Ruby, **apenas** _nil_ e _false_ são considerados valores falsos (falsy). Todos os outros valores são considerados verdadeiros (truthy), incluindo uma string vazia "", o número 0, um array vazio [ ] e um hash vazio { }.
@@ -585,6 +631,8 @@ case "A"
       # code
 end
 ```
+
+## Estruturas de repetição
 
 ### While Loop
 
@@ -1032,34 +1080,52 @@ puts p1.saudacao       # Saída: "Olá!"
 puts p2.saudacao       # Saída: "Olá!"
 ```
 
-## Closures e Blocks
+### Safe navigation (&.)
 
-Em Ruby, os blocos (Blocks) podem funcionar como closures. Isso significa que eles "capturam" o ambiente (variáveis locais) onde foram definidos e podem acessar essas variáveis mesmo quando executados em um contexto diferente.
+Ele permite chamar métodos ou acessar atributos apenas se o objeto não for nil. Se o objeto for nil, Ruby não lança exceção e simplesmente retorna nil.
 
-Ruby blocks "**são pequenas funções anônimas** que podem ser passadas nos métodos". Podemos identificar quando vemos ou escrevemos no código comandos dentro dos `do...end` ou entre chaves `{}` e os argumentos vão dentro de pipes `|args|`. São frequentemente utilizados em métodos **iteradores**.
+Características:
 
-> Métodos podem aceitar blocks como parâmetro.
+- Se obj for nil, retorna nil sem erro
+- Se o método não existir, Ruby lança NoMethodError
 
 ```ruby
-# Sintaxe "do...end"
+nil.attr    # undefined method 'attr' for nil (NoMethodError)
+nil&.attr   # nil
+
+# Exemplo de caso de uso
+user&.profile&.email
+```
+
+## Closures
+
+Uma closure é uma função que captura o ambiente léxico onde foi criada e mantém acesso a variáveis externas mesmo depois que esse ambiente saiu de escopo.
+
+### Block
+
+Um bloco é uma estrutura léxica anexada a uma chamada de método, **não é um objeto** por padrão. Podemos identificar quando encontramos no código comandos como `do...end` e `{ ... }`, e os argumentos vão dentro de pipes `|args|`. São frequentemente utilizados em métodos **iteradores**.
+
+Funcionam como pequenas funções temporárias que modificam o comportamento do método.
+
+```ruby
+# Sintaxe "do...end" - Block multiline
 [1, 2, 3, 4, 5].each do |num|
     puts num
 end
 
-# Sintaxe {} - Bloco inline
-[1, 2, 3, 4, 5].each {|num| puts num}
+# Sintaxe "{ ... }" - Inline block
+[1, 2, 3, 4, 5].each { |num| puts num.odd? }
 ```
 
-### Procs
+### Proc
 
-Um Proc é apenas um objeto que você pode usar para **armazenar blocks** e passá-los como variáveis.
+Um Proc é um objeto real — uma instância da classe Proc — que encapsula um bloco. Pode ser armazenado, retornado e passado como block usando `&my_proc`.
 
 As Procs tem algumas particularidades, a mais notável é o fato dos argumentos **não** interferirem na execução da mesma. Procs preenche os argumentos ausentes com `nil` e um **único** argumento de array é desconstruído se o proc tiver vários argumentos.
 
 ```ruby
 # Criando proc
 a = Proc.new { |x, y| "x = #{x}, y = #{y}" }
-b = Proc.new { "Hello, world!" }
 
 # Executando proc
 puts a.call(1, 2)       # Saída: x = 1, y = 2
@@ -1071,6 +1137,38 @@ puts a.call             # Saída: x = , y =
 # Também é possível executar um Proc com colchetes []
 puts a[1, 2]            # Saída: x = 1, y = 2
 ```
+
+#### to_proc
+
+`to_proc` é um método definido em diversas classes do Ruby que converte um objeto em um objeto da classe Proc. Ele foi criado para permitir sintaxe mais enxuta e expressiva ao trabalhar com blocos, especialmente em métodos de **iteração** como map, select, each, etc.
+
+O uso mais conhecido é quando utilizado com o operador `&`, que instrui Ruby a converter o objeto fornecido para um Proc usando to_proc.
+
+```ruby
+# Exemplo 1
+# &:to_i é o mesmo que :to_i.to_proc
+["1", "2", "3"].map(&:to_i)   # :to_i é um Symbol
+
+# Gera um Proc equivalente a:
+proc { |num| num.to_i }
+
+# Observe que `to_i` é um método da classe String, no caso, válido pois o conteúdo é "1", "2" ou "3"
+
+# Exemplo 2
+test = :foo.to_proc
+# test = proc { |obj, *args| obj.send(:foo, *args) }     # Gerado internamente
+test.class              # Saída: Proc
+test.call 0             # Saída: undefined method 'foo'
+```
+
+#### Operador &
+
+O operador & aplicado em um argumento faz:
+
+1. Verifica se o argumento é nil.
+   Se for, não faz nada.
+2. Caso contrário, ele chama to_proc nesse objeto.
+3. Ruby recebe o Proc retornado e o utiliza como bloco para o método.
 
 ### Lambda
 
@@ -1314,6 +1412,48 @@ A biblioteca `English` pode ser incluída para fornecer nomes mais descritivos p
 > O uso dessas variáveis globais **não** é recomendado em bibliotecas, pois elas afetam o comportamento de todo o programa.
 
 Você pode conferir a lista de variáveis especiais [clicando aqui](https://ruby-doc.org/docs/ruby-doc-bundle/Manual/man-1.4/variable.html).
+
+## Datas
+
+### Date
+
+A classe Date em Ruby faz parte da biblioteca padrão e fornece uma representação robusta e imutável de datas do calendário gregoriano. É adequada para operações que **não armazena hora nem fuso horário**.
+
+```ruby
+require "date"
+
+# Iniciação
+Date.new(2025, 12, 25)
+Date.parse("2025-12-25")
+Date.iso8601("2025-12-25")
+
+# Formatação
+Date.strptime("25-12-2025", "%d-%m-%Y")         # Parseia String Date
+Date.new(2025, 12, 25).strftime("%d/%m/%Y")     # Formata Date para String
+
+# Data atual
+Date.today
+
+# Somar e subtrair dias (inteiros)
+Date.new(2025, 12, 10) + 5    # Saída: 2025-12-15
+Date.new(2025, 12, 10) - 3    # Saída: 2025-12-07
+
+# Diferença entre datas
+# NOTA: Permite comparação <, <=, ==, => e >
+(Date.new(2025, 12, 10) - Date.new(2025, 12, 1)).to_i   # Saída: 9 (dias) - Valor racional (Pode ser 3/2 que resulta em 1.5, ou seja, um dia e meio)
+
+# Métodos úteis
+Date.valid_date?(2025, 2, 29)   # False
+d = Date.new(2025, 1, 31)
+d.next_month                    # Saída: 2025-02-28 (não há 31/02)
+d.prev_month                    # Saída: 2024-12-31
+d.next_year
+d.prev_year
+```
+
+### Time
+
+> Opte no lugar de DateTime.
 
 ## Arquivos e Serialização
 
