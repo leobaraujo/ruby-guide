@@ -1,64 +1,84 @@
-TODO:
+# Ruby
 
-- [ ] Revisão e adição de imagens
-- [ ] Reestruturação da ordem do conteúdo
-- [ ] Busca por novas informações
-  - [ ] Simbolo como atalho em iterações
-  - [ ] Adicionar lista de "helpers"
+Ruby é uma linguagem de programação interpretada, orientada a objetos e de propósito geral, criada por Yukihiro Matsumoto (Matz) em 1995, com o objetivo explícito de priorizar a produtividade do desenvolvedor e a legibilidade do código.
 
-# Table of Contents
+Seu princípio central é que o código deve ser natural de ler e agradável de escrever. Para isso, Ruby oferece uma sintaxe expressiva, consistente e de alto nível, na qual tudo é objeto e comportamentos são definidos por métodos.
 
-- [História](#história)
-- [Características](#características)
-- [Preparando o ambiente](#preparando-o-ambiente)
-- [REPL: IRB e PRY](#repl-irb-e-pry)
-- [Syntax](#syntax)
-  - [Comments](#comments)
-  - [Variables & Data Types](#variables--data-types)
-    - [Symbols & Strings](#symbols--strings)
-      - [Gsub & heredoc](#gsub--heredoc)
-    - [Range](#range)
-    - [Casting](#casting)
-    - [Constants](#constants)
-  - [Strings / Interpolation / Concat / Printing](#strings--interpolation--concat--printing)
-  - [Numbers, Operators and Methods](#numbers-operators-and-methods)
-  - [User Input](#user-input)
-  - [Arrays](#arrays)
-    - [2d Arrays](#2d-arrays)
-    - [Principais métodos](#principais-métodos)
-  - [Hashes](#hashes)
-  - [Methods](#methods)
-  - [Flow Control](#flow-control)
+A linguagem possui tipagem dinâmica, coleta automática de lixo (garbage collection) e um ecossistema robusto de bibliotecas (gems), gerenciadas pelo RubyGems e Bundler. Esses fatores permitem desenvolvimento rápido, especialmente em aplicações web, automações, scripts e ferramentas de infraestrutura.
+
+> [Documentação](https://ruby-doc.org/core-3.1.1/)
+
+## Table of Contents
+- [Ruby](#ruby)
+  - [Table of Contents](#table-of-contents)
+  - [Características](#características)
+    - [Ruby Style Guide](#ruby-style-guide)
+  - [Preparando o ambiente](#preparando-o-ambiente)
+    - [IntelliSense (VS Code)](#intellisense-vs-code)
+  - [REPL: IRB e PRY](#repl-irb-e-pry)
+  - [Comentários](#comentários)
+  - [Variáveis e Tipos de dados](#variáveis-e-tipos-de-dados)
+    - [Tipos de variáveis](#tipos-de-variáveis)
+    - [Símbolos e Strings](#símbolos-e-strings)
+      - [gsub \& heredoc](#gsub--heredoc)
+      - [chomp \& strip](#chomp--strip)
+      - [Concatenação (Interpolação)](#concatenação-interpolação)
+    - [Intervalos (Range)](#intervalos-range)
+    - [Conversão de tipos (Casting)](#conversão-de-tipos-casting)
+    - [Constantes](#constantes)
+    - [Operadores e Métodos numéricos](#operadores-e-métodos-numéricos)
+  - [Array (Vetor)](#array-vetor)
+    - [2D Array (Matriz)](#2d-array-matriz)
+    - [Métodos](#métodos)
+    - [Hashes](#hashes)
+  - [Saída de dados (Output)](#saída-de-dados-output)
+  - [Entrada de dados (Input)](#entrada-de-dados-input)
+  - [Métodos](#métodos-1)
+    - [Diferentes formas de chamar métodos](#diferentes-formas-de-chamar-métodos)
+  - [Estruturas de controle](#estruturas-de-controle)
     - [If Statements](#if-statements)
     - [Unless Statement](#unless-statement)
     - [Ternary Operator](#ternary-operator)
-    - [Switch Statements (case)](#switch-statements-case)
+    - [Switch Statements](#switch-statements)
+  - [Estruturas de repetição](#estruturas-de-repetição)
     - [While Loop](#while-loop)
     - [Until Loop](#until-loop)
     - [Loop do](#loop-do)
     - [For Loop](#for-loop)
-    - [Loops times / each / map (collect)](#loops-times--each--map-collect)
-  - [Exception Handling](#exception-handling)
+    - [Times](#times)
+    - [For Loop X Each](#for-loop-x-each)
+    - [Each X Map (Collect)](#each-x-map-collect)
+      - [Efeito colateral (Side effect)](#efeito-colateral-side-effect)
+  - [Tratamento de exceções](#tratamento-de-exceções)
   - [Classes e Objetos](#classes-e-objetos)
+    - [Herança e Polimorfismo](#herança-e-polimorfismo)
     - [Variáveis de instância](#variáveis-de-instância)
     - [Variáveis de classe](#variáveis-de-classe)
     - [Variáveis globais](#variáveis-globais)
     - [Monkey Patch](#monkey-patch)
-    - [class_eval e instance_eval](#class_eval-e-instance_eval)
-  - [Metaprogramação: class_eval / instance_eval](#metaprogramação-class_eval--instance_eval)
-  - [Closures & Blocks](#closures--blocks)
-    - [Procs](#procs)
-    - [Lambdas](#lambdas)
-
-# Ruby
-
-> Versão de estudo: 3.1.1 ([Documentação](https://ruby-doc.org/core-3.1.1/))
-
-## História
-
-Foi publicada em 1995 por Yukihiro Matsumoto ("Matz") no Japão. Ela combina ideias de várias linguagens como Perl, Smalltalk, Eiffel, Ada e Lisp, e é conhecida por sua sintaxe legível e elegante.
-
-Inicialmente, Ruby não era uma linguagem bem documentada, pois Matz preferia escrever programas a documentação. Ele expressa a sua gratidão a Dave Thomas e Andy Hunt, autores do livro "Programming Ruby" (também conhecido como "PickAxe"), por terem apresentado Ruby em grande escala fora do Japão.
+    - [class\_eval e instance\_eval](#class_eval-e-instance_eval)
+    - [Safe navigation (\&.)](#safe-navigation-)
+  - [Closures](#closures)
+    - [Block](#block)
+    - [Proc](#proc)
+      - [to\_proc](#to_proc)
+      - [Operador \&](#operador-)
+    - [Lambda](#lambda)
+      - [Diferenças entre Lambda e Proc](#diferenças-entre-lambda-e-proc)
+  - [Catch/Throw](#catchthrow)
+  - [Módulos](#módulos)
+    - [Mixin](#mixin)
+    - [Classe Abstrata e Interfaces](#classe-abstrata-e-interfaces)
+  - [Singleton Pattern](#singleton-pattern)
+    - [Singleton Class](#singleton-class)
+  - [Variáveis Especiais (Global Magic Variables)](#variáveis-especiais-global-magic-variables)
+  - [Datas](#datas)
+    - [Date](#date)
+    - [Time](#time)
+  - [Arquivos e Serialização](#arquivos-e-serialização)
+    - [Path](#path)
+  - [Estrutura de pastas padrão (Recomendado)](#estrutura-de-pastas-padrão-recomendado)
+  - [RubyGems](#rubygems)
 
 ## Características
 
@@ -92,6 +112,13 @@ Executando script ruby:
 ruby meu_script.rb
 ```
 
+### IntelliSense (VS Code)
+
+- Extensão: [Ruby LSP](https://marketplace.visualstudio.com/items?itemName=Shopify.ruby-lsp)
+- RubyGems (Development):
+  - ruby-lsp
+  - syntax_tree
+
 ## REPL: IRB e PRY
 
 - REPL (Read-Eval-Print-Loop): Permite que você digite código Ruby em um prompt e veja os resultados imediatamente
@@ -112,7 +139,7 @@ ruby meu_script.rb
 =end
 ```
 
-## Variáveis e Tipos de Dados
+## Variáveis e Tipos de dados
 
 Os nomes de variáveis locais devem começar com uma letra minúscula ou um sublinhado \_. Variáveis de instância começam com @ e variáveis de classe com @@. Variáveis globais começam com $. É uma conveção utilizar **snake_case** para nomes de variáveis e métodos (funções). Ex.: minha_variavel.
 
@@ -139,6 +166,14 @@ is_false = false    # FalseClass
 # Vazio
 vazio = nil         # NilClass
 ```
+
+### Tipos de variáveis
+
+- Local: Variáveis locais são válidas apenas dentro do escopo onde foram definidas
+- Classe: Compartilhadas entre todas as instâncias da classe e suas subclasses. Seu uso é geralmente desaconselhado devido a efeitos colaterais
+- Instância: Pertencem a uma instância específica de um objeto. São acessíveis por todos os métodos da instância
+- Global: Acessíveis em qualquer lugar do programa. Devem ser evitadas, pois dificultam manutenção e testes
+- Constante: Definidas com letras maiúsculas. Podem ser acessadas dentro do escopo onde foram declaradas e em escopos aninhados. Não são verdadeiramente imutáveis, mas sua alteração gera warning
 
 ### Símbolos e Strings
 
@@ -248,7 +283,7 @@ puts "Maior de idade" if (18..100).include?(age)
 end
 ```
 
-### Conversão de Tipos (Casting)
+### Conversão de tipos (Casting)
 
 ```ruby
 3.14.to_i()           # Float para Integer
@@ -279,7 +314,7 @@ PI = "Hello world"    # warning: already initialized constant PI
 puts PI               # Saída: "Hello world"
 ```
 
-### Operadores e Métodos Numéricos
+### Operadores e Métodos numéricos
 
 ```ruby
 # Operadores aritméticos: +, -, *, / e %
@@ -319,7 +354,7 @@ Math.sqrt(100)  # 10
 Math.log(0)     # -Infinity
 ```
 
-## Arrays
+## Array (Vetor)
 
 São coleções ordenadas e indexadas por inteiros de qualquer objeto. São objetos da classe Array.
 
@@ -345,7 +380,7 @@ array_a[1, 3]         # [8.1, true, "cinco"] (start, count)
 array_a[1..3]         # [8.1, true, "cinco"] (start..end)
 ```
 
-### Arrays 2D
+### 2D Array (Matriz)
 
 ```ruby
 my_grid = [[1, 2], [3, 4]]
@@ -367,21 +402,25 @@ puts my_grid[0][1]  # Saída: 2
 - compact: Retorna uma cópia do array com todos os elementos nil removidos
 - delete: Remove todas as ocorrências de um determinado valor do array
 - delete_at: Remove o elemento em um determinado índice
-- each: Itera sobre cada elemento do array, passando-o para o bloco (Enumerable)
+- map / collect: Itera sobre cada elemento do array, passando-o para o bloco (Enumerable), retorna um novo array ou modifica o arrau que invocou o método (!)
+- each: Itera sobre cada elemento do array, passando-o para o bloco (Enumerable). Não altera o objeto original, a menos que seja explicitamente modificado dentro do bloco (o que não é recomendado)
 - inject: Acumula um valor ao iterar sobre os elementos, aplicando um bloco de operação entre o acumulador e cada elemento
 - empty?: Retorna true se o array estiver vazio
 - flatten: Retorna um novo array que é uma versão unidimensional do array original (recursivamente)
 - include?: Retorna true se o array contém um determinado objeto
 - find / detect: Buscar o primeiro elemento em uma coleção que satisfaça uma condição (bloco)
-- dig: Permite acessar valores aninhados de forma segura
+- dig: Acessa valores aninhados de forma segura
 - join: Concatena todos os elementos em uma string, separados por um separador opcional
 - size: Retorna o número de elementos no array
 - push: Adiciona um ou mais elementos ao final do array
+- unshift: Adiciona um ou mais elementos no início do array
 - pop: Remove e retorna o último elemento do array
 - shift: Remove e retorna o primeiro elemento do array
 - slice!: Remove e retorna o elemento ou subarray especificado
 - sort: Retorna um novo array com os elementos ordenados
 - uniq: Retorna um novo array com valores duplicados removidos
+- min: Retorna o objeto de menor valor do array. Compara apenas tipos iguais
+- max: Retorna o objeto de maior valor do array. Compara apenas tipos iguais
 
 ### Hashes
 
@@ -415,7 +454,7 @@ my_hash.keys      # Saída: ["Andy", :Stanley, :is_true, 3, :other_hash]
 my_hash.values    # Saída: ["A", "B", false, 10.0, {:foo=>"bar"}]
 ```
 
-## Impressão (Output)
+## Saída de dados (Output)
 
 ```ruby
 puts("Hel" + "lo")    # Hello\n (Adiciona quebra de linha no final do texto)
@@ -424,7 +463,7 @@ print("World")        # World
 print(`clear`)        # Limpa o terminal
 ```
 
-### Entrada do Usuário (Input)
+## Entrada de dados (Input)
 
 ```ruby
 name = gets()         # Espera pelo input do usuário. Armazena o "enter" após o input
@@ -438,7 +477,7 @@ Um método pode retornar um valor implicitamente (o resultado da última express
 Existem convenções de nomenclatura para tipos específicos de métodos:
 
 - Predicate methods (?): Métodos que atuam como consultas geralmente terminam com um ponto de interrogação, retornam um valor booleano
-- Bang methods (!): Métodos que podem modificar o objeto receptor frequentemente terminam com um ponto de exclamação, geralmente têm uma versão correspondente sem o "!" que retorna uma nova cópia modificada do objeto
+- Bang methods / Destructive methods (!): Métodos que podem modificar o objeto receptor frequentemente terminam com um ponto de exclamação, geralmente têm uma versão correspondente sem o "!" que retorna uma nova cópia modificada do objeto
 
 > Conteúdo sobre _blocks_, _procs_ e _lambda_ mais à frente.
 
@@ -526,7 +565,7 @@ default_value 1, 2      # Saída: 3
 args_param(1, 2, 3)     # Saída: 6
 args_param 1, 2         # Saída: 3
 
-block_param { |black_method_var| puts black_method_var }
+block_param { |var| puts var }
 block_param do
   texto = "Bloco executado com sucesso"
   puts texto
@@ -782,7 +821,7 @@ def adicionar_nome(lista, nome)
 end
 ```
 
-## Tratamento de Exceções
+## Tratamento de exceções
 
 O mecanismo principal para capturar exceções em Ruby é a estrutura `begin`, `rescue` e `end`.
 
@@ -922,7 +961,7 @@ puts athlete1.name  # Saída: "Doe Jhon"
 athlete1.run
 ```
 
-### Variáveis de Instância
+### Variáveis de instância
 
 Armazena dados **específicos do objeto** e só pode ser acessada dentro da instância onde foi definida. Requer _getter_ e _setter_ uma vez que são **privados**.
 
@@ -935,7 +974,7 @@ def initialize(title, author)
 end
 ```
 
-### Variáveis de Classe
+### Variáveis de classe
 
 Variáveis de classe em Ruby começam com `@@` e são **compartilhadas entre todas as instâncias** da mesma classe mantendo um valor comum.
 
@@ -948,6 +987,7 @@ class Pessoa
     @@contador += 1
   end
 
+  # Class method
   # 'self.' determina que o método será acessível somente pela classe e não pelo objeto
   def self.modelo_contador
     @@contador
@@ -969,7 +1009,7 @@ puts Pessoa.modelo_contador         # Saída: 2
 puts Pessoa::modelo_contador        # Saída: 2
 ```
 
-### Variáveis Globais
+### Variáveis globais
 
 Começam com `$` e podem ser acessadas e modificadas de qualquer lugar do programa.
 
@@ -1180,8 +1220,13 @@ A maior diferença entre Proc e Lambda se dá pela forma que tratam os argumento
 
 ```ruby
 # Criando lambda
-lambda_a = lambda {puts "Hey"}
-lambda_b = -> (x) {puts "Hello, " + x}
+lambda_a = lambda { |x| puts "Hello, " + x }
+lambda_b = -> (x) { puts "Hello, " + x }
+lambda_c = -> (x) do
+  puts "Hello, " + x
+end
+
+lambda_a.class            # Saída: Proc
 
 # Existem várias maneiras de chamar expressões lambdas
 # .call
@@ -1195,6 +1240,44 @@ lambda_b["world"]        # Saída: "Hello, world"
 
 # .===
 lambda_b.===("world")    # Saída: "Hello, world"
+```
+
+#### Diferenças entre Lambda e Proc
+
+Toda lambda é um Proc, mas nem todo Proc é uma lambda.
+
+Diferenças:
+
+- Validação do número de argumentos (Lambda: aridade estrita vs Proc: aridade flexível)
+- Comportamento do return (Lambda: return só sai da lambda vs Proc: return tenta sair do método externo)
+
+```ruby
+# Validação do número de argumentos
+# Lambda: aridade estrita
+l = -> (a, b) { a + b }      # Saída: # ArgumentError: wrong number of arguments (given 1, expected 2)
+l.call(1)
+
+# Proc: aridade flexível
+f = Proc.new { |a, b| a.to_i + b.to_i }
+f.call(1)                    # Saída: 1 (b virou nil)
+
+# Comportamento do return
+# Lambda: return só sai da lambda
+def teste_lambda
+  l = -> { return "saiu da lambda" }
+  l.call
+  "continua"
+end
+
+teste_lambda()     # Saída: "continua"
+
+def teste_proc
+  p = Proc.new { return "saiu do método" }
+  p.call
+  "continua?"
+end
+
+teste_proc()      # Saída: "saiu do método"
 ```
 
 ## Catch/Throw
@@ -1230,7 +1313,7 @@ busca_em_listas(listas, 5)      # Saída: "Encontrado em listas[1][1]"
 
 # throw fora do bloco catch
 def verificar_usuario(usuario)
-  throw :interromper_fluxo, "Usuário inválido: #{usuario[:nome]}" if usuario[:ativo] == false
+  throw :interromper_fluxo, puts("Usuário inválido: #{usuario[:nome]}") if usuario[:ativo] == false
 end
 
 def processar_usuarios
@@ -1242,16 +1325,17 @@ def processar_usuarios
     ]
 
     usuarios.each do |usuario|
-      verificar_usuario(usuario) # O throw está aqui, em outro método
+      verificar_usuario usuario
       puts "Processando #{usuario[:nome]}"
     end
 
-    puts "Todos os usuários foram processados."
+    puts "Todos os usuários foram processados." # Executado apenas se o throw não for chamado
   end
+
+  puts "Finalizado" # Executado sempre
 end
 
-resultado = processar_usuarios
-puts resultado    # Saída: "Usuário inválido: Carlos"
+processar_usuarios()    # Saída: "Usuário inválido: Carlos"
 ```
 
 ## Módulos
@@ -1453,11 +1537,48 @@ d.prev_year
 
 ### Time
 
-> Opte no lugar de DateTime.
+> Opte no lugar de DateTime (legado).
+
+Representa instantes específicos no tempo, com data, hora, minuto, segundo, opcionalmente subsegundos e **fuso horário**.
+
+É a classe padrão para trabalhar com timestamps, registros de logs, cálculos de intervalos e manipulação de horários.
+
+```ruby
+require "time"
+
+# Iniciação
+t1 = Time.new
+t1 = Time.new(2025, 12, 25)
+t1 = Time.new(2025, 12, 25, 14, 30, 0, "-03:00")    # ano, mês, dia, hora, minuto, segundo, fuso
+t1 = Time.at(1734540000)                            # Unix timestamp (epoch)
+t1 = Time.parse("2025-12-25 14:30")
+
+# Conversão
+t1.utc            # UTC
+t1.localtime      # Local
+t1.to_i           # Para Epoch
+t1.to_f           # Para Epoch (inclui subsegundos)
+
+# Formatação
+t1.strftime("%d/%m/%Y %H:%M")       # Saída: 25/12/2025 14:30"
+t1.iso8601                          # Saída: 2025-12-25T14:30:00-03:00
+
+# Somar e subtrair datas
+# Somar e subtrair segundos
+t2 = Time.now     # Data atual
+t2 + 60           # +1 minuto
+t2 - 3600         # -1 hora
+(t2 - t1)         # Retorna float em segundos
+
+# Comparação
+t1 < t2
+t1 == t2
+t1.between?(t1, t2)
+```
 
 ## Arquivos e Serialização
 
-Arquivos são essencialmente coleções de bits e bytes que podem ser lidos, modificados e salvos. É útil pensar neles como uma longa string ou fluxo (stream) de bytes, que seu script Ruby pode ler de cima para baixo, realizando operações ao longo do caminho.
+Arquivos são essencialmente coleções de bits que podem ser lidos, modificados e salvos. É útil pensar neles como uma longa string ou fluxo (stream) de bytes, que seu script Ruby pode ler de cima para baixo, realizando operações ao longo do caminho.
 
 A classe `File` e a classe `Dir` são usadas para manipular arquivos e diretórios. Um objeto arquivo é um tipo de objeto `IO`.
 
@@ -1491,7 +1612,6 @@ end
 # Criar e remover diretório
 Dir.mkdir("novo_diretorio") unless Dir.exist?("novo_diretorio")
 Dir.rmdir("novo_diretorio") if Dir.exist?("novo_diretorio")
-
 ```
 
 ### Path
@@ -1499,9 +1619,9 @@ Dir.rmdir("novo_diretorio") if Dir.exist?("novo_diretorio")
 A biblioteca `Pathname` (que precisa ser requerida: `require "pathname"`) fornece uma maneira orientada a objetos de trabalhar com caminhos de arquivo. Um objeto Pathname representa o nome absoluto ou relativo de um arquivo. Ele tem dois usos principais:
 
 - **Manipulação de caminhos**: Permite manipular partes de um caminho, construir novos caminhos (usando o operador +) e verificar propriedades como se é um caminho absoluto (absolute?) ou obter o caminho real (realpath).
-- **Fachada para métodos de Dir, File e FileTest**: Um objeto Pathname pode agir como um proxy para chamar métodos de status de arquivo/diretório, como file?, directory?, executable?, size, read, readlines.
+- **Fachada para métodos de Dir, File e FileTest** (Facade pattern): Um objeto Pathname pode agir como um proxy para chamar métodos de status de arquivo/diretório, como file?, directory?, executable?, size, read, readlines.
 
-## Estrutura de Pastas Padrão (Recomendado)
+## Estrutura de pastas padrão (Recomendado)
 
 Uma estrutura de diretórios considerada idiomática para projetos Ruby “puros” — aqueles que não utilizam frameworks como Rails — segue convenções amplamente adotadas pela comunidade Ruby para garantir modularidade, carregamento consistente de arquivos e compatibilidade com Bundler, Rubygems e ferramentas de automação.
 
@@ -1526,7 +1646,7 @@ my_project/
 └── README.md
 ```
 
-## Ruby Gems
+## RubyGems
 
 [RubyGems](https://rubygems.org/) é um utilitário de pacote (gem) e um gerenciador de pacotes para Ruby. Ele serve como um framework padronizado de empacotamento e instalação para bibliotecas e aplicações Ruby.
 
@@ -1550,3 +1670,5 @@ Principais gems:
 - dotenv-rails: Carrega variáveis de ambiente via .env
 - figaro: Carrega variáveis de ambiente via .yml
 - rubocop: Linter e formatador de código Ruby
+- ruby_llm: Integração com **diferentes** modelos de IA
+- ruby_whatsapp_sdk: Integração com Whatsapp Cloud API
