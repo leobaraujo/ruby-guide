@@ -1,9 +1,6 @@
 # TODO
 
-- Separar conteúdo relacionado a "gems"
-- Lista de gemas [clique aqui](https://www.youtube.com/watch?v=dMyDS4oYlvo&list=PLe3LRfCs4go-mkvHRMSXEOG-HDbzesyaP&index=22)
 - Ruby-Toolbox [Clique aqui](https://www.ruby-toolbox.com/)
-- gem faker: Informações falsas ideais para seed
 
 # Ruby on Rails
 
@@ -44,15 +41,19 @@ Características:
 
 ## Comandos
 
-- rails new nome_do_projeto: Cria um novo projeto Rails
-- - rails new nome_do_projeto --database=ADAPTADOR: Altera o banco de dados da aplicação (SQLite3 é o padrão. É possível modificar posteriormente)
-- rails server (ou apenas "s"): Inicia o projeto
-- - rails s -e [production | development | test]: Altera o modo de execução da aplicação
-- rails generate [model | view | controller | scaffold | etc..] <name?>
-- rails destroy migration [nome_da_migration]: TODO
-- rails console (ou apenas "c"): Prompt de comando para a aplicação Rails. Todas as classes presentes no app Rails são carregadas e ficam prontas para uso no console.
-- rails db:[create | migrate | seed]: TODO
-- rails assets:precompile: TODO
+- `rails new <nome_do_projeto>`: Cria um novo projeto Rails
+  - `rails new <nome_do_projeto> --database=ADAPTADOR`: Altera o banco de dados da aplicação (SQLite3 é o padrão. É possível modificar posteriormente)
+  - `rails new <nome_do_projeto> --api`: Cria um app Rails como API
+  - `rails new <nome_do_projeto> --css tailwind`: Cria um app Rails com Tailwind
+- `rails server` (ou apenas "s"): Inicia o projeto
+  - `rails s -e [production | development | test]`: Altera o modo de execução da aplicação
+- `rails generate [model | view | controller | scaffold | etc..] <nome>`
+- `rails destroy migration <nome_da_migration>`: TODO
+- `rails console` (ou apenas "c"): Prompt de comando para a aplicação Rails. Todas as classes presentes no app Rails são carregadas e ficam prontas para uso no console.
+- `rails db:[create | migrate | seed | rollback]`: TODO
+- `rails assets:precompile`: TODO
+
+> Nota: Adicione `RAILS_ENV=[production | development | test]` para modificar o ambiente de execução do comando
 
 ## Banco de Dados
 
@@ -105,10 +106,6 @@ end
 - rake db:migrate - Gera as tableas de acordo com os models da aplicação
 - rake db:seed - Popula tabelas com informações pré-definidas. Casos de uso: Tabelas auxiliares como lista de bancos suportados, cidades, etc. (Arquivo db/seeds.rb)
 
-#### Criando Rake Task
-
-TODO
-
 ## CoC (Convention over Configuration)
 
 É um paradigma de projeto que visa diminuir o número de decissões que os desenvolvedores devem fazer, ganhando simplicidade sem perder a flexibilidade.
@@ -135,11 +132,11 @@ rails generate scaffold nome:tipo nome:tipo nome:tipo ...
 ```shell
 # Sintaxe
 # Troque YYY pelo nome do model. Adicione o "s" em "Field" caso seja mais de um campo
-rails generate migration AddFieldToYYY atribute:type
-rails generate migration RemoveXXXFromYYY
+rails generate migration AddFieldToYYY nome:tipo    # PascalCase
+rails generate migration remove_xxx_from_yyy        # snake_case
 
 # Exemplo
-rails g migration addFieldToPerson name:string
+rails g migration addNameToPerson name:string
 
 # Aplicando modificações no Banco de Dados
 rake db:migrate
@@ -159,6 +156,64 @@ Além dos campos criados pelo programador, o arquivo _migrate_ também cria algu
 ```shell
 # Deixa o banco de dados igual ao script schema. A tabela pode ser criada, modificada ou removida
 rake db:migrate
+```
+
+### Operações em tabelas
+
+- add_column
+- remove_column
+- rename_column
+- change_column
+
+```ruby
+# Tornando `change_column` reversível
+
+# Método 1
+class ChangeTypeOfDescriptionInDemos < ActiveRecord::Migration[6.1]
+  def change
+    reversible do |dir|
+      # Será executado em `db:migrate`
+      dir.up do
+        change_column :demos, :description, :text
+      end
+
+      # Será executado em `db:rollback`
+      dir.down do
+        change_column :demos, :description, :string
+      end
+    end
+  end
+end
+
+# Método 2
+class ChangeTypeOfDescriptionInDemos < ActiveRecord::Migration[6.1]
+  def up
+    change_column :demos, :description, :text
+  end
+
+  def down
+    change_column :demos, :description, :string
+  end
+end
+```
+
+### Migração específica
+
+> NOTA: Observe que "VERSION=" é o **timestamp** da migração.
+
+```shell
+# Migração específica
+rails db:migrate:up VERSION=20251225246060
+
+# Rollback específico
+rails db:migrate:down VERSION=20251225246060
+
+# Quantia de rollbacks
+rails db:rollback STEP=n
+
+# Quantia de migrações a partir da última definida no "schema"
+rails db:migrate:redo STEP=n
+
 ```
 
 ## Views
@@ -191,15 +246,37 @@ variavel = "interpolado"
 
 São arquivos com a extensão _.html.erb_ cujo nome começam com underline (\_).
 
-```shell
+```ruby
 # app/view/customer/new.html.erb
 <%= render "form" %>
+
+# NOTA: Caso a view tenha acesso á variavel @user, a partial também terá automaticamente
+<%= render "form", @user %>
+
+<%= render "form", user: @user %>
+<%= render partial: "form", locals: { user: @user } %>
 
 # app/view/customer/_form.html.erb (É um "mini-controller" contém lógica de
 # programação e renderização. No contexto React, seria como um componente.) ...
 ```
 
 ### Formulário
+
+`form_with` Substitui form_for e form_tag. Usa sempre `FormBuilder`.
+
+```ruby
+# Com model
+<%= form_with model: @user do |f| %>
+  <%= f.text_field :name %>
+  <%= f.submit %>
+<% end %>
+
+# Sem model
+<%= form_with url: "/login" do |f| %>
+  <%= f.text_field :email %>
+  <%= f.submit %>
+<% end %>
+```
 
 ```ruby
 # Select
@@ -215,6 +292,50 @@ f.collection_select(:model_id, @models, :id, :name, include_blank: true)
 
 # OBS: "include_blank" pode ser substituido para "prompt" que contém uma mensagem padrão. Evite chamar o model dentro da view, utilize uma variável que contenha a informação desejada
 ```
+
+#### field helpers
+
+São métodos do FormBuilder.
+
+Campos de texto e numéricos:
+- text_field
+- text_area
+- number_field
+- range_field
+- password_field
+- email_field
+- telephone_field
+- url_field
+- search_field
+
+Campos de data e tempo:
+- date_field
+- time_field
+- datetime_field
+- datetime_local_field
+- month_field
+- week_field
+
+Campos de seleção:
+- select
+- collection_select
+- grouped_collection_select
+- time_zone_select
+
+Campos booleanos:
+- check_box
+- radio_button
+
+Upload e arquivos:
+- file_field
+
+Campos ocultos e auxiliares:
+- hidden_field
+- color_field
+
+Campos de envio e ação:
+- submit
+- button
 
 #### Formulários complexos e Nested Attributes
 
@@ -301,10 +422,34 @@ class Person < ApplicationRecord
 end
 ```
 
+### Validadores
+
+> Validações não substituem constraints do banco. Para integridade real, use índices únicos, NOT NULL e foreign keys no banco de dados.
+
+| Categoria     | Validadores                  |
+| ------------- | ---------------------------- |
+| Presença      | `presence`, `absence`        |
+| Exclusividade | `uniqueness`                 |
+| Tamanho       | `length`                     |
+| Número        | `numericality`               |
+| Formato       | `format`                     |
+| Conjunto      | `inclusion`, `exclusion`     |
+| Confirmação   | `confirmation`, `acceptance` |
+| Associação    | `validates_associated`       |
+| Customizado   | `validate`                   |
+
 ### Associações
 
-- belongs_to: Pertence
-- has_many: Tem muitos
+Associações diretas:
+- `belongs_to`: Pertence a outro modelo
+- `has_one`: Relação 1 para 1
+- `has_many`: Relação 1 para N
+
+Associações indiretas:
+- `has_many :through`: Relacionamento N para N usando uma tabela intermediária
+- `has_one :through`: Relacionamento 1 para 1 indireto
+
+> TODO: Associações polimórficas & pesquisar por `dependent: :destroy`
 
 ![Associação](/assets/images/Associacao.jpeg)
 
@@ -358,16 +503,28 @@ end
 
 ## Controllers
 
-Local onde está presente as **ações** do sistema. Para toda _ação_, haverá uma _view_ relacionada a ação.
+O controller é o componente responsável por receber requisições HTTP, orquestrar a lógica da aplicação e retornar uma resposta ao cliente (HTML, JSON, redirecionamento, etc.). São compostos por actions, que são métodos públicos associados a rotas. Por convenção, utilizam actions RESTful, promovendo padronização e previsibilidade.
 
-O arroba "@" antes do nome da variável indica que a variável é uma variável de instância. Em Rails, ao criar uma variável de instância no controller, a view também terá acesso a ela.
+Boas práticas recomendam controllers enxutos, contendo apenas lógica de fluxo, validação básica e controle de resposta, delegando regras de negócio para outras camadas da aplicação.
 
 > OBS: O nome da _view_ **deve** ser o mesmo do **método** do _controller_, no caso, index.
 
 ```ruby
 # Controller "customers_controller.rb"
 def index
+    # Carrega TODOS os registros de uma vez em memória. Alto consumo de memória
     @customers = Customer.all
+
+    # Alternativas performáticas
+
+    # .find_each: Processamento interno / batch / jobs
+    # - Ignora `order` customizado
+    # - Ignora `limit`
+    # - Requer `id` incremental
+    @customers = Customer.find_each
+
+    # keyset pagination: Listagem incremental / API / UI
+    @customers = Customer.where("id > ?", last_id).order(:id).limit(20)
 end
 
 # View "customers/index.html.erb"
@@ -376,9 +533,68 @@ end
 <% end %>
 ```
 
-### before_action x before_filter
+### Ações (Actions)
 
-> São o mesmo elemento. before*filter até rails 3.x e before_action >= 4.x. São filtros exclusivo do \_Rails*.
+São **métodos públicos** responsáveis por responder a requisições HTTP. Por convenção, Rails fornece um conjunto padrão de actions RESTful, especialmente quando usamos resources no roteamento.
+
+```ruby
+# Lista todos os recursos (GET)
+def index
+  @users = User.all
+end
+
+# Exibe um recurso específico (GET)
+def show
+  @user = User.find(params[:id])
+end
+
+# Exibe o formulário para criar um novo recurso (GET)
+def new
+  @user = User.new
+end
+
+# Cria um novo recurso no banco de dados (POST)
+def create
+  @user = User.new(user_params)
+  @user.save
+end
+
+# Exibe o formulário para editar um recurso existente (GET)
+def edit
+  @user = User.find(params[:id])
+end
+
+# Atualiza um recurso existente (PATCH / PUT)
+def update
+  @user = User.find(params[:id])
+  @user.update(user_params)
+end
+
+# Remove um recurso (DELETE)
+def destroy
+  @user = User.find(params[:id])
+  @user.destroy     # Ativa callbacks do ActiveRecord
+  # @user.delete    # Ignora callbacks do ActiveRecord
+end
+```
+
+Controllers não são limitados às actions REST. Qualquer método público pode ser uma action.
+
+```ruby
+# Controller
+class UsersController < ApplicationController
+  def activate
+    # lógica personalizada
+  end
+end
+
+# Rota correspondente
+post "users/:id/activate", to: "users#activate"
+```
+
+### before_action
+
+> `before_filter` foi descontinuado.
 
 Em Rails, filtros são métodos que são executados antes, depois ou ambos os casos (around) de uma ação de controle. Evita repetição de código (DRY).
 
@@ -447,12 +663,15 @@ Utilitários:
 - link_to: Substitui o "href" do elemento \_anchor\*
 - [Lista completa](https://guides.rubyonrails.org/action_view_helpers.html)
 
-```
+```ruby
 # View - link_to(name, path)
 <%= link_to "Texto", :action => "action_name" %>
 
 # <%= link_to "Texto", "/customers" %> >> 'customers_path' é gerado automaticamente pelo Rails (/rails/info/routes)
 <%= link_to "Texto", customers_path %>
+
+# Adiciona o método HTTP e gera um alerta de confirmação
+<%= link_to "Texto", @customer, method: :delete, data: { confirm: "Are you sure?" } %>
 ```
 
 #### Criando helper
@@ -477,14 +696,15 @@ model = <Model>.new(name: "John Doe", age: 20) # Instância o objeto e depois sa
 model.save
 
 # Read
-<Model>.all # Retorna um array
-<Model>.last # Retorna o último elemento
-<Model>.where(name: :Josivaldo) # Filtra os objetos e retorna um array. Argumento é 'hash'
-<Model>.find(:id => 1) # Filtra os objetos e retorna um único elemento. Argumento é 'hash'
+<Model>.all   # Retorna um array
+<Model>.first # Retorna o primeiro elemento
+<Model>.last  # Retorna o último elemento
+<Model>.where(name: :John)  # Filtra os objetos e retorna um array. Argumento é 'hash'
+<Model>.find(:id => 1)      # Filtra os objetos e retorna um único elemento. Argumento é 'hash'
 
 # Método "where" com "like"
-<Model>.where("name like '%#{params[:name]}%'") # ERRO: Perigo de SQL Injection
-<Model>.where("name like ?", "%#{params[:name]}%") # Correto
+<Model>.where("name like '%#{params[:name]}%'")     # ERRO: Perigo de SQL Injection
+<Model>.where("name like ?", "%#{params[:name]}%")  # Correto
 
 # TODO: Pesquisar escopos (Scopes)
 
@@ -508,6 +728,14 @@ end
 # Execução
 Person.new(name: "John Doe").valid? # true
 Person.new(name: nil).valid?        # false
+```
+
+### Callbacks
+
+> TODO: Completar
+
+```ruby
+before_create
 ```
 
 ### Métodos de model
