@@ -79,6 +79,9 @@ A linguagem possui tipagem dinâmica, coleta automática de lixo (garbage collec
     - [Path](#path)
   - [Estrutura de pastas padrão (Recomendado)](#estrutura-de-pastas-padrão-recomendado)
   - [RubyGems](#rubygems)
+    - [Bundle add](#bundle-add)
+    - [Gem install](#gem-install)
+    - [Principais gems](#principais-gems)
 
 ## Características
 
@@ -1656,7 +1659,35 @@ O **gemspec** é um arquivo de metadados que fornece informações chave sobre a
 
 O comando `bundle exec` é usado para garantir que os executáveis sejam executados no contexto das gems definidas no Gemfile.
 
-Principais gems:
+### Bundle add
+
+Adiciona a gem como **dependência do projeto** usando Bundler.
+
+> `bundle add <gem>`
+
+Características:
+
+- Modifica o Gemfile
+- Atualiza o Gemfile.lock
+- Resolve dependências automaticamente
+- Garante versões consistentes por projeto
+- A gem só é usada dentro do contexto do projeto
+
+### Gem install
+
+Instala a gem globalmente (ou no ambiente Ruby atual) usando o RubyGems. Tipicamente utilizado em ferramentas de linha de comando como rubocop, mailcatcher, intellisense, etc.
+
+> `gem install <gem>`
+
+Características:
+
+- Instala a gem no sistema ou no gemset ativo
+- Não altera o Gemfile
+- Não altera o Gemfile.lock
+- Não controla versões por projeto
+- Pode causar conflitos entre projetos
+
+### Principais gems
 
 - rails: Framework web completo MVC
 - grape: Cliente HTTP simples (Pode ser utilizado junto do Rails)
@@ -1667,8 +1698,9 @@ Principais gems:
 - pg: Driver PostgreSQL
 - sqlite3: Driver SQLite (ambiente local/dev)
 - kaminari: Paginação de resultados
-- dotenv-rails: Carrega variáveis de ambiente via .env
+- dotenv: Carrega variáveis de ambiente via .env
 - figaro: Carrega variáveis de ambiente via .yml
 - rubocop: Linter e formatador de código Ruby
+- mailcatcher: Intercepta e exibe e-mails enviados pela aplicação em uma interface web local
 - ruby_llm: Integração com **diferentes** modelos de IA
 - ruby_whatsapp_sdk: Integração com Whatsapp Cloud API

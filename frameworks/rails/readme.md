@@ -47,8 +47,9 @@ Características:
   - `rails new <nome_do_projeto> --css tailwind`: Cria um app Rails com Tailwind
 - `rails server` (ou apenas "s"): Inicia o projeto
   - `rails s -e [production | development | test]`: Altera o modo de execução da aplicação
+- `rails generate`: Mostra todos os comandos "generate"
 - `rails generate [model | view | controller | scaffold | etc..] <nome>`
-- `rails destroy migration <nome_da_migration>`: TODO
+- `rails destroy [model | view | controller | scaffold | etc..] <nome>`
 - `rails console` (ou apenas "c"): Prompt de comando para a aplicação Rails. Todas as classes presentes no app Rails são carregadas e ficam prontas para uso no console.
 - `rails db:[create | migrate | seed | rollback]`: TODO
 - `rails assets:precompile`: TODO
@@ -57,7 +58,19 @@ Características:
 
 ## Banco de Dados
 
-Para configurar o banco de dados, modifique o arquivo **config/database.yml**.
+Para configurar o banco de dados, modifique o arquivo **config/database.yml**, nele contém instruções de como configurar de acordo com o Banco de Dados selecionado.
+
+Se você tiver um arquivo `config/database.yml` vazio, mas a variável de ambiente `ENV['DATABASE_URL']` estiver definida, o Rails irá se conectar ao banco de dados por meio dessa variável de ambiente.
+
+Prioridade:
+
+- Variável de ambiente
+- config/database.yml
+
+```shell
+# Altera o driver do Banco de Dados
+bin/rails db:system:change --to=[postgresql | mysql |sqlite3]
+```
 
 ### Rake (Contexto Rails)
 
@@ -124,7 +137,8 @@ Gera os arquivos necessários (MVC) e configura as rotas para realizar CRUD da e
 
 ```shell
 # Para criar um Scaffold, utilize o seguinte comando
-rails generate scaffold nome:tipo nome:tipo nome:tipo ...
+rails generate scaffold Modelo nome:tipo nome:tipo nome:tipo ...
+rails g scaffold Article title:string body:text
 ```
 
 #### Adicionando/removendo campos
@@ -438,15 +452,28 @@ end
 | Associação    | `validates_associated`       |
 | Customizado   | `validate`                   |
 
+```ruby
+validates :name, presence: true
+validate :validate_age    # Validador personalizado
+
+def validate_age
+  if self.date_of_birth.present?
+    age = Date.today.year - self.date_of_birth.year
+
+    if age < 18
+      errors.add " must be greater than 18 years old"
+    end
+  end
+end
+```
+
 ### Associações
 
-Associações diretas:
-- `belongs_to`: Pertence a outro modelo
 - `has_one`: Relação 1 para 1
 - `has_many`: Relação 1 para N
-
-Associações indiretas:
-- `has_many :through`: Relacionamento N para N usando uma tabela intermediária
+- `belongs_to`: Pertence a outro modelo. Deve conter uma FK
+- `has_and_belongs_to_many`: Relacionamento N para N usando uma tabela intermediária, porém, sem modelo
+- `has_many :through`: Relacionamento N para N usando uma tabela intermediária e um modelo. Permite atributos extras e callbacks
 - `has_one :through`: Relacionamento 1 para 1 indireto
 
 > TODO: Associações polimórficas & pesquisar por `dependent: :destroy`
@@ -478,6 +505,14 @@ filho.save!
 father.children.create(name: "Maria Doe")
 ```
 
+#### has_and_belongs_to_many
+
+É utilizado para estabelecer um relacionamento muitos-para-muitos entre dois modelos, sem a existência de um modelo intermediário. Esse relacionamento requer uma tabela de junção dedicada no banco de dados, que armazena apenas as chaves estrangeiras dos dois modelos associados e não possui chave primária própria, modelo correspondente nem atributos adicionais.
+
+Requer que a join table seja criada através duma migration. O nome da tabela deve ser o nome dos dois modelos pluralizado e em ordem alfabética, e sem *primary key*.
+
+> NOTA: Prefira `has_many :through`.
+
 #### Through
 
 Uma associação [has_many | has_one] :through é frequentemente usada para configurar um relacionamento muitos-para-muitos (ou um-para-um) com outro modelo/entidade.
@@ -499,6 +534,128 @@ class Consulta < ApplicationRecord
   belongs_to :medico
   belongs_to :paciente
 end
+```
+
+#### Polymorphic association
+
+São modelos que pode pertencer a mais de um modelo.
+
+Em uma associação polimorfica, o modelo "filho" (ex: Comentário) armazena não apenas o ID do "pai", mas também o Tipo (nome da classe) do pai.
+
+```ruby
+# rails g model Comment content:text commentable:references{polymorphic}
+class Comment < ApplicationRecord
+  # Por convenção, usamos um nome que termine em "-able"
+  belongs_to :commentable, polymorphic: true
+end
+
+class Event < ApplicationRecord
+  has_many :comments, as: :commentable
+end
+
+class Article < ApplicationRecord
+  has_many :comments, as: :commentable
+end
+
+class News < ApplicationRecord
+  has_many :comments, as: :commentable
+end
+
+comment = Comment.first
+comment.event             # Error
+comment.article           # Error
+comment.news              # Error
+comment.commentable       # [Event | Article | News] object
+Event.first.comments      # Lista de Comment
+```
+
+### Callbacks
+
+Os Callbacks são ganchos (hooks) no ciclo de vida de um objeto ActiveRecord que permitem a execução de lógica antes ou depois de alterações específicas no estado desse objeto (como criar, atualizar ou deletar).
+
+Eles são ferramentas poderosas para manter a integridade dos dados e automatizar tarefas, como formatar uma string antes de salvar ou disparar um e-mail após a criação de um registro.
+
+Lista
+
+- before_validation
+- after_validation
+- before_save
+- around_save
+- before_[create | update | destroy]
+- around_[create | update | destroy]
+- after_[create | update | destroy]
+- after_save
+- after_commit / after_rollback
+- after_initialize
+- after_find
+- after_touch: Chamado quando você executa o método `touch` no objeto
+
+> NOTA: `after_save` é acionado mesmo que ocorra um erro. Para ações que devem ser acionadas apenas após o sucesso (como enviar e-mail), utilize `after_commit`
+
+#### Service Object
+
+Problematica: Toda vez que você criar um usuário em um teste ou no console, ele tentará enviar e-mails e logs. Isso deixa os testes lentos e acopla o modelo a serviços externos.
+
+Um Service Object é uma classe simples (POJO - Plain Old Ruby Object) que executa uma única ação de negócio. Remove a lógica de "efeito colateral" do modelo. O modelo agora só cuida dos dados.
+
+```ruby
+# app/models/user.rb
+class User < ApplicationRecord
+  # Apenas validações e associações aqui
+  validates :email, presence: true
+end
+
+# app/services/user_registration_service.rb
+class UserRegistrationService
+  def initialize(user_params)
+    @user_params = user_params
+  end
+
+  def call
+    user = User.new(@user_params)
+
+    if user.save
+      # A lógica de "depois de criar" fica aqui, fora do model!
+      UserMailer.welcome(user).deliver_later
+      ExternalLogger.log("Novo usuário: #{user.email}")
+      return user
+    else
+      return nil
+    end
+  end
+end
+
+# app/controllers/users_controller.rb
+def create
+  @user = UserRegistrationService.new(user_params).call
+
+  if @user
+    render json: @user, status: :created
+  else
+    render json: { errors: "Erro ao criar usuário" }, status: :unprocessable_entity
+  end
+end
+```
+
+> TODO: Service Object usando RSpec (Testes)
+
+### Mensagens de erros personalizadas
+
+> TODO
+
+### Enum
+
+```ruby
+class Conversation < ActiveRecord::Base
+  # Cria um enum cujo valor no Banco de Dados será o 'key' do 'value'
+  enum status: [:active, :archived]
+end
+
+# Gera métodos para definir e checar automaticamente
+conversation.active!    # Define o valor de "status" para active (0)
+conversation.archived!  # Define o valor de "status" para archived (1)
+conversation.active?    # Retorna "true" ou "false" dependendo do valor do "status"
+conversation.status     # Saída: "archived"
 ```
 
 ## Controllers
@@ -592,31 +749,6 @@ end
 post "users/:id/activate", to: "users#activate"
 ```
 
-### before_action
-
-> `before_filter` foi descontinuado.
-
-Em Rails, filtros são métodos que são executados antes, depois ou ambos os casos (around) de uma ação de controle. Evita repetição de código (DRY).
-
-```ruby
-# before_action :method_to_include, only: [:method_name, :method_name]
-
-class Customer < ApplicationController
-  before_action :set_customer, only: [:hello]
-  #after_action :set_customer, only: [:hello]
-  #around_action :set_customer, only: [:hello]
-
-  def hello
-    puts customer.name
-  end
-
-  private
-    def set_customer
-      @customer = {id: 1, name: "John Doe", email: "example@email.org"}
-    end
-end
-```
-
 ## Rotas
 
 > config/routes.rb
@@ -696,11 +828,14 @@ model = <Model>.new(name: "John Doe", age: 20) # Instância o objeto e depois sa
 model.save
 
 # Read
-<Model>.all   # Retorna um array
-<Model>.first # Retorna o primeiro elemento
-<Model>.last  # Retorna o último elemento
-<Model>.where(name: :John)  # Filtra os objetos e retorna um array. Argumento é 'hash'
-<Model>.find(:id => 1)      # Filtra os objetos e retorna um único elemento. Argumento é 'hash'
+<Model>.all           # Retorna um array com *todos* os registros
+<Model>.find_each     # Retorna um batch de 1000 elementos (padrão)
+<Model>.ids           # Retorna um array contendo todos os ids
+<Model>.first         # Retorna o primeiro elemento
+<Model>.last          # Retorna o último elemento
+<Model>.find(1)       # Busca por id. Aceita múltiplos argumentos
+<Model>.find_by(name: "John")   # Busca por atributo. Retorna o primeiro elemento encontrado
+<Model>.where(name: :John)      # Busca por atributo. Retorna um array
 
 # Método "where" com "like"
 <Model>.where("name like '%#{params[:name]}%'")     # ERRO: Perigo de SQL Injection
@@ -709,52 +844,6 @@ model.save
 # TODO: Pesquisar escopos (Scopes)
 
 # DICA: Modifique o Model para ter um método where_like
-```
-
-### Validações (Active Record Validations)
-
-Active Record Validation verifica o valor do atributo antes de salvá-lo no banco de dados, as alterações são realizadas dentro do model.
-
-Lista de critérios possíveis [aqui](https://guides.rubyonrails.org/active_record_validations.html).
-
-```ruby
-# Modelo
-class Person < ApplicationRecord
-  # Valida que o atributo "name" não é vazio (nil)
-  validates :name, presence: true
-  validates :email, presence: true, uniqueness: true
-end
-
-# Execução
-Person.new(name: "John Doe").valid? # true
-Person.new(name: nil).valid?        # false
-```
-
-### Callbacks
-
-> TODO: Completar
-
-```ruby
-before_create
-```
-
-### Métodos de model
-
-TODO: Validações e mensagens de erro personalizadas
-
-### Enum
-
-```ruby
-class Conversation < ActiveRecord::Base
-  # Cria um enum cujo valor no Banco de Dados será o 'key' do 'value'
-  enum status: [:active, :archived]
-end
-
-# Gera métodos para definir e checar automaticamente
-conversation.active!    # Define o valor de "status" para active (0)
-conversation.archived!  # Define o valor de "status" para archived (1)
-conversation.active?    # Retorna "true" ou "false" dependendo do valor do "status"
-conversation.status     # Saída: "archived"
 ```
 
 ## i18n (Internationalization)
@@ -786,23 +875,78 @@ l() # Localização
 
 > gem Paperclip
 
-## Devise
+## Devise (Auth)
 
-> Autenticação
+Devise é construída sobre Warden, uma biblioteca de autenticação de baixo nível, e integra-se de forma nativa ao ActiveRecord, gerando controllers, views e validações prontas, alinhadas às boas práticas do Rails.
 
-[Guia da gem](https://github.com/heartcombo/devise)
+Fornece funcionalidades como login, logout, registro, recuperação de senha, confirmação de conta, bloqueio por tentativas, sessão persistente (remember me) e expiração de sessão. O comportamento é modular, permitindo ativar apenas os recursos necessários.
 
-### Pundit
+Links úteis:
 
-> Autorização
+- [Repositório](https://github.com/heartcombo/devise)
+- [How-Tos](https://github.com/heartcombo/devise/wiki/How-Tos)
 
-[Guia da gem](https://github.com/varvet/pundit)
+```shell
+# Adicionando Devise no Gemfile
+bundle add devise
+
+# Instalando Devise
+rails g devise:install
+
+# Gerando modelo Devise
+# "User" é uma convenção e não uma regra, poderia, por exemplo, ser "Admin". Pode haver mais de um modelo, como User e Admin e não apenas um ou outro
+rails g devise User
+rails g devise User role:integer    # Atributos adicionais
+
+# Gerando views e controllers
+rails g devise:views
+rails g devise:controllers
+```
+
+### Roles
+
+O Devise gera o mesmo *form* para todos os modelos, caso seu app tenha mais de um modelo (role), utilize a configuração abaixo para gerar as views individualmente.
+
+```ruby
+# config/initializers/devise.rb
+config.scoped_views = true
+
+# CLI
+rails g devise:views users          # Gera view específica
+rails g devise:controllers [scope]  # Scope é o modelo Devise, ex.: User, Admin, etc.
+```
+
+> NOTA: Utilize a gem **Pundit** para definir lógica de *roles* (Policy object pattern).
+
+Request > Devise > Controller > Pundit > Action
+
+### Controller filters and helpers
+
+> Se o modelo gerado pelo Devise for diferente de User, troque "_user" por "_meumodelo".
+
+```ruby
+# Redireciona caso o usuário não esteja autenticado
+before_action :authenticate_user!
+
+# Verifica se o usuário está autenticado
+user_signed_in?
+
+# Retorna o usuário atual
+current_user.email
+
+# Retorna a sessão atual
+user_session
+```
 
 ## Ransack
 
 > Pesquisa no Banco de Dados como "ElasticSearch"
 
 [Guia da gem](https://github.com/activerecord-hackery/ransack)
+
+## Logs
+
+> TODO
 
 ## Testes
 
