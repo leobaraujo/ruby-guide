@@ -312,6 +312,7 @@ f.collection_select(:model_id, @models, :id, :name, include_blank: true)
 São métodos do FormBuilder.
 
 Campos de texto e numéricos:
+
 - text_field
 - text_area
 - number_field
@@ -323,6 +324,7 @@ Campos de texto e numéricos:
 - search_field
 
 Campos de data e tempo:
+
 - date_field
 - time_field
 - datetime_field
@@ -331,23 +333,28 @@ Campos de data e tempo:
 - week_field
 
 Campos de seleção:
+
 - select
 - collection_select
 - grouped_collection_select
 - time_zone_select
 
 Campos booleanos:
+
 - check_box
 - radio_button
 
 Upload e arquivos:
+
 - file_field
 
 Campos ocultos e auxiliares:
+
 - hidden_field
 - color_field
 
 Campos de envio e ação:
+
 - submit
 - button
 
@@ -509,7 +516,7 @@ father.children.create(name: "Maria Doe")
 
 É utilizado para estabelecer um relacionamento muitos-para-muitos entre dois modelos, sem a existência de um modelo intermediário. Esse relacionamento requer uma tabela de junção dedicada no banco de dados, que armazena apenas as chaves estrangeiras dos dois modelos associados e não possui chave primária própria, modelo correspondente nem atributos adicionais.
 
-Requer que a join table seja criada através duma migration. O nome da tabela deve ser o nome dos dois modelos pluralizado e em ordem alfabética, e sem *primary key*.
+Requer que a join table seja criada através duma migration. O nome da tabela deve ser o nome dos dois modelos pluralizado e em ordem alfabética, e sem _primary key_.
 
 > NOTA: Prefira `has_many :through`.
 
@@ -581,9 +588,9 @@ Lista
 - after_validation
 - before_save
 - around_save
-- before_[create | update | destroy]
-- around_[create | update | destroy]
-- after_[create | update | destroy]
+- before\_[create | update | destroy]
+- around\_[create | update | destroy]
+- after\_[create | update | destroy]
 - after_save
 - after_commit / after_rollback
 - after_initialize
@@ -905,24 +912,26 @@ rails g devise:controllers
 
 ### Roles
 
-O Devise gera o mesmo *form* para todos os modelos, caso seu app tenha mais de um modelo (role), utilize a configuração abaixo para gerar as views individualmente.
+O Devise gera o mesmo _form_ para todos os modelos, caso seu app tenha mais de um modelo (role), utilize a configuração abaixo para gerar as views individualmente.
 
 ```ruby
 # config/initializers/devise.rb
 config.scoped_views = true
+```
 
+```shell
 # CLI
 rails g devise:views users          # Gera view específica
 rails g devise:controllers [scope]  # Scope é o modelo Devise, ex.: User, Admin, etc.
 ```
 
-> NOTA: Utilize a gem **Pundit** para definir lógica de *roles* (Policy object pattern).
+> NOTA: Utilize a gem **Pundit** para definir lógica de _roles_ (Policy object pattern).
 
 Request > Devise > Controller > Pundit > Action
 
 ### Controller filters and helpers
 
-> Se o modelo gerado pelo Devise for diferente de User, troque "_user" por "_meumodelo".
+> Se o modelo gerado pelo Devise for diferente de User, troque "\_user" por "\_meumodelo".
 
 ```ruby
 # Redireciona caso o usuário não esteja autenticado
@@ -938,11 +947,405 @@ current_user.email
 user_session
 ```
 
-## Ransack
+### Pundit
 
-> Pesquisa no Banco de Dados como "ElasticSearch"
+Biblioteca de autorização que utiliza classes Ruby simples (chamadas de Policies) para decidir se um usuário tem permissão para realizar uma ação específica em um objeto. Diferente de outras ferramentas, ele foca em ser mínimo e explícito, usando apenas orientação a objetos básica.
 
-[Guia da gem](https://github.com/activerecord-hackery/ransack)
+Aplicação:
+
+- `bundle add pundit`
+- `rails g pundit:install`
+- Incluir `Pundit::Authorization` no `ApplicationController`
+- `rails g pundit:policy <model_name>`
+
+#### Authorize
+
+Sua função é responder a uma pergunta simples: "Este usuário tem permissão para fazer isso com este objeto?", se a resposta for "sim" (o método na Policy retornar `true`), o código segue normalmente. Se for "não" (`false` ou `nil`), o Pundit interrompe a execução e levanta a exceção `Pundit::NotAuthorizedError`.
+
+Assume automaticamente que um modelo `User` possui uma classe `UserPolicy` correspondente. Em seguida, instancia a policy com o usuário atual e o objeto User específico. Ele utiliza o nome da ação (por exemplo, `create`) para chamar o método apropriado da policy (`create?`).
+
+> TODO: `user` é fornecido pelo current_user (Devise)
+
+```ruby
+# app/policies/post_policy.rb
+class PostPolicy < ApplicationPolicy
+  def edit?
+    user.admin?   # Saída: true ou false
+  end
+
+  def update?
+    user.admin?
+  end
+end
+
+# app/controllers/posts_controller.rb
+# Uso Padrão (Inferência)
+def edit
+  authorize @post # Pundit deduz que deve chamar 'edit?' na PostPolicy
+end
+
+# Uso Explícito (Quando a ação tem nome diferente)
+def publicar
+  @post = Post.find(params[:id])
+  authorize @post, :update? # Força o Pundit a usar o método 'update?' em vez de 'publicar?'
+end
+
+# Uso sem Registro (Classes)
+def new
+  authorize Post # Procura por 'new?' na PostPolicy
+  @post = Post.new
+end
+```
+
+#### Scope
+
+O Scope é uma ferramenta para filtrar coleções de dados (**listas**) com base nas permissões do usuário.
+
+Enquanto o `authorize` serve para verificar se um usuário pode realizar uma ação em um único registro (ex: "Eu posso editar este post?"), o Scope serve para definir quais registros o usuário pode ver em uma listagem (ex: "Quais posts eu tenho permissão para listar?").
+
+Dentro da sua `PostPolicy`, por exemplo, existe uma classe interna chamada `Scope`. Nela, você define o método `resolve`.
+
+> É comumente utilizado para a action `index`, porém, há outros casos de uso como retornar uma lista para um _dropdown_, entre outros.
+
+```ruby
+# app/policies/post_policy.rb
+class Scope < ApplicationPolicy::Scope
+  # O scope dentro do método resolve refere-se à classe que você passou (neste caso, Post)
+  def resolve
+    if user.present? && user&.admin?
+      scope.all
+    else
+      scope.where(published: true)
+    end
+  end
+end
+
+# app/controllers/post_controller.rb
+def index
+  @posts = policy_scope(Post)
+
+  # Você pode usar o Scope inclusive para associações
+  @posts = policy_scope(@user.posts) # Aplica o filtro nos posts deste usuário específico
+end
+```
+
+#### Permitted Attributes
+
+Centraliza quem pode editar o quê diretamente na Policy, usando o método `permitted_attributes`. Por exemplo, o usuário comum pode atualizar apenas o conteúdo do post enquanto o admin pode modificar o título e o conteúdo.
+
+E se o usuário puder definir o status ao criar um post, mas não puder editá-lo depois? O Pundit é inteligente o suficiente para buscar `permitted_attributes_for_#{action}` automaticamente.
+
+```ruby
+# app/policies/post_policy.rb
+
+# def permitted_attributes_for_create
+# def permitted_attributes_for_update
+def permitted_attributes
+  if user.admin?
+    [ :title, :body ]
+  else
+    [ :body ]
+  end
+end
+
+# app/controllers/posts_controller.rb
+  def update
+    authorize @post
+
+    respond_to do |format|
+      # Troque "post_params" por "permitted_attributes(@post)"
+      if @post.update(permitted_attributes @post)
+        format.html { redirect_to @post, notice: "Post was successfully updated.", status: :see_other }
+      else
+        format.html { render :edit, status: :unprocessable_entity }
+      end
+    end
+  end
+```
+
+#### Validação vs. Autorização
+
+É importante separar as responsabilidades:
+
+- Model (Validação): Foca no O QUÊ. "Este post pode existir?" (Ex: Tem título? O conteúdo é curto demais?). A regra vale para todos, independente de quem está salvando.
+- Pundit/Policy (Autorização): Foca no QUEM. "Este usuário específico tem permissão para fazer isso agora?".
+
+#### Views
+
+Você pode acessar uma instância da policy tanto nas views quanto nos controllers usando o método policy. Esse recurso é muito valioso para exibir links ou botões de forma condicional na view.
+
+```erb
+<% if policy(@user).update? %>
+  <%= link_to "Edit User", edit_user_path(@user) %>
+<% end %>
+```
+
+#### Helpers e mensagem de erro customizada
+
+```ruby
+# app/controllers/application_controller.rb
+class ApplicationController < ActionController::Base
+  include Pundit
+
+# Mensagem de erro customizada
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+
+  # Lança uma exeção caso não tenha configurado um `authorize` na action (Funciona como um "lembrete")
+  after_action :verify_authorized
+  # Similar ao utilitário acima, porém, monitora o `policy_scope` no lugar do `authorize`
+  after_action :verify_policy_scoped, only: :index
+
+  private
+
+  def user_not_authorized(exception)
+    # The default behavior uses the I18n lookup
+    flash[:alert] = t("#{policy_scope_key(exception.policy)}", scope: "pundit", default: :default)
+    redirect_to(request.referrer || root_path)
+  end
+
+  # Helper method to get the correct I18n key for the policy
+  def policy_scope_key(policy)
+    "#{policy.class.to_s.underscore}.#{exception.query}"
+  end
+end
+```
+
+## Hotwire
+
+Hotwire significa **HTML Over The Wire**. A ideia central é enviar HTML pronto do servidor para o cliente, em vez de enviar JSON e deixar o JavaScript reconstruir a página.
+
+Caso de uso: Mudar de página sem recarregar ou atualizar uma lista de comentários.
+
+### Turbo
+
+É o principal mecanismo do Hotwire. Carrega os novos posts automaticamente via WebSocket sem você dar refresh.
+
+Ele se divide em três partes:
+
+- Turbo Drive: Acelera a navegação capturando cliques em links e submissões de formulários, substituindo apenas o <body> da página sem um "refresh" completo
+- Turbo Frames: Permite dividir a página em blocos independentes. Ao clicar em algo dentro de um frame, apenas aquele pedaço da página é atualizado
+- Turbo Streams: Permite fazer atualizações parciais na página (adicionar, remover ou trocar elementos) via WebSockets (ActionCable) ou em resposta a um formulário
+- Turbo Native: Gere aplicativos nativos para iOS e Android através do seu monolito
+
+[Saiba mais](https://turbo.hotwired.dev/handbook/introduction)
+
+### Turbo Drive
+
+Funciona interceptando cliques em links e submissões de formulários, buscando o HTML via AJAX e substituindo apenas o conteúdo do `<body>`, mantendo o `<head>` (e, consequentemente, o JavaScript e CSS) carregados.
+
+> No Rails 7+, o Turbo Drive já vem **habilitado por padrão**.
+
+Conceito:
+
+- Captura o clique no link
+- Busca a nova página em segundo plano
+- Troca o corpo (`<body>`) atual pelo novo
+- Sincroniza o `<head>` se houver mudanças
+
+```erb
+<%# Link normal - Turbo Drive intercepta automaticamente %>
+<%= link_to "Ver Perfil", user_path(@user) %>
+
+<%# Link que abre em uma nova aba - Turbo Drive ignora automaticamente %>
+<%= link_to "Google", "https://google.com", target: "_blank" %>
+
+<%# Desabilitando Turbo em link ou form %>
+<%= link_to "Ver Perfil", user_path(@user), data: { turbo: false } %>
+```
+
+Submissão de formulário:
+
+- Sucesso: O servidor deve responder com um redirecionamento (status 303)
+- Erro: O servidor deve responder com um `:unprocessable_entity` (status 422) para que o Turbo Drive atualize a página com as informações de erro de validação (notice / alert)
+
+#### Turbo Morphing
+
+Permite atualizar a página sem que o scroll mude de posição ou que vídeos/inputs percam o foco.
+
+O Turbo compara o HTML novo com o antigo e altera apenas o que mudou, como se fosse um "diff" do React, mas feito no servidor.
+
+```erb
+<%# app/views/layouts/application.html.erb %>
+<head>
+  <%# ... %>
+  <%= turbo_refreshes_with method: :morph, scroll: :preserve %>
+</head>
+```
+
+#### Prefetch
+
+Quando o usuário passa o mouse sobre um link, o Turbo começa a baixar a página antes mesmo do clique ocorrer.
+
+```erb
+<%# app/views/layouts/application.html.erb %>
+<head>
+  <%# ... %>
+  <meta name="turbo-prefetch" content="true">
+</head>
+```
+
+### Turbo Frame
+
+Permite que você divida sua página em "pedaços" independentes. Quando você clica em um link ou envia um formulário dentro de um Frame, apenas aquele pedaço é atualizado, sem afetar o resto da página.
+
+Conceito:
+
+- O usuário clica em um link dentro de um `<%= turbo_frame_tag "meu_bloco" do %>`
+- O servidor responde com uma página HTML completa
+- O Turbo ignora tudo da página nova, exceto o conteúdo que está dentro do `<%= turbo_frame_tag "meu_bloco" do %>`
+- Ele substitui o conteúdo antigo pelo novo apenas naquele local
+
+#### Self-Replacement (ou "Inline")
+
+É quando um Turbo Frame substitui a si mesmo. É o comportamento padrão.
+
+> Exemplo: Um botão "Editar" dentro de um card que transforma o card em um formulário.
+
+```erb
+<%# app/views/tasks/index.html.erb %>
+<% @tasks.each do |task| %>
+  <%# `dom_id()` evita conflitos de IDs no DOM %>
+  <%= turbo_frame_tag dom_id(task) do %>
+    <p><%= task.name %></p>
+    <%= link_to "Editar Nome", edit_task_path(task) %>
+  <% end %>
+<% end %>
+
+<%# app/views/tasks/edit.html.erb %>
+<%# A página de edição deve ter um frame com o mesmo ID %>
+<%= turbo_frame_tag dom_id(@task) do %>
+  <%= form_with model: @task do |f| %>
+    <%= f.text_field :name %>
+    <%= f.submit "Salvar" %>
+
+    <%# Saindo do Frame / Breakout ou Top-level Navigation %>
+    <%= link_to "Cancelar", task_path(@task), data: { turbo_frame: "_top" } %>
+  <% end %>
+<% end %>
+
+<%# Helper: Verifica se a requisição é Turbo %>
+<% if turbo_frame_request? %>
+  <%# Conteúdo... %>
+<% end %>
+```
+
+#### Targeting a Frame (ou "Targeted Update")
+
+Utiliza usa o atributo `data-turbo-frame` para apontar para um ID de um frame que está em outro lugar da página.
+
+> Exemplo: Uma barra lateral com uma lista de contatos. Ao clicar em um contato, o frame central (o perfil) é atualizado.
+
+```erb
+<%= link_to "Filtrar categoria", posts_path(cat: "tech"), data: { turbo_frame: "lista_de_posts" } %>
+
+<%= turbo_frame_tag "lista_de_posts" do %>
+  <%# Conteúdo será inserido aqui %>
+<% end %>
+```
+
+#### Lazy Loading
+
+Quando o frame não carrega com a página, mas faz uma requisição automática para o `src` assim que aparece na tela.
+
+> Dica UI/UX: Utilize _Skeletons_ para elementos que estão em "loading".
+
+```erb
+<%# app/views/dashboards/show.html.erb %>
+<h1>Meu Dashboard</h1>
+
+<%= turbo_frame_tag "estatisticas_vendas", src: statistics_path, loading: "lazy" do %>
+  <p>Conteúdo que será substituído</p>
+<% end %>
+```
+
+### Turbo Streams
+
+[Helpers](https://github.com/hotwired/turbo-rails?tab=readme-ov-file#rubydoc-documentation)
+
+O Turbo Streams permite que o servidor envie instruções para alterar múltiplas partes da página de uma só vez. Ele pode adicionar, remover ou atualizar elementos em resposta a um formulário ou via WebSockets (em tempo real).
+
+O Rails procura por um arquivo Turbo Stream chamado `*.turbo_stream.erb` quando a requisição vem de um formulário Turbo. Observe que "\*" é o nome da ação, por exemplo, create, update ou destroy.
+
+Lista de ações Turbo Stream:
+
+- `append`: Adiciona ao final de um elemento
+- `prepend`: Adiciona ao início de um elemento
+- `replace`: Substitui o elemento inteiro
+- `update`: Substitui apenas o conteúdo interno do elemento
+- `remove`: Remove o elemento
+- `before`: Insere antes do elemento
+- `after`: Insere depois do elemento
+
+#### Formulário
+
+```ruby
+# Controller
+def create
+  # ...
+  respond_to do |format|
+    format.turbo_stream # Procura por create.turbo_stream.erb
+    format.html { redirect_to @comment }
+  end
+end
+```
+
+```erb
+<%# View %>
+<%# turbo_stream.<action> "target_id", partial: "content_view", locals: { content_data } %>
+
+<%# app/views/comments/create.turbo_stream.erb %>
+<%# Adiciona o novo comentário ao início da lista com ID "comments_list" %>
+<%= turbo_stream.prepend "comments_list", partial: "comments/comment", locals: { comment: @comment } %>
+
+<%# Limpa o formulário de comentário após o envio %>
+<%= turbo_stream.replace "new_comment_form", partial: "comments/form", locals: { comment: Comment.new } %>
+
+<%# app/views/comments/destroy.turbo_stream.erb %>
+<%# Remove o elemento que tem o ID dom_id(@comment), ex: "comment_42" %>
+<%= turbo_stream.remove @comment %>
+```
+
+#### WebSocket (Broadcast)
+
+Pode fazer com que um comentário, por exemplo, apareça na view de todos os usuários no momento em que ele é criado, atualizado ou removido; utiliza `ActionCable` (WebSockets).
+
+> Nota: Utilize `<%= console %>` em alguma view para acionar o Turbo Broadcast no lugar de `bin/dev` ou `rails server`.
+
+```ruby
+# app/models/comment.rb
+class Post < ApplicationRecord
+  # Por padrão cria um canal chamado "posts"
+  broadcasts
+end
+
+# app/models/comment.rb
+class Comment < ApplicationRecord
+  belongs_to :post
+
+  # Transmite automaticamente para quem estiver "ouvindo" o post deste comentário
+  # Substitui as seguintes declarações. Adicione `broadcasts` no modelo Post
+  # broadcasts_to :post
+  after_create_commit -> { broadcast_prepend_to [post, :comments], target: "comments_list" }
+  after_update_commit -> { broadcast_remove_to [post, :comments] }
+  after_destroy_commit -> { broadcast_remove_to [post, :comments] }
+end
+```
+
+```erb
+<%# app/views/posts/show.html.erb %>
+<%# Abre o canal de comunicação em tempo real. O argumento deve ser uma string válida %>
+<%= turbo_stream_from [@post, :comments] %>
+
+<div id="comments_list">
+  <%= render @post.comments %>
+</div>
+```
+
+## Stimulus
+
+O Hotwire é uma "suíte" ou um guarda-chuva de tecnologias, enquanto o Stimulus é uma ferramenta específica dentro desse pacote. Trabalha localmente no navegador (Manipulação de DOM/Eventos).
+
+Caso de uso: Mostrar um alerta ou esconder um menu ao clicar em um botão.
 
 ## Logs
 
@@ -970,93 +1373,6 @@ Como funciona o TDD?
 
 ![TDD](/assets/images/tdd.png)
 
-## Framework front-end
+## Dicas
 
-### Adicionando assets de terceiros
-
-Utilize o **content_for :head do** dentro da view que deseja adicionar o asset. Para JavaScript utilize a tag _javascript\_include\_tag 'nome\_do\_asset'_ e para CSS utilize _stylesheet\_link\_tag 'nome\_do\_asset'_.
-
-> Lembre-se que é preciso carregar o asset em: config/initializers/assets.rb
-
-Locais onde é recomendado colocar os arquivos tipo assets (Organização):
-
-- app/assets: Local onde fica os assets gerados **automaticamente**
-- lib/assets: Assets **criados** pelo desenvolvedor
-- vendor/assets: Assets de **terceiros** como plugins
-
-### Twitter Bootstrap
-
-Framework web front-end para desenvolver aplicativos responsivos. Acesse [aqui](https://getbootstrap.com/2.0.2/).
-
-### Rails Composer
-
-App terceiro que gera template de views.
-
-## Asset Pipeline
-
-Provê um framework para concatenar (unificar) e minificar (comprimir) recursos como JavaScript e CSS. Também permite escrever esses formatos a partir de pré-processadores como CoffeeScript, Sass e ERB.
-
-> Gem padrão: Sprockets. OBS: Requer um runtime JS em ruby como ExecJS.
-
-Fingerprint (impressão digital) é a técnica que "força" o navegador a fazer o download dos _assets_ afim de sobreescrever o cache. Esta técnica é realizada modificando o nome dos assets e quando o navegador identifica um novo nome para o recurso, ele realiza o download - é uma ação realizada automaticamente quando os assets são compilados.
-
-Locais onde é recomendado colocar os arquivos tipo assets (Organização):
-
-- app/assets: Local onde fica os assets gerados **automaticamente**
-- lib/assets: Assets **criados** pelo desenvolvedor
-- vendor/assets: Assets de **terceiros** como plugins
-
-### Assets personalizados
-
-Para apontar quais assets devem ser pré-compilados, modifique o seguinte arquivo:
-
-```ruby
-# config/initializers/assets.rb
-Rails.application.config.assets.precompile += %w( nome_do_asset.[js | coffee | sass | css] )
-```
-
-Para utilizar o asset compilado, modifique o seguinte arquivo:
-
-```html
-<!-- app/views/layouts/application.html.erb -->
-<%= stylesheet_link_tag 'nome_do_asset' %> <%= javascript_include_tag
-'nome_do_asset' %>
-
-<!-- params[:controller] retorna a página atual (url) -->
-<!-- Faz com que cada página tenha seu assets -->
-<%= javascript_include_tag params[:controller] %>
-```
-
-## Ajax
-
-Função JavaScript que permite realizar requisições assincronas sem que a página seja recarregada.
-
-> Ciclo Ruby on Rails (RoR): Browser > Controller > JavaScript > Browser
-
-```ruby
-# OBS: Resposta no formato HTML e Json serão ignoradas neste exemplo. "format.js" será o hook para solicitações tipo JS.
-
-# app/controllers/meu_controller.rb
-def create
-  @user = User.new(user_params)
-
-  respond_to do |format|
-    if @user.save # Sucesso
-      format.js   # retorna o arquivo: app/views/minha_view/create.js.erb
-    else          # Erro
-      format.js
-    end
-  end
-end
-```
-
-```html
-<!-- Adicione "remote: true" no helper "form_for" para relizar chamadas ajax -->
-
-<!-- app/views/minha_view/create.html.erb -->
-<%= form_for(@user, remote: true) do |f| %> <%# ... %> <% end %>
-```
-
-## Painel Administrativo (activeadmin)
-
-> gem: activeadmin [link](https://github.com/activeadmin/activeadmin)
+- [Simple CSS](https://github.com/kevquirk/simple.css/wiki/Getting-Started-With-Simple.css): Estilização sem customização inicial
