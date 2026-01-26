@@ -917,9 +917,7 @@ O Devise gera o mesmo _form_ para todos os modelos, caso seu app tenha mais de u
 ```ruby
 # config/initializers/devise.rb
 config.scoped_views = true
-```
 
-```shell
 # CLI
 rails g devise:views users          # Gera view específica
 rails g devise:controllers [scope]  # Scope é o modelo Devise, ex.: User, Admin, etc.
@@ -1343,9 +1341,149 @@ end
 
 ## Stimulus
 
+O Stimulus.js é um framework JavaScript modesto e focado em HTML, criado pela mesma equipe do Ruby on Rails (37signals).
+
 O Hotwire é uma "suíte" ou um guarda-chuva de tecnologias, enquanto o Stimulus é uma ferramenta específica dentro desse pacote. Trabalha localmente no navegador (Manipulação de DOM/Eventos).
 
-Caso de uso: Mostrar um alerta ou esconder um menu ao clicar em um botão.
+Possuí três conceitos principais aplicados diretamente ao HTML:
+
+- Controllers: Onde o código JavaScript reside
+- Targets: Elementos específicos que serão manipulados
+- Values: Armazena estados no `data-controller`
+- Actions: Eventos (como cliques) que disparam funções no controller
+
+### Controller
+
+É uma classe JavaScript que define a lógica de um componente. Ele é conectado ao HTML através do atributo `data-controller="nome"`. Toda vez que esse atributo aparece no DOM, o Stimulus cria uma nova instância dessa classe.
+
+O nome do arquivo do controller determina o seu identificador no DOM. Por exemplo, o `hello_controller.js` terá como identificador `hello`.
+
+#### Associando controlador-elemento
+
+```javascript
+// app/javascript/controllers/hello_controller.js
+
+import { Controller } from "@hotwired/stimulus";
+
+export default class extends Controller {
+  // Ciclo de vida (Opcional)
+  initialize() {
+    // Executado quando o controlador é iniciado
+  }
+
+  connect() {
+    // Executado quando o controlador conecta ao DOM
+  }
+
+  disconnect() {
+    // Executado quando o controlador desconecta ao DOM
+  }
+
+  // Personalizado
+  my_method() {
+    // Executado através de algum evento, inclusive do lifecycle
+  }
+}
+```
+
+```erb
+<%# View %>
+
+<div data-controller="hello">
+    <p>Hello, world!</p>
+</div>
+```
+
+### Targets
+
+São as referências aos elementos HTML importantes dentro do seu controller. Em vez de usar `document.getElementById()`, você marca elementos com `data-controller-target="alvo"` e o Stimulus os disponibiliza automaticamente no JavaScript como `this.alvoTarget`.
+
+#### Lendo e modificando dados
+
+```javascript
+// app/javascript/controllers/hello_controller.js
+
+import { Controller } from "@hotwired/stimulus";
+
+export default class extends Controller {
+  // Busca por 'data-hello-target="message"'
+  static targets = ["message"];
+
+  // Acionado pelo evento de "click"
+  greet(event) {
+    event.preventDefault();
+    this.messageTarget.textContent = "Hello, world!";
+
+    // this.[attr-key]Target   # Retorna o elemento apontado pelo target
+    // this.messageTargets     # Retorna um array dos "message" targets encontrados
+    // this.hasMessageTarget   # Retorna true ou false
+    // this.element            # Retorna o elemento HTML e todos as suas propriedades e métodos
+  }
+}
+```
+
+```erb
+<%# View %>
+
+<div data-controller="hello">
+    <!-- data-[identifier]-target="[attr-key]" -->
+    <p data-hello-target="message"></p>
+
+    <!-- data-action="[event]->[controller]#[method]" -->
+    <button data-action="click->hello#greet">Greetings</button>
+</div>
+```
+
+### Values
+
+São as variáveis de estado ou configurações que você passa do HTML para o JavaScript. Através de atributos como `data-controller-nome-value="10"`, você consegue ler, escrever e até observar mudanças nesses dados diretamente no controller.
+
+Características:
+
+- Controllers são stateless
+- Estados são armazenados no DOM através de datasets
+
+```javascript
+// app/javascript/controllers/hello_controller.js
+
+import { Controller } from "@hotwired/stimulus";
+
+export default class extends Controller {
+  // static values = { counter: Number }
+  static values = { counter: { type: Number, default: 0 } };
+  static targets = ["counter"];
+
+  decrement() {
+    this.counterValue--;
+  }
+
+  increment() {
+    this.counterValue++;
+  }
+
+  // Acionado quando o valor de "counter" é modificado
+  // [value-key]ValueChanged
+  counterValueChanged() {
+    // this.[attr-key]Target.* = this.[value-key]Value
+    this.counterTarget.textContent = this.counterValue;
+  }
+}
+```
+
+```erb
+<%# View %>
+<%# Um novo atributo será adicionado no `data-controller`: data-hello-counter-value="0" %>
+
+<div data-controller="hello">
+  <button data-action="click->hello#decrement">-</button>
+  <p data-hello-target="counter"></p>
+  <button data-action="click->hello#increment">+</button>
+</div>
+```
+
+### External content
+
+[Guia](https://stimulus.hotwired.dev/handbook/working-with-external-resources)
 
 ## Logs
 
@@ -1359,19 +1497,95 @@ Principais tipos de testes:
 - **Teste de Integração**: É a fase do teste de software em que módulos são combinados e testados em grupo. Ela sucede o teste de unidade, em que os módulos são testados individualmente, e antecede o teste de sistema, em que o sistema completo (integrado) é testado num ambiente que simula o ambiente de produção. **É quando temos mais de um teste de unidade testado ao mesmo tempo**.
 - **Teste de Aceitação**: É uma fase do processo de teste em que um teste de caixa-preta é realizado num sistema antes de sua disponibilização. Tem por função verificar o sistema em relação aos seus requisitos originais, e às necessidades atuais do usuário. **Testa se o sistema atende aos requisitos**, valida as ações do usuário como clicar e preencher campos.
 
-A gem _RSpec(-Rails)_ (pasta _spec_) é utilizada para Testes Unitários e de Integração, já para Testes de Aceitação, é utilizado a gem _Capybara_. Por padrão o Rails utiliza a biblioteca MiniTest (pasta padrão _test_).
+A gem _RSpec(-Rails)_ (pasta _spec_) é utilizada para Testes Unitários e de Integração, já para Testes de Aceitação, é utilizado a gem _Capybara_. Por padrão o Rails utiliza a biblioteca MiniTest (pasta padrão _test_), para deixar de gerar testes _minitest_ utilize a flag `-T` ao gerar o projeto Rails ou remova a pasta `test` em um projeto já existente.
 
-### TDD (Test Driven Development)
+### RSpec
 
-É uma metodologia de desenvolvimento de software que visa criar software de maior qualidade e confiabilidade.
+O RSpec é um framework de testes orientado a **Behavior-Driven Development (BDD)** para Ruby que oferece uma alternativa ao framework padrão utilizado pelo Rails (Minitest).
 
-Como funciona o TDD?
+BDD é um processo colaborativo que define o comportamento do sistema por meio de exemplos em linguagem natural, alinhando stakeholders, desenvolvedores e testadores, e expressando requisitos de forma clara no formato **Given–When–Then**, o que reduz ambiguidades e previne defeitos.
 
-- O desenvolvedor escreve um teste que representa o que o código deve fazer
-- O desenvolvedor cria o código para passar nesse teste
-- O código é alterado iterativamente até que os testes sejam bem-sucedidos
+O RSpec utiliza palavras-chave como `describe`, `context` e `it` para estruturar os testes como especificações de comportamento - Arrange, Act e Assert -, tornando-os altamente legíveis, expressivos e fáceis de manter.
 
-![TDD](/assets/images/tdd.png)
+[Documentação](https://rspec.info/documentation/)
+
+#### Instalação, geração e execução
+
+```shell
+# Adicionar no Gemfile
+bundle add rspec-rails -g 'development, test'
+
+# Instalação
+rails generate rspec:install
+
+# Gerando teste boilerplate
+rails generate rspec:model user
+
+# Verifica outros comandos geradores
+rails generate --help | grep rspec
+
+# Execução
+rspec                 # Todos
+rspec spec/models     # Pasta
+rspec spec/controllers/accounts_controller_spec.rb      # Arquivo
+rspec spec/controllers/accounts_controller_spec.rb:42   # Arquivo:Linha
+```
+
+> Opcional: Adicione `--format documentation` no arquivo _.rspec_ gerado para alterar o output dos testes.
+
+#### Matchers
+
+Matchers são as expressões que definem o que você está testando. Eles são as "regras de comparação".
+
+No RSpec, enquanto o `expect` identifica o objeto, o matcher é quem faz a pergunta: "Este objeto é igual a X?", "Ele contém Y?" ou "Ele lançou o erro Z?".
+
+| Matcher                       | Descrição                                                                                    | Exemplo                                                        |
+| ----------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `eq(expected)`                | Verifica igualdade de valor usando `==`                                                      | `expect(5).to eq(5)`                                           |
+| `eql(expected)`               | Verifica igualdade de objetos usando `eql?`                                                  | `expect([1, 2]).to eql([1, 2])`                                |
+| `equal(expected)`             | Verifica identidade de objeto usando `equal?` (mesmo objeto na memória)                      | `expect(obj1).to equal(obj1)`                                  |
+| `be(expected)`                | Matcher flexível, frequentemente usado para verificar _truthiness_ ou identidade             | `expect(true).to be(true)`                                     |
+| `be_truthy`, `be_falsey`      | Verifica se um valor é _truthy_ (não é `false` nem `nil`) ou _falsey_ (`false` ou `nil`)     | `expect("hello").to be_truthy`                                 |
+| `be_nil`                      | Verifica se um valor é `nil`                                                                 | `expect(variable).to be_nil`                                   |
+| `be_instance_of(klass)`       | Verifica se um objeto é uma instância exata de uma classe específica                         | `expect("string").to be_instance_of(String)`                   |
+| `be_kind_of(klass)`           | Verifica se um objeto é de um determinado tipo de classe ou módulo (inclui herança)          | `expect("string").to be_kind_of(Object)`                       |
+| `match(/regex/)`              | Verifica se uma string ou objeto corresponde a uma expressão regular ou valor especificado   | `expect("RSpec").to match(/RSpec/)`                            |
+| `include(item1, item2, ...)`  | Verifica se uma coleção inclui os itens especificados                                        | `expect([1, 2, 3]).to include(2)`                              |
+| `contain_exactly(item1, ...)` | Verifica se uma coleção contém exatamente os itens especificados, independentemente da ordem | `expect([1, 2]).to contain_exactly(2, 1)`                      |
+| `raise_error(ErrorClass)`     | Usado com um bloco para verificar se o código lança (`raise`) um erro específico             | `expect { raise StandardError }.to raise_error(StandardError)` |
+| `change { ... }`              | Usado com um bloco para verificar se um valor muda após a execução do código                 | `expect { counter += 1 }.to change { counter }.by(1)`          |
+
+```ruby
+# Arrange
+RSpec.describe "Calculator" do
+  context "add" do
+    it "returns the sum of two numbers" do
+      # Act
+      result = Calculator.add(7, 5)
+
+      # Assert [.to | .not_to]
+      expect(result).to eq(12)
+    end
+  end
+end
+
+RSpec.describe Post do
+  context "before publication" do
+    it "cannot have comments" do
+      post = Post.create
+
+      # NOTA: Usamos { } em vez de ( ) para executar ações e capturar exceções.
+      expect {
+        post.comments.create! body: "Hello, world!"
+      }.to raise_error(ActiveRecord::RecordInvalid)
+    end
+  end
+end
+```
+
+### GitHub Actions
+
+> TODO
 
 ## Dicas
 
