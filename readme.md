@@ -292,6 +292,7 @@ end
 3.14.to_i()           # Float para Integer
 3.to_f()              # Integer para Float
 3.0.to_s()            # Float para String
+314.digits()          # Integer para Array
 "4".to_i()            # String para Integer
 "4.2".to_f()          # String para Float
 "foo".to_sym()        # String para Symbol
@@ -422,6 +423,7 @@ puts my_grid[0][1]  # Saída: 2
 - slice!: Remove e retorna o elemento ou subarray especificado
 - sort: Retorna um novo array com os elementos ordenados
 - uniq: Retorna um novo array com valores duplicados removidos
+- reverse: Retorna um novo array com a ordem dos valores invertidas
 - min: Retorna o objeto de menor valor do array. Compara apenas tipos iguais
 - max: Retorna o objeto de maior valor do array. Compara apenas tipos iguais
 
@@ -770,6 +772,16 @@ O laço de repetição _times_ em Ruby é um método da classe `Integer`, usado 
 # Integer
 5.times do |num|
   puts num
+end
+```
+
+#### upto
+
+O método upto itera de um valor inicial até um valor final, executando um bloco para cada passo incremental.
+
+```ruby
+5.upto(10) do |num|
+  # num terá o valor inicial de 5 e a cada iteração aumenta 1 até 10
 end
 ```
 
