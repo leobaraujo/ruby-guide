@@ -1,439 +1,201 @@
-# TODO
-
-- Ruby-Toolbox [Clique aqui](https://www.ruby-toolbox.com/)
-
 # Ruby on Rails
 
-[Descrição dos métodos](https://apidock.com/rails)
+Ruby on Rails é um framework web de alto nível escrito em Ruby, criado em 2004 por David Heinemeier Hansson (DHH) a partir do desenvolvimento do Basecamp.
 
-## História
+Rails se baseia fortemente nos princípios de **CoC** (Convention over Configuration) e **DRY** (Don’t Repeat Yourself), incentivando código limpo, reutilizável e fácil de manter. O framework segue a **arquitetura MVC**, e oferece um ecossistema completo com ferramentas integradas como o **ActiveRecord** para acesso ao banco de dados, um sistema de rotas expressivo e suporte nativo a testes.
 
-Ruby on Rails (ou simplesmente Rails) é um framework de desenvolvimento web escrito em Ruby, lançado em 2004 por David Heinemeier Hansson (também conhecido como DHH) e a versão 1.0 foi lançada em dezembro de 2005. Ele foi criado como parte do desenvolvimento da ferramenta de gerenciamento de projetos Basecamp pela empresa 37signals (hoje Basecamp).
+[Documentação](https://rubyonrails.org/docs)
 
-Características:
+## Table of Contents
 
-- Arquitetura MVC
-- Generator
-- Servidor embutido
+- [Ruby on Rails](#ruby-on-rails)
+  - [Table of Contents](#table-of-contents)
+  - [Características](#características)
+    - [Estrutura de pastas](#estrutura-de-pastas)
+  - [Comandos](#comandos)
+  - [Models](#models)
+    - [Validações](#validações)
+    - [Associações](#associações)
+      - [has\_and\_belongs\_to\_many](#has_and_belongs_to_many)
+      - [Through](#through)
+      - [Polymorphic association](#polymorphic-association)
+    - [Callbacks](#callbacks)
+      - [Service Object](#service-object)
+    - [Enum](#enum)
+    - [Scopes](#scopes)
+  - [Controllers](#controllers)
+    - [Actions](#actions)
+    - [Helpers](#helpers)
+  - [Views](#views)
+    - [Embedded Ruby](#embedded-ruby)
+    - [Partials](#partials)
+    - [Formulário](#formulário)
+      - [Helpers](#helpers-1)
+      - [Formulários complexos e Nested Attributes](#formulários-complexos-e-nested-attributes)
+    - [yield](#yield)
+  - [Helpers](#helpers-2)
+  - [Scaffold](#scaffold)
+  - [Rotas](#rotas)
+    - [Recuperando parâmetros](#recuperando-parâmetros)
+    - [REST / RESTful](#rest--restful)
+  - [Migration](#migration)
+    - [Adicionando/removendo campos](#adicionandoremovendo-campos)
+    - [Aplicando migrações pendentes](#aplicando-migrações-pendentes)
+    - [Operações em tabelas](#operações-em-tabelas)
+  - [ActiveRecord](#activerecord)
+  - [Upload de arquivos](#upload-de-arquivos)
+  - [Devise (Auth)](#devise-auth)
+    - [Roles](#roles)
+    - [Controller filters and helpers](#controller-filters-and-helpers)
+    - [Pundit](#pundit)
+      - [Authorize](#authorize)
+      - [Scope](#scope)
+      - [Permitted Attributes](#permitted-attributes)
+      - [Validação vs. Autorização](#validação-vs-autorização)
+      - [Views](#views-1)
+      - [Helpers e mensagem de erro customizada](#helpers-e-mensagem-de-erro-customizada)
+  - [Hotwire](#hotwire)
+    - [Turbo](#turbo)
+    - [Turbo Drive](#turbo-drive)
+      - [Turbo Morphing](#turbo-morphing)
+      - [Prefetch](#prefetch)
+    - [Turbo Frame](#turbo-frame)
+      - [Self-Replacement (ou "Inline")](#self-replacement-ou-inline)
+      - [Targeting a Frame (ou "Targeted Update")](#targeting-a-frame-ou-targeted-update)
+      - [Lazy Loading](#lazy-loading)
+    - [Turbo Streams](#turbo-streams)
+      - [Formulário](#formulário-1)
+      - [WebSocket (Broadcast)](#websocket-broadcast)
+  - [Stimulus](#stimulus)
+    - [Controller](#controller)
+      - [Associando controlador-elemento](#associando-controlador-elemento)
+    - [Targets](#targets)
+      - [Lendo e modificando dados](#lendo-e-modificando-dados)
+    - [Values](#values)
+    - [External content](#external-content)
+  - [i18n (Internationalization)](#i18n-internationalization)
+  - [Testes](#testes)
+    - [RSpec](#rspec)
+      - [Estrutura de pastas](#estrutura-de-pastas-1)
+      - [Instalação, geração e execução](#instalação-geração-e-execução)
+      - [Matchers](#matchers)
+      - [Requisições (Devise)](#requisições-devise)
+    - [GitHub Actions (CI/CD)](#github-actions-cicd)
+  - [Deploy](#deploy)
+  - [Rake Task](#rake-task)
+  - [Cron Jobs](#cron-jobs)
+    - [Sidekiq](#sidekiq)
+  - [Dicas](#dicas)
 
-## Estrutura de pastas
+## Características
 
-- app/: Onde fica a aplicação MVC
-- bin/: Scripts
-- config/: Configuração
-- db/: Banco de dados
-- lib/: Módulos extendidos da aplicação
-- log/: Registro de ações (log)
-- public/: Pasta pública para usuário final, arquivos estáticos
-- store/: Banco de Dados SQLite e ActiveRecord (ORM)
-- test/: TDD (Test-Driven-Development)
-- tmp/: Arquivos temporários gerado automaticamante, como, seções, conexões, cache, cookies, etc..
-- vendor/: Plugins de terceiros (inclusive gems)
+### Estrutura de pastas
 
-## Arquivos
+> Arquitetura MVC
 
-- Gemfile(.lock): Lista de gems que a aplicação necessita. São gerenciadas pelo Bundler (rubygems.org)
-- Rakefile: Contém as tarefas a serem executadas. Se estiver utilizando Rails, adicione as tarefas em 'lib/tasks'
-
-## Arquitetura
-
-> TODO
+```
+.
+├── app/
+│   ├── assets/              # Assets da aplicação (imagens, estilos, JS via importmaps ou bundlers)
+│   ├── channels/            # WebSockets (Action Cable)
+│   ├── components/          # ViewComponents (se utilizado)
+│   ├── controllers/         # Controllers
+│   ├── helpers/             # Helpers de views
+│   ├── javascript/          # JavaScript moderno (importmap, esbuild, vite, etc.)
+│   ├── jobs/                # Background jobs (Active Job)
+│   ├── mailers/             # Mailers (Action Mailer)
+│   ├── models/              # Models e regras de domínio (Active Record)
+│   └── views/               # Views e templates
+│
+├── bin/                     # Scripts executáveis (rails, rake, setup, dev)
+│
+├── config/
+│   ├── environments/        # Configurações por ambiente
+│   ├── initializers/        # Inicialização de gems e configurações globais
+│   ├── locales/             # I18n
+│   ├── routes.rb            # Definição de rotas
+│   ├── application.rb       # Configuração principal da aplicação
+│   └── database.yml         # Configuração do banco de dados
+│
+├── db/
+│   ├── migrate/             # Migrações do banco
+│   ├── seeds.rb             # Dados iniciais
+│   ├── schema.rb            # Schema do banco (ou structure.sql)
+│   └── development.sqlite3  # Banco SQLite (quando utilizado)
+│
+├── lib/
+│   ├── tasks/               # Rake tasks customizadas
+│   └── modules/             # Código reutilizável / serviços / extensões
+│
+├── log/
+│   ├── development.log
+│   ├── test.log
+│   └── production.log
+│
+├── public/
+│   ├── assets/              # Assets pré-compilados
+│   ├── favicon.ico
+│   └── 404.html             # Páginas de erro estáticas
+│
+├── storage/                 # Active Storage (uploads locais)
+│
+├── test/                    # Testes automatizados (Minitest)
+│   ├── controllers/
+│   ├── models/
+│   ├── system/
+│   └── fixtures/
+│
+├── tmp/
+│   ├── cache/               # Cache temporário
+│   ├── pids/                # PID do servidor
+│   └── sockets/             # Sockets
+│
+├── vendor/
+│   └── assets/              # Assets externos não empacotados como gems
+│
+├── .gitignore
+├── Gemfile                  # Dependências (Bundler)
+├── Gemfile.lock
+├── Rakefile
+├── README.md
+└── config.ru                # Rack configuration
+```
 
 ## Comandos
 
-- `rails new <nome_do_projeto>`: Cria um novo projeto Rails
-  - `rails new <nome_do_projeto> --database=ADAPTADOR`: Altera o banco de dados da aplicação (SQLite3 é o padrão. É possível modificar posteriormente)
-  - `rails new <nome_do_projeto> --api`: Cria um app Rails como API
-  - `rails new <nome_do_projeto> --css tailwind`: Cria um app Rails com Tailwind
-- `rails server` (ou apenas "s"): Inicia o projeto
-  - `rails s -e [production | development | test]`: Altera o modo de execução da aplicação
-- `rails generate`: Mostra todos os comandos "generate"
-- `rails generate [model | view | controller | scaffold | etc..] <nome>`
-- `rails destroy [model | view | controller | scaffold | etc..] <nome>`
-- `rails console` (ou apenas "c"): Prompt de comando para a aplicação Rails. Todas as classes presentes no app Rails são carregadas e ficam prontas para uso no console.
-- `rails db:[create | migrate | seed | rollback]`: TODO
-- `rails assets:precompile`: TODO
-
-> Nota: Adicione `RAILS_ENV=[production | development | test]` para modificar o ambiente de execução do comando
-
-## Banco de Dados
-
-Para configurar o banco de dados, modifique o arquivo **config/database.yml**, nele contém instruções de como configurar de acordo com o Banco de Dados selecionado.
-
-Se você tiver um arquivo `config/database.yml` vazio, mas a variável de ambiente `ENV['DATABASE_URL']` estiver definida, o Rails irá se conectar ao banco de dados por meio dessa variável de ambiente.
-
-Prioridade:
-
-- Variável de ambiente
-- config/database.yml
-
-```shell
-# Altera o driver do Banco de Dados
-bin/rails db:system:change --to=[postgresql | mysql |sqlite3]
-```
-
-### Rake (Contexto Rails)
-
-> OBS: comandos _rails db:[create | migrate | seed]_ servem como proxys de comandos rakes a partir da versão 5 do Rails, ou seja, ao utilizar _rails db:create_, você estará utilizando _rake db:create_ "por baixo dos panos".
-
-É uma gema para gerenciamento de tarefas. Contém scripts geradores úteis para aplicações Rails.
-
-> Comando _rake -T_ mostra todos os rake task do projeto. Para filtrar, utilize _rake -T db_ e tudo que começar com "db" será mostrado.
-
-```shell
-# Sintaxe
-
-# rake namespace:rake_task
-rake db:create
-```
-
-#### Criando Rake Task
-
-As tasks geradas pelo comando generate são salvas em _lib/tasks/_ com a extensão _.rake_
-
-> Comando: _rails generate task [namespace] [task_name]_
-
-```ruby
-# rails generate task utils say_hello
-# lib/tasks/utils.rake
-namespace :utils do
-  desc "Say Hello World n times"      # Descrição ao utilizar 'rake -T'
-  task say_hello: :environment do
-  # Algoritmo
-    if Rails.env.development?     # Verifica o ambiente
-      ENV['QTD'].to_i.times do |i|     # Valor da chave 'QTD' ao utilizar o comando rake (ARGV contém todos argumentos)
-        puts "Hello World"
-      end
-    end
-  end
-
-  # Para adicionar mais uma rake task a este namespace, copie e modifique o bloco a cima
-end
-
-# Comando: rake utils:say_hello QTD=10
-```
-
-#### Comandos
-
-- rake db:create - Cria o banco de dados de acordo com o **config/database.yml** (DB de produção deve ser especificado)
-- rake db:migrate - Gera as tableas de acordo com os models da aplicação
-- rake db:seed - Popula tabelas com informações pré-definidas. Casos de uso: Tabelas auxiliares como lista de bancos suportados, cidades, etc. (Arquivo db/seeds.rb)
-
-## CoC (Convention over Configuration)
-
-É um paradigma de projeto que visa diminuir o número de decissões que os desenvolvedores devem fazer, ganhando simplicidade sem perder a flexibilidade.
-
-Em Rails, os comandos geradores de models, views, controlers, schemas, etc. é um CoC, pois, não há a necessidade de desenvolver todo um código _boilerplate_.
-
-### Scaffold (Andaime)
-
-No contexto Rails é como se o app recém gerado estivesse pré-moldado para que você o personalize, sem a necessidade de criá-lo do absoluto zero.
-
-Gera os arquivos necessários (MVC) e configura as rotas para realizar CRUD da entidade criada e também o arquivo de _migrate_. É necessário realizar a migração para o banco de dados (próx. conteúdo).
-
-![Scaffold](/assets/images/Scaffold.jpeg)
-
-> OBS: O nome do modelo é no singular, mas no banco de dados é no plural (convenção).
-
-```shell
-# Para criar um Scaffold, utilize o seguinte comando
-rails generate scaffold Modelo nome:tipo nome:tipo nome:tipo ...
-rails g scaffold Article title:string body:text
-```
-
-#### Adicionando/removendo campos
-
-```shell
-# Sintaxe
-# Troque YYY pelo nome do model. Adicione o "s" em "Field" caso seja mais de um campo
-rails generate migration AddFieldToYYY nome:tipo    # PascalCase
-rails generate migration remove_xxx_from_yyy        # snake_case
-
-# Exemplo
-rails g migration addNameToPerson name:string
-
-# Aplicando modificações no Banco de Dados
-rake db:migrate
-```
-
-> É preciso permitir os novos campos no controller para realizar atualizações nas requisições
-
-## Migration
-
-A troca de informações entre o Banco de Dados e a aplicação Rails é realizada através das _migrates_.
-
-Além dos campos criados pelo programador, o arquivo _migrate_ também cria alguns campos, são eles:
-
-- id: Chave primária do tipo autoincremento
-- timestamps: Gera dois campos, created_at e updated_at. São atualizados automaticamente.
-
-```shell
-# Deixa o banco de dados igual ao script schema. A tabela pode ser criada, modificada ou removida
-rake db:migrate
-```
-
-### Operações em tabelas
-
-- add_column
-- remove_column
-- rename_column
-- change_column
-
-```ruby
-# Tornando `change_column` reversível
-
-# Método 1
-class ChangeTypeOfDescriptionInDemos < ActiveRecord::Migration[6.1]
-  def change
-    reversible do |dir|
-      # Será executado em `db:migrate`
-      dir.up do
-        change_column :demos, :description, :text
-      end
-
-      # Será executado em `db:rollback`
-      dir.down do
-        change_column :demos, :description, :string
-      end
-    end
-  end
-end
-
-# Método 2
-class ChangeTypeOfDescriptionInDemos < ActiveRecord::Migration[6.1]
-  def up
-    change_column :demos, :description, :text
-  end
-
-  def down
-    change_column :demos, :description, :string
-  end
-end
-```
-
-### Migração específica
-
-> NOTA: Observe que "VERSION=" é o **timestamp** da migração.
-
-```shell
-# Migração específica
-rails db:migrate:up VERSION=20251225246060
-
-# Rollback específico
-rails db:migrate:down VERSION=20251225246060
-
-# Quantia de rollbacks
-rails db:rollback STEP=n
-
-# Quantia de migrações a partir da última definida no "schema"
-rails db:migrate:redo STEP=n
-
-```
-
-## Views
-
-> NOTA: Toda view, partial, etc.. Passa por app/views/application.html.erb (root da view).
-
-### Embedded Ruby
-
-É um sistema de template que combina a linguagem Ruby com texto. Sua extensão é **.erb**.
-
-Tags
-
-- <% %>: Código ruby sem saída para HTML
-- <%= %>: Código ruby cujo retorno será impresso no HTML
-- <%= -%>: Código ruby cujo retorno será impresso no HTML, porém, remove a quebra de linha final
-- <%# %>: Comenta o código ruby, pode estar junto de = e -.
-
-### Interpolação de váriaveis em texto
-
-Adiciona o valor duma variável na string.
-
-```ruby
-variavel = "interpolado"
-"Minha string #{variavel}" # Saída: Minha string interpolada
-
-<%= "Interpolando em embedded ruby: #{variavel}" %>
-```
-
-### Partials
-
-São arquivos com a extensão _.html.erb_ cujo nome começam com underline (\_).
-
-```ruby
-# app/view/customer/new.html.erb
-<%= render "form" %>
-
-# NOTA: Caso a view tenha acesso á variavel @user, a partial também terá automaticamente
-<%= render "form", @user %>
-
-<%= render "form", user: @user %>
-<%= render partial: "form", locals: { user: @user } %>
-
-# app/view/customer/_form.html.erb (É um "mini-controller" contém lógica de
-# programação e renderização. No contexto React, seria como um componente.) ...
-```
-
-### Formulário
-
-`form_with` Substitui form_for e form_tag. Usa sempre `FormBuilder`.
-
-```ruby
-# Com model
-<%= form_with model: @user do |f| %>
-  <%= f.text_field :name %>
-  <%= f.submit %>
-<% end %>
-
-# Sem model
-<%= form_with url: "/login" do |f| %>
-  <%= f.text_field :email %>
-  <%= f.submit %>
-<% end %>
-```
-
-```ruby
-# Select
-# OBS: {include_blank: [true | false | "string_placeholder"]}
-select("model_name", "attribute", %w(option option option), {include_blank: true})
-
-# "f" representa o model no closure "form_for". ":attribute" é o symbol com o nome do atributo do model. "@person.sex" altera o "M" para "Masculino" (neste caso) para quando for modificar o model
-f.select(:attribute, options_for_select([["Masculino", "M"], ["Feminino", "F"]], @person.sex), {include_blank: "Selecione"})
-
-# Collection select
-# f.collection_select(nome_do_campo, modelos_para_popular, valor, nome_da_option, include_blank)
-f.collection_select(:model_id, @models, :id, :name, include_blank: true)
-
-# OBS: "include_blank" pode ser substituido para "prompt" que contém uma mensagem padrão. Evite chamar o model dentro da view, utilize uma variável que contenha a informação desejada
-```
-
-#### field helpers
-
-São métodos do FormBuilder.
-
-Campos de texto e numéricos:
-
-- text_field
-- text_area
-- number_field
-- range_field
-- password_field
-- email_field
-- telephone_field
-- url_field
-- search_field
-
-Campos de data e tempo:
-
-- date_field
-- time_field
-- datetime_field
-- datetime_local_field
-- month_field
-- week_field
-
-Campos de seleção:
-
-- select
-- collection_select
-- grouped_collection_select
-- time_zone_select
-
-Campos booleanos:
-
-- check_box
-- radio_button
-
-Upload e arquivos:
-
-- file_field
-
-Campos ocultos e auxiliares:
-
-- hidden_field
-- color_field
-
-Campos de envio e ação:
-
-- submit
-- button
-
-#### Formulários complexos e Nested Attributes
-
-**Problemática**: Ao criar um usuário através de um formulário com os campos "Nome, e-mail e telefone" e "Endereço, cód. postal, referência", como saber quais dados são do modelo Usuário e quais dados são do modelo Endereço?
-
-Quando um modelo tem o helper **has_one** (no caso, Usuário tem apenas um endereço) o método **build\_\*** (\* é o nome do modelo) fica acessível para o modelo. O método faz com que ao criar o Endereço e salvar o usuário sejam salvos duas entidades diferentes no banco de dados.
-
-> É preciso atualizar o controller para permitir os novos campos vindo do formulário.
-
-```ruby
-# OBS: As classes contém construtor apenas para demonstrar os seus atributos
-
-# Criando classes
-class Usuario
-  attr_accessor :nome, :email, :telefone
-  has_one :endereco
-  accepts_nested_attributes_for :endereco
-
-  def initialize(nome, email, telefone)
-    self.nome = nome
-    self.email = email
-    self.telefone = telefone
-  end
-end
-
-class Endereco
-  attr_accessor :endereco, :cep, :referencia
-  belongs_to :usuario
-
-  def initialize(endereco, cep, referencia)
-    self.endereco = endereco
-    self.cep = cep
-    self.referencia = referencia
-  end
-end
-
-# Criando sem "accepts_nested_attributes_for"
-usuario = Usuario.new(nome: "John Doe", email: "johndoe@email.com", telefone: "12345678")
-usuario.build_endereco(endereco: "Rua A", cep: "87654321", referencia: "Padaria")
-
-# Criando com "accepts_nested_attributes_for"
-usuario = Usuario.new(nome: "John Doe", email: "johndoe@email.com", telefone: "12345678", endereco_attributes: {endereco: "Rua A", cep: "87654321", referencia: "Padaria"})
-```
-
-```ruby
-# Controller
-def new
-  @usuario = Usuario.new
-  @usuario.build_endereco # Novo
-end
-```
-
-### Conteúdo head personalizado
-
-Dentro da tag head em _app/views/layouts/application.html.erb_ adicione **<%= yield :head %>** e dentro da view, adicione o bloco **content_for :head do**. Adicione o _yield_ na primeira linha da tag head.
-
-```html
-<!-- app/views/layouts/application.html.erb -->
-<head>
-  <%= yield :head %>
-  <!-- ... -->
-</head>
-```
-
-```html
-<!-- app/views/minha_view/index.html.erb -->
-<% content_for :head do %>
-<title>A simple page</title>
-<% end %>
-<p>Hello, Rails!</p>
-```
+| Comando                                            | Descrição                              | Observações / Variações                        |
+| -------------------------------------------------- | -------------------------------------- | ---------------------------------------------- |
+| `rails new <nome_do_projeto>`                      | Cria um novo projeto Rails             | SQLite por padrão                              |
+| `rails new <nome_do_projeto> --database=ADAPTADOR` | Define o banco de dados                | `postgresql`, `mysql`, `sqlite3`               |
+| `rails new <nome_do_projeto> --api`                | Cria uma aplicação Rails API-only      | Remove views e assets                          |
+| `rails new <nome_do_projeto> --css tailwind`       | Cria app com Tailwind CSS              | Padrão Rails 7+                                |
+| `rails server` ou `rails s`                        | Inicia o servidor Rails                | Porta padrão: 3000                             |
+| `rails s -e <ambiente>`                            | Executa o servidor em outro ambiente   | `development`, `test`, `production`            |
+| `rails console` ou `rails c`                       | Console interativo da aplicação        | Classes do app carregadas                      |
+| `rails runner "<código>"`                          | Executa código Ruby no contexto do app | Ideal para scripts                             |
+| `rails generate` ou `rails g`                      | Lista geradores disponíveis            |                                                |
+| `rails generate <tipo> <nome>`                     | Gera código automaticamente            | `model`, `controller`, `migration`, `scaffold` |
+| `rails destroy <tipo> <nome>`                      | Remove código gerado                   | Reverte `generate`                             |
+| `rails routes`                                     | Lista todas as rotas                   | Use `-g` para filtrar                          |
+| `rails db:create`                                  | Cria o banco de dados                  | Usa `database.yml`                             |
+| `rails db:migrate`                                 | Executa migrations pendentes           |                                                |
+| `rails db:rollback`                                | Desfaz a última migration              | `STEP=n`                                       |
+| `rails db:reset`                                   | Recria o banco do zero                 | `drop + create + migrate + seed`               |
+| `rails db:seed`                                    | Executa `db/seeds.rb`                  | Dados iniciais                                 |
+| `rails db:prepare`                                 | Prepara banco automaticamente          | Muito usado em CI                              |
+| `rails assets:precompile`                          | Compila assets para produção           | Deploy tradicional                             |
+| `rails test`                                       | Executa testes (Minitest)              | Padrão Rails                                   |
+| `rails about`                                      | Mostra infos do projeto                | Versões e ambiente                             |
+| `rails app:update`                                 | Atualiza configs do Rails              | Importante em upgrades                         |
+| `rails credentials:edit`                           | Edita credenciais criptografadas       | Por ambiente                                   |
+| `rails tmp:clear`                                  | Limpa arquivos temporários             |                                                |
+| `rails log:clear`                                  | Limpa logs                             |                                                |
+
+> Nota: Adicione `RAILS_ENV=[production | development | test]` para modificar o ambiente de execução do comando.
 
 ## Models
 
-Quando um modelo herda de _ActiveRecord::Base_ (notação de módulo), há uma comunicação com o Banco de Dados gerando as informações na mesma. Active Record é um ORM (Object Relational Mapping).
-
-> OBS: É possível criar métodos personalizados dentro do model.
+O Model representa a camada de domínio e persistência. Nele ficam as regras de negócio, validações, associações e acesso ao banco de dados via ActiveRecord, que implementa o padrão ORM. O model não conhece HTTP nem renderização; seu foco é estado e comportamento do domínio.
 
 ```ruby
 class Person < ApplicationRecord
@@ -443,25 +205,31 @@ class Person < ApplicationRecord
 end
 ```
 
-### Validadores
+### Validações
 
-> Validações não substituem constraints do banco. Para integridade real, use índices únicos, NOT NULL e foreign keys no banco de dados.
+Validações não substituem constraints do banco. Para integridade real, use índices únicos, NOT NULL e foreign keys no banco de dados.
 
-| Categoria     | Validadores                  |
-| ------------- | ---------------------------- |
-| Presença      | `presence`, `absence`        |
-| Exclusividade | `uniqueness`                 |
-| Tamanho       | `length`                     |
-| Número        | `numericality`               |
-| Formato       | `format`                     |
-| Conjunto      | `inclusion`, `exclusion`     |
-| Confirmação   | `confirmation`, `acceptance` |
-| Associação    | `validates_associated`       |
-| Customizado   | `validate`                   |
+| Validação   | Helper / Opção                        | Descrição                                     |
+| ----------- | ------------------------------------- | --------------------------------------------- |
+| Presença    | `validates :attr, presence: true`     | Garante que o atributo não seja nulo ou vazio |
+| Ausência    | `validates :attr, absence: true`      | Garante que o atributo esteja vazio           |
+| Unicidade   | `validates :attr, uniqueness: true`   | Garante valor único (requer índice no banco)  |
+| Comprimento | `validates :attr, length: {}`         | Valida tamanho mínimo, máximo ou intervalo    |
+| Formato     | `validates :attr, format: {}`         | Valida com expressão regular                  |
+| Inclusão    | `validates :attr, inclusion: {}`      | Garante que o valor esteja em um conjunto     |
+| Exclusão    | `validates :attr, exclusion: {}`      | Garante que o valor não esteja em um conjunto |
+| Numérico    | `validates :attr, numericality: true` | Valida números e comparações                  |
+| Confirmação | `validates :attr, confirmation: true` | Exige campo \*\_confirmation                  |
+| Aceitação   | `validates :attr, acceptance: true`   | Valida aceite de termos                       |
+| Comparação  | `validates :attr, comparison: {}`     | Compara valores (>=, <=, >, <)                |
+| Associação  | `validates :assoc, presence: true`    | Garante associação presente                   |
+| Customizada | `validate :method_name`               | Executa validação definida pelo desenvolvedor |
 
 ```ruby
-validates :name, presence: true
-validate :validate_age    # Validador personalizado
+attr_accessor :parent               # Cria um "atributo virtual" que pode ser utilizado na lógica de negócio, mas que não será persistido no banco de dados
+
+validate :validate_age              # Define validações de atributos
+validates :name, presence: true     # Executa validação customizada
 
 def validate_age
   if self.date_of_birth.present?
@@ -476,31 +244,36 @@ end
 
 ### Associações
 
-- `has_one`: Relação 1 para 1
-- `has_many`: Relação 1 para N
-- `belongs_to`: Pertence a outro modelo. Deve conter uma FK
-- `has_and_belongs_to_many`: Relacionamento N para N usando uma tabela intermediária, porém, sem modelo
-- `has_many :through`: Relacionamento N para N usando uma tabela intermediária e um modelo. Permite atributos extras e callbacks
-- `has_one :through`: Relacionamento 1 para 1 indireto
+Referências dentro de tabelas seguem a seguinte convenção: model-name_id. Lembre-se que o nome dos models são no **singular** (as tabelas ficarão no plural) e o "\_id" será adicionado automaticamente.
 
-> TODO: Associações polimórficas & pesquisar por `dependent: :destroy`
+| Associação                | Tipo de Relação  | Descrição                                                                 |
+| ------------------------- | ---------------- | ------------------------------------------------------------------------- |
+| `has_one`                 | 1 → 1            | Relacionamento um para um                                                 |
+| `has_many`                | 1 → N            | Relacionamento um para muitos                                             |
+| `belongs_to`              | N → 1            | Pertence a outro modelo; **exige chave estrangeira (FK)**                 |
+| `has_and_belongs_to_many` | N ↔ N            | N para N via tabela intermediária **sem model próprio**                   |
+| `has_many :through`       | N ↔ N            | N para N via tabela intermediária **com model**, suporta atributos extras |
+| `has_one :through`        | 1 → 1 (indireto) | Um para um indireto via outro modelo                                      |
+| `dependent: :destroy`     | N → 1            | Define ação em cascata ao remover o pai                                   |
 
 ![Associação](/assets/images/Associacao.jpeg)
-
-> Associações/referências dentro de tabelas em Ruby seguem a seguinte convenção: model-name_id. Lembre-se que o nome dos models são no **singular** (as tabelas ficarão no plural) e o "\_id" será adicionado automaticamente.
-
-No exemplo acima, "Child" belongs_to "Father" e "Father" has_many "Child".
 
 ```shell
 rails g model Father name:string
 rails g model Child name:string father:references
-
-# OBS: É preciso adicionar "has_many :child" no model Father
 ```
 
-Para controlar os modelos com Orientação a objetos, é possível fazer da seguinte forma:
-
 ```ruby
+# Model
+class Father < ApplicationRecord
+  has_many :children    # Nome no plural
+end
+
+class Child < ApplicationRecord
+  belongs_to :father    # Nome no singular
+end
+
+# Example
 pai = Father.create(name: "John Doe")
 filho = Child.create(name: "Junior Doe")
 
@@ -514,7 +287,7 @@ father.children.create(name: "Maria Doe")
 
 #### has_and_belongs_to_many
 
-É utilizado para estabelecer um relacionamento muitos-para-muitos entre dois modelos, sem a existência de um modelo intermediário. Esse relacionamento requer uma tabela de junção dedicada no banco de dados, que armazena apenas as chaves estrangeiras dos dois modelos associados e não possui chave primária própria, modelo correspondente nem atributos adicionais.
+É utilizado para estabelecer um relacionamento **muitos-para-muitos** entre dois modelos, sem a existência de um modelo intermediário. Esse relacionamento requer uma tabela de junção dedicada no banco de dados, que armazena apenas as chaves estrangeiras dos dois modelos associados e não possui chave primária própria, modelo correspondente nem atributos adicionais.
 
 Requer que a join table seja criada através duma migration. O nome da tabela deve ser o nome dos dois modelos pluralizado e em ordem alfabética, e sem _primary key_.
 
@@ -522,7 +295,7 @@ Requer que a join table seja criada através duma migration. O nome da tabela de
 
 #### Through
 
-Uma associação [has_many | has_one] :through é frequentemente usada para configurar um relacionamento muitos-para-muitos (ou um-para-um) com outro modelo/entidade.
+Uma associação `[has_many | has_one] :through` é frequentemente usada para configurar um relacionamento muitos-para-muitos (ou um-para-um) com outro modelo/entidade.
 
 > Gem recomendada: Cocoon
 
@@ -580,24 +353,29 @@ Event.first.comments      # Lista de Comment
 
 Os Callbacks são ganchos (hooks) no ciclo de vida de um objeto ActiveRecord que permitem a execução de lógica antes ou depois de alterações específicas no estado desse objeto (como criar, atualizar ou deletar).
 
-Eles são ferramentas poderosas para manter a integridade dos dados e automatizar tarefas, como formatar uma string antes de salvar ou disparar um e-mail após a criação de um registro.
+| Callback            | Momento de Execução                                          |
+| ------------------- | ------------------------------------------------------------ |
+| `after_initialize`  | Após o objeto ser instanciado (`new` ou carregado do banco)  |
+| `after_find`        | Após o objeto ser carregado do banco (`find`, `first`, etc.) |
+| `before_validation` | Antes das validações                                         |
+| `after_validation`  | Após as validações                                           |
+| `before_save`       | Antes de salvar (create ou update)                           |
+| `around_save`       | Envolve a operação de save                                   |
+| `before_create`     | Antes de criar um novo registro                              |
+| `around_create`     | Envolve a operação de create                                 |
+| `after_create`      | Após criar o registro                                        |
+| `before_update`     | Antes de atualizar um registro                               |
+| `around_update`     | Envolve a operação de update                                 |
+| `after_update`      | Após atualizar o registro                                    |
+| `before_destroy`    | Antes de remover o registro                                  |
+| `around_destroy`    | Envolve a operação de destroy                                |
+| `after_destroy`     | Após remover o registro                                      |
+| `after_save`        | Após salvar (create ou update)                               |
+| `after_commit`      | Após commit bem-sucedido da transação                        |
+| `after_rollback`    | Após rollback da transação                                   |
+| `after_touch`       | Quando `touch` é chamado e `updated_at` é alterado           |
 
-Lista
-
-- before_validation
-- after_validation
-- before_save
-- around_save
-- before\_[create | update | destroy]
-- around\_[create | update | destroy]
-- after\_[create | update | destroy]
-- after_save
-- after_commit / after_rollback
-- after_initialize
-- after_find
-- after_touch: Chamado quando você executa o método `touch` no objeto
-
-> NOTA: `after_save` é acionado mesmo que ocorra um erro. Para ações que devem ser acionadas apenas após o sucesso (como enviar e-mail), utilize `after_commit`
+> NOTA: `after_save` é acionado mesmo que ocorra um erro. Para ações que devem ser acionadas apenas após o sucesso (como enviar e-mail), utilize `after_commit`.
 
 #### Service Object
 
@@ -646,16 +424,12 @@ end
 
 > TODO: Service Object usando RSpec (Testes)
 
-### Mensagens de erros personalizadas
-
-> TODO
-
 ### Enum
 
 ```ruby
 class Conversation < ActiveRecord::Base
   # Cria um enum cujo valor no Banco de Dados será o 'key' do 'value'
-  enum status: [:active, :archived]
+  enum :status, { active: 0, active: 1 }
 end
 
 # Gera métodos para definir e checar automaticamente
@@ -665,13 +439,38 @@ conversation.active?    # Retorna "true" ou "false" dependendo do valor do "stat
 conversation.status     # Saída: "archived"
 ```
 
+### Scopes
+
+São consultas reutilizáveis e encadeáveis (`ActiveRecord::Relation`) definidas no modelo para encapsular lógica de filtro do banco de dados de forma limpa, expressiva e consistente com o estilo Rails.
+
+Eles servem para nomear queries, evitar repetição e manter regras de negócio relacionadas à persistência dentro do modelo.
+
+```ruby
+# Definição no *Model*
+class Order < ApplicationRecord
+  # Padrão
+  scope :published, -> { where(published: true) }
+  # Com parâmetro
+  scope :by_author, ->(user_id) { where(author_id: user_id) }
+  # Condicional
+  scope :by_status, ->(status) { status.present? ? where(status:) : all }
+  # Condicional e parâmetro
+  scope :recent, ->(days_ago) { where("published_at >= ?", Time.current - days_ago.days) }
+end
+
+# Utilização no *Controller*
+def index
+  @orders = Order.by_author(1).published.recent(7).limit(20)
+end
+```
+
 ## Controllers
 
-O controller é o componente responsável por receber requisições HTTP, orquestrar a lógica da aplicação e retornar uma resposta ao cliente (HTML, JSON, redirecionamento, etc.). São compostos por actions, que são métodos públicos associados a rotas. Por convenção, utilizam actions RESTful, promovendo padronização e previsibilidade.
+O Controller atua como orquestrador da requisição. Ele recebe a request HTTP, coordena chamadas aos models, decide o fluxo da aplicação e prepara os dados para a resposta. Controllers devem ser finos: sem lógica de negócio pesada, apenas controle de fluxo, autorização, autenticação e seleção da resposta (HTML, JSON, etc.).
 
-Boas práticas recomendam controllers enxutos, contendo apenas lógica de fluxo, validação básica e controle de resposta, delegando regras de negócio para outras camadas da aplicação.
+São compostos por actions, que são métodos públicos associados a rotas. Por convenção, utilizam actions RESTful, promovendo padronização e previsibilidade.
 
-> OBS: O nome da _view_ **deve** ser o mesmo do **método** do _controller_, no caso, index.
+> OBS: O nome da _view_ **deve** ser o mesmo da **action** do _controller_, por exemplo, index.
 
 ```ruby
 # Controller "customers_controller.rb"
@@ -689,6 +488,9 @@ def index
 
     # keyset pagination: Listagem incremental / API / UI
     @customers = Customer.where("id > ?", last_id).order(:id).limit(20)
+
+    # Associação has_many
+    @customers = Customer.includes(:items)    # Resolve query N+1
 end
 
 # View "customers/index.html.erb"
@@ -697,7 +499,7 @@ end
 <% end %>
 ```
 
-### Ações (Actions)
+### Actions
 
 São **métodos públicos** responsáveis por responder a requisições HTTP. Por convenção, Rails fornece um conjunto padrão de actions RESTful, especialmente quando usamos resources no roteamento.
 
@@ -756,6 +558,261 @@ end
 post "users/:id/activate", to: "users#activate"
 ```
 
+### Helpers
+
+| Helper                    | Tipo            | Finalidade                                     |
+| ------------------------- | --------------- | ---------------------------------------------- |
+| `before_action`           | Callback        | Executa método antes da action                 |
+| `after_action`            | Callback        | Executa método após a action                   |
+| `around_action`           | Callback        | Executa código antes e depois da action        |
+| `skip_before_action`      | Callback        | Ignora um before_action específico             |
+| `prepend_before_action`   | Callback        | Executa antes dos demais before_action         |
+| `rescue_from`             | Tratamento erro | Captura exceções e define resposta customizada |
+| `helper_method`           | Exposição       | Disponibiliza método do controller para a view |
+| `respond_to`              | Resposta        | Define formatos de resposta (html, json, etc.) |
+| `render`                  | Resposta        | Renderiza uma view ou payload                  |
+| `redirect_to`             | Resposta        | Redireciona para outra rota/URL                |
+| `head`                    | Resposta        | Retorna resposta sem corpo (ex: head :ok)      |
+| `params`                  | Request         | Acesso aos parâmetros da requisição            |
+| `session`                 | Estado          | Armazena dados na sessão                       |
+| `cookies`                 | Estado          | Manipula cookies                               |
+| `flash`                   | Estado          | Mensagens temporárias entre requisições        |
+| `request`                 | Request         | Objeto da requisição HTTP                      |
+| `response`                | Response        | Objeto da resposta HTTP                        |
+| `protect_from_forgery`    | Segurança       | Proteção contra CSRF                           |
+| `skip_forgery_protection` | Segurança       | Desativa proteção CSRF                         |
+| `send_data`               | Utilitário      | Envia dados binários (PDF, CSV, etc.)          |
+| `send_file`               | Utilitário      | Envia arquivos                                 |
+| `logger`                  | Log             | Acesso ao logger da aplicação                  |
+| `render_to_string`        | Renderização    | Renderiza view para string                     |
+| `url_for`                 | Roteamento      | Gera URLs manualmente                          |
+| `polymorphic_url`         | Roteamento      | Gera URLs para recursos polimórficos           |
+
+## Views
+
+As views devem ser simples e focadas em exibição, delegando lógica reutilizável para helpers, partials e layouts.
+
+### Embedded Ruby
+
+É um sistema de template que combina a linguagem Ruby com texto. Sua extensão é `.erb`.
+
+| Sintaxe ERB        | Finalidade                    | Exemplo                        |
+| ------------------ | ----------------------------- | ------------------------------ |
+| `<% %>`            | Executar código Ruby          | `<% if user.admin? %>`         |
+| `<%= %>`           | Executar e imprimir resultado | `<%= user.name %>`             |
+| `<%- -%>`          | Executar sem quebra de linha  | `<%- items.each do \|i\| -%>`  |
+| `<%= raw %>`       | Imprimir HTML sem escape      | `<%= raw("\<b>Texto\</b>") %>` |
+| `<%= html_safe %>` | Marca string como segura      | `"\<b>ok\</b>".html_safe`      |
+| `<%# %>`           | Comentário ERB                | `<%# comentário %>`            |
+
+### Partials
+
+São arquivos com a extensão `*.html.erb` cujo nome começam com underline (\_).
+
+```erb
+# app/view/customer/new.html.erb
+<%= render "form" %>
+
+<!-- NOTA: Caso a view tenha acesso á variavel @user, a partial também terá -->
+<%= render "form", @user %>
+
+<%= render "form", user: @user %>
+<%= render partial: "form", locals: { user: @user } %>
+```
+
+### Formulário
+
+`form_with` Substitui `form_for` e `form_tag`. Usa sempre `FormBuilder`.
+
+```ruby
+# Com model
+<%= form_with model: @user do |f| %>
+  <%= f.text_field :name %>
+  <%= f.submit %>
+<% end %>
+
+# Sem model
+<%= form_with url: "/login" do |f| %>
+  <%= f.text_field :email %>
+  <%= f.submit %>
+<% end %>
+```
+
+```ruby
+# Select
+# OBS: {include_blank: [true | false | "string_placeholder"]}
+select("model_name", "attribute", %w(option option option), { include_blank: true })
+
+# "f" representa o model no closure "form_for". ":attribute" é o symbol com o nome do atributo do model. "@person.sex" altera o "M" para "Masculino" (neste caso) para quando for modificar o model
+f.select(:attribute, options_for_select([["Masculino", "M"], ["Feminino", "F"]], @person.sex), {include_blank: "Selecione"})
+
+# Collection select (nome_do_campo, modelos_para_popular, valor, nome_da_option, include_blank)
+f.collection_select(:model_id, @models, :id, :name, include_blank: true)
+# OBS: "include_blank" pode ser substituido para "prompt" que contém uma mensagem padrão. Evite chamar o model dentro da view, utilize uma variável que contenha a informação desejada
+```
+
+#### Helpers
+
+São métodos do FormBuilder.
+
+| Categoria         | Helper                      | Descrição                         |
+| ----------------- | --------------------------- | --------------------------------- |
+| Texto / Numérico  | `text_field`                | Campo de texto simples            |
+| Texto / Numérico  | `text_area`                 | Campo de texto multilinha         |
+| Texto / Numérico  | `number_field`              | Campo numérico                    |
+| Texto / Numérico  | `range_field`               | Campo numérico em forma de slider |
+| Texto / Numérico  | `password_field`            | Campo de senha                    |
+| Texto / Numérico  | `email_field`               | Campo para e-mail                 |
+| Texto / Numérico  | `telephone_field`           | Campo para telefone               |
+| Texto / Numérico  | `url_field`                 | Campo para URL                    |
+| Texto / Numérico  | `search_field`              | Campo de busca                    |
+| Data / Tempo      | `date_field`                | Seleção de data                   |
+| Data / Tempo      | `time_field`                | Seleção de horário                |
+| Data / Tempo      | `datetime_field`            | Seleção de data e hora            |
+| Data / Tempo      | `datetime_local_field`      | Data e hora no fuso local         |
+| Data / Tempo      | `month_field`               | Seleção de mês                    |
+| Data / Tempo      | `week_field`                | Seleção de semana                 |
+| Seleção           | `select`                    | Dropdown simples                  |
+| Seleção           | `collection_select`         | Dropdown baseado em coleção       |
+| Seleção           | `grouped_collection_select` | Dropdown agrupado por coleção     |
+| Seleção           | `time_zone_select`          | Seleção de fuso horário           |
+| Booleano          | `check_box`                 | Caixa de seleção                  |
+| Booleano          | `radio_button`              | Botão de opção exclusiva          |
+| Upload / Arquivos | `file_field`                | Upload de arquivos                |
+| Oculto / Auxiliar | `hidden_field`              | Campo oculto                      |
+| Oculto / Auxiliar | `color_field`               | Seletor de cor                    |
+| Envio / Ação      | `submit`                    | Botão de envio do formulário      |
+| Envio / Ação      | `button`                    | Botão genérico de ação            |
+
+#### Formulários complexos e Nested Attributes
+
+**Problemática**: Ao criar um usuário através de um formulário com os campos "Nome, e-mail e telefone" e "Endereço, cód. postal, referência", como saber quais dados são do modelo Usuário e quais dados são do modelo Endereço?
+
+Quando um modelo tem o helper **has_one** (no caso, Usuário tem apenas um endereço) o método **build\_\*** (\* é o nome do modelo) fica acessível para o modelo. O método faz com que ao criar o Endereço e salvar o usuário sejam salvos duas entidades diferentes no banco de dados.
+
+> É preciso atualizar o controller para permitir os novos campos vindo do formulário.
+
+```ruby
+# Model
+class Father < ApplicationRecord
+  has_many :children, inverse_of: :father, dependent: :destroy
+  accepts_nested_attributes_for :children, allow_destroy: true
+
+  # `allow_destroy: true` Permite excluir registros associados através do formulário do `father`
+end
+
+class Child < ApplicationRecord
+  belongs_to :father
+end
+
+# Controller
+class FathersController < ApplicationController
+  def new
+    @father = Father.new
+    @father.children.build # cria ao menos 1 child no form
+  end
+
+  def create
+    @father = Father.new(father_params)
+    if @father.save
+      redirect_to @father
+    else
+      render :new
+    end
+  end
+
+  private
+
+  def father_params
+    params.require(:father).permit(
+      :name,
+      children_attributes: [:id, :name, :_destroy]
+    )
+  end
+end
+```
+
+> OBS: Utilize `Stimulus` para adicionar/remover _children_ dinamicamente na view.
+
+```erb
+<%= form_with model: @father do |f| %>
+  <div>
+    <%= f.label :name, "Father name" %>
+    <%= f.text_field :name %>
+  </div>
+  <h3>Children</h3>
+  <%= f.fields_for :children do |child_form| %>
+    <div class="child-fields">
+      <%= child_form.label :name, "Child name" %>
+      <%= child_form.text_field :name %>
+
+      <%# "Exclui o Child ao salvar o Father" %>
+      <%= child_form.check_box :_destroy %>
+      <%= child_form.label :_destroy, "Remove" %>
+    </div>
+  <% end %>
+  <%= f.submit %>
+<% end %>
+```
+
+### yield
+
+`yield` é o ponto de inserção onde o conteúdo da view é renderizado dentro do layout.
+
+- `yield`: Onde renderizar
+- `content_for`: O que renderizar
+
+```erb
+<!-- app/views/layouts/application.html.erb -->
+<head>
+  <%= yield :head %>
+</head>
+```
+
+```erb
+<!-- app/views/minha_view/index.html.erb -->
+<% content_for :head do %>
+  <title>A simple page</title>
+<% end %>
+
+<p>Hello, Rails!</p>
+```
+
+## Helpers
+
+| Helper                  | Descrição                                 | Exemplo                                                 |
+| ----------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| `link_to`               | Gera um link HTML                         | `link_to "Home", root_path`                             |
+| `button_to`             | Gera um botão que dispara uma requisição  | `button_to "Delete", post_path(@post), method: :delete` |
+| `image_tag`             | Renderiza uma imagem                      | `image_tag "logo.png", alt: "Logo"`                     |
+| `image_url`             | Retorna a URL de uma imagem               | `image_url("logo.png")`                                 |
+| `render`                | Renderiza partials ou templates           | `render "shared/header"`                                |
+| `pluralize`             | Pluraliza palavras com base em quantidade | `pluralize(2, "erro")`                                  |
+| `truncate`              | Trunca texto longo                        | `truncate(text, length: 30)`                            |
+| `simple_format`         | Converte texto em parágrafos HTML         | `simple_format(text)`                                   |
+| `number_to_currency`    | Formata número como moeda                 | `number_to_currency(100)`                               |
+| `number_to_percentage`  | Formata número como porcentagem           | `number_to_percentage(50)`                              |
+| `number_with_delimiter` | Adiciona separador de milhar              | `number_with_delimiter(1000000)`                        |
+| `time_ago_in_words`     | Tempo relativo (ex: "2 days ago")         | `time_ago_in_words(@post.created_at)`                   |
+| `l`                     | Localiza datas/horas (I18n)               | `l(Time.current, format: :short)`                       |
+| `sanitize`              | Remove HTML inseguro                      | `sanitize(user_input)`                                  |
+| `raw`                   | Renderiza HTML sem escapar                | `raw("<strong>HTML</strong>")`                          |
+| `safe_join`             | Junta strings HTML com segurança          | `safe_join(items, tag.br)`                              |
+
+[Lista completa](https://guides.rubyonrails.org/action_view_helpers.html)
+
+## Scaffold
+
+Scaffold no Ruby on Rails é um gerador automático de código que cria, de forma rápida e padronizada, toda a estrutura básica de um recurso CRUD, incluindo `model`, `migration`, `controller`, `views`, `rotas` e `testes iniciais`, sempre seguindo as convenções do framework; seu principal objetivo é acelerar o desenvolvimento inicial.
+
+![Scaffold](/assets/images/Scaffold.jpeg)
+
+```shell
+# Para criar um Scaffold, utilize o seguinte comando
+rails generate scaffold Modelo nome:tipo nome:tipo nome:tipo ...
+rails g scaffold Article title:string body:text
+```
+
 ## Rotas
 
 > config/routes.rb
@@ -769,6 +826,8 @@ get "inicio" => "welcome#index"
 # Rota padrão (raiz), index da aplicação
 root "view#action"
 ```
+
+[Guia completo](https://guiarails.com.br/routing.html)
 
 ### Recuperando parâmetros
 
@@ -793,33 +852,90 @@ Em resumo, REST é uma forma simples e eficiente de criar APIs que seguem padrõ
 
 > Adiciona semântica nas requisições web.
 
-### Helpers
+## Migration
 
-São comandos **Rails** para ajudar o desenvolvedor.
+É um mecanismo de versionamento do banco de dados que permite criar, alterar e manter a estrutura das tabelas de forma organizada e reprodutível por meio de código Ruby, garantindo consistência entre ambientes e facilitando a evolução do schema ao longo do desenvolvimento
 
-Utilitários:
+### Adicionando/removendo campos
 
-- link_to: Substitui o "href" do elemento \_anchor\*
-- [Lista completa](https://guides.rubyonrails.org/action_view_helpers.html)
+```shell
+# Sintaxe
+# Troque YYY pelo nome do model. Adicione o "s" em "Field" caso seja mais de um campo
+rails generate migration AddFieldToYYY nome:tipo    # PascalCase
+rails generate migration remove_xxx_from_yyy        # snake_case
 
-```ruby
-# View - link_to(name, path)
-<%= link_to "Texto", :action => "action_name" %>
+# Exemplo
+rails g migration addNameToPerson name:string
 
-# <%= link_to "Texto", "/customers" %> >> 'customers_path' é gerado automaticamente pelo Rails (/rails/info/routes)
-<%= link_to "Texto", customers_path %>
-
-# Adiciona o método HTTP e gera um alerta de confirmação
-<%= link_to "Texto", @customer, method: :delete, data: { confirm: "Are you sure?" } %>
+# Aplicando modificações no Banco de Dados
+rake db:migrate
 ```
 
-#### Criando helper
+> É preciso permitir os novos campos no controller para realizar atualizações nas requisições
 
-Os _helpers_ encontram-se na pasta _/app/helpers_. Cada model tem seu helper e o helper criado dentro de "application_helper.rb" será um helper global. O método criado pode ser chamado na view especificada ou em todas (caso tenha sido criado em "application_helper").
+### Aplicando migrações pendentes
 
-## Active Record
+> NOTA: Observe que "VERSION=" é o **timestamp** da migração.
 
-Active Record é uma gem presente no Ruby on Rails e é responsável por tratar a persistência das informações no Banco de Dados.
+```shell
+# Deixa o banco de dados igual ao script schema. A tabela pode ser criada, modificada ou removida
+bin/rails db:migrate
+
+# Migração específica
+rails db:migrate:up VERSION=20251225246060
+
+# Rollback específico
+rails db:migrate:down VERSION=20251225246060
+
+# Quantia de rollbacks
+rails db:rollback STEP=n
+
+# Quantia de migrações a partir da última definida no "schema"
+rails db:migrate:redo STEP=n
+```
+
+### Operações em tabelas
+
+- add_column
+- remove_column
+- rename_column
+- change_column
+
+```ruby
+# Tornando `change_column` reversível
+
+# Método 1
+class ChangeTypeOfDescriptionInDemos < ActiveRecord::Migration[6.1]
+  def change
+    reversible do |dir|
+      # Será executado em `db:migrate`
+      dir.up do
+        change_column :demos, :description, :text
+      end
+
+      # Será executado em `db:rollback`
+      dir.down do
+        change_column :demos, :description, :string
+      end
+    end
+  end
+end
+
+# Método 2
+class ChangeTypeOfDescriptionInDemos < ActiveRecord::Migration[6.1]
+  def up
+    change_column :demos, :description, :text
+  end
+
+  def down
+    change_column :demos, :description, :string
+  end
+end
+```
+
+## ActiveRecord
+
+ActiveRecord é uma gem presente no Ruby on Rails e é responsável por tratar a persistência das informações no Banco de Dados (ORM).
 
 > NOTA: Para visualizar os campos do modelo, veja os arquivos de migrate.
 
@@ -853,34 +969,9 @@ model.save
 # DICA: Modifique o Model para ter um método where_like
 ```
 
-## i18n (Internationalization)
-
-Maneira simplificada para traduzir páginas Rails.
-
-Para modificar a _locale_ padrão, altere "config/application.rb" em "config.i18n.default_locale".
-
-Observações:
-
-- Tradução: Traduzir textos
-- Localização: Localizar data/hora/moeda (Requer tradução, veja link a seguir)
-
-[i18n de data em pt-BR](https://github.com/svenfuchs/rails-i18n/blob/master/rails/locale/pt-BR.yml)
-
-```ruby
-# NOTA: Caso a chave não seja encontrada, será renderizado o nome da chave e não seu valor.
-
-# Tradução em métodos
-i18n.t('caminho.da.chave') # Tradução
-i18n.l() # Localização
-
-# Tradução nas views
-t(:'caminho.da.chave') # Tradução
-l() # Localização
-```
-
 ## Upload de arquivos
 
-> gem Paperclip
+> TODO: gem Paperclip
 
 ## Devise (Auth)
 
@@ -1485,9 +1576,29 @@ export default class extends Controller {
 
 [Guia](https://stimulus.hotwired.dev/handbook/working-with-external-resources)
 
-## Logs
+## i18n (Internationalization)
 
-> TODO
+i18n (internationalization) é o mecanismo utilizado para adaptar uma aplicação a múltiplos idiomas e formatos regionais, como textos, datas, números e moedas, sem alterar a lógica do sistema. No Ruby on Rails, o i18n é nativo e faz parte do core do framework.
+
+As traduções são definidas em arquivos YAML localizados, por padrão, em `config/locales`. Cada arquivo representa um idioma e contém chaves organizadas hierarquicamente.
+
+> Caso a chave não seja encontrada, será renderizado o nome da chave e não seu valor.
+
+```ruby
+# Definindo locale padrão global (config/application.rb)
+config.i18n.default_locale = :"pt-BR"
+config.i18n.available_locales = [:"pt-BR", :en]
+
+# Tradução em métodos
+I18n.t('caminho.da.chave')    # Tradução - textos
+I18n.l()                      # Localização - datas, horas e números
+
+# Tradução nas views
+t(:caminho_da_chave)
+l()
+```
+
+[i18n pt-BR](https://github.com/svenfuchs/rails-i18n/blob/master/rails/locale/pt-BR.yml)
 
 ## Testes
 
@@ -1508,6 +1619,20 @@ BDD é um processo colaborativo que define o comportamento do sistema por meio d
 O RSpec utiliza palavras-chave como `describe`, `context` e `it` para estruturar os testes como especificações de comportamento - Arrange, Act e Assert -, tornando-os altamente legíveis, expressivos e fáceis de manter.
 
 [Documentação](https://rspec.info/documentation/)
+
+#### Estrutura de pastas
+
+No RSpec, a estrutura de pastas não é apenas organizacional; ela define o comportamento e os helpers que estarão disponíveis para o seu teste.
+
+Quando o RSpec "vê" um arquivo dentro de `spec/requests`, ele automaticamente atribui o `type: :request`, o que libera métodos como `get`, `post`, `patch` e o objeto `response`.
+
+```
+spec/
+├── factories/          # (Se usar FactoryBot)
+├── models/             # Testes de lógica de banco e validações (type: :model)
+├── requests/           # Testes de integração/API/Controllers (type: :request)
+└── rails_helper.rb     # Configuração principal
+```
 
 #### Instalação, geração e execução
 
@@ -1583,10 +1708,168 @@ RSpec.describe Post do
 end
 ```
 
-### GitHub Actions
+#### Requisições (Devise)
+
+```ruby
+# spec/rails_helper.rb
+config.include Devise::Test::IntegrationHelpers, type: :request
+
+# spec/requests/posts_spec.rb
+RSpec.describe "Posts", type: :request do
+  # Cria um "User" e "Post" a cada novo teste. Também pode ser utilizado dentro do escopo "describe"
+  let(:user) { User.create(email: "user@example.com", password: "password") }
+  let(:post) { Post.create(title: "Title", body: "Body") }
+
+  describe "GET /post" do
+    it "Redirect to login page" do
+      # "post" faz referência ao "let(:post)"
+      get post_path(post)
+      expect(response).to redirect_to(new_user_session_path)
+    end
+
+    it "Access the post page" do
+      # "sign_in" é um helper Devise adicionado no "spec/rails_helper.rb"
+      # "user" faz referência ao "let(:user)"
+      sign_in user
+
+      # get post_path(id: 1)
+      # get post_path(slug: "test")
+      get post_path(post)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "Don't allow user with :reader role" do
+      sign_in user
+
+      get new_post_path(post)
+      expect(response).to have_http_status(:found)
+    end
+  end
+end
+```
+
+### GitHub Actions (CI/CD)
+
+GitHub Actions é a plataforma de CI/CD nativa do GitHub.
+
+No contexto de CI (Continuous Integration), ele serve para:
+
+- Executar testes automaticamente
+- Validar builds a cada `push` ou `pull_request`
+- Detectar erros antes do merge
+- Garantir que o código no repositório principal esteja estável
+
+> Ele executa workflows definidos em YAML dentro do próprio repositório (.github/workflows/ci.yml).
+
+Ambiente de execução:
+
+- Máquinas virtuais efêmeras
+- Criadas sob demanda
+- Sistema operacional típico: `ubuntu-latest`, `windows-latest` e `macos-latest`
+- "Roda" em uma VM isolada
+- Não compartilha estado com outros jobs
+- É destruída ao final da execução
+
+> A execução de CI é gratuita em repositórios públicos, para repositórios privados (free) o limite é de 2.000 minutos/mês.
+
+Desativando CI (Escolha uma das opções):
+
+1. Remover _.github/workflows/ci.yml_
+2. (GitHub) Settings > Actions > General > (Actions permissions) Disable Actions
+
+## Deploy
+
+Consiste em preparar o **ambiente de produção**, publicar o código e garantir que a aplicação esteja pronta para atender usuários de forma estável e segura.
+
+Etapas:
+
+- [ ] Configurar OS
+- [ ] Dependências
+- [ ] Variáveis de ambiente
+- [ ] Banco de dados
+- [ ] Servidor web
+- [ ] Serviços auxiliares (background jobs, cache, etc.)
+- [ ] Estratégias de: rollback, failover, playbooks e critérios de "Go/No-Go"
+- [ ] Deploy e validação pós-deploy
+- [ ] Monitoramento contínuo
+
+> NOTA: Crie uma variável de ambiente que representa o arquivo config/master.key
+
+```shell
+# Instalação de Dependências
+RAILS_ENV=production bundle install
+
+# Compilação de Assets (CSS/JS)
+RAILS_ENV=production bundle exec rake assets:precompile
+RAILS_ENV=production bundle exec rake assets:clean          # Automatico em Rails 6+
+
+# Banco de Dados
+RAILS_ENV=production bundle exec rails db:prepare
+```
+
+[Guia completo](https://github.com/ankane/production_rails)
+
+## Rake Task
+
+Rake tasks são **tarefas automatizadas** escritas em Ruby e executadas via Rake (Ruby Make), usadas para orquestrar rotinas operacionais fora do fluxo normal da aplicação web.
+
+No contexto do Ruby on Rails, rake tasks servem para executar processos repetitivos, administrativos ou de manutenção, como migrações de banco, carga de dados, limpeza, integrações e scripts pontuais. Elas ficam, por convenção, em `lib/tasks/*.rake` e são definidas declarando um namespace, a tarefa e suas dependências.
+
+Rake tasks são síncronas, executam no processo que as chama e não substituem jobs em background; quando a tarefa é pesada ou demorada, o padrão é usá-las apenas como disparadoras de jobs (por exemplo, Sidekiq).
+
+```shell
+# Listando tasks
+rails -T
+
+# Gerando rake task
+rails g task <namespace> <task_name>
+
+# Exemplo (Gera lib/tasks/utils.rake)
+rails g task utils say_hello
+```
+
+```ruby
+# lib/tasks/utils.rake
+namespace :utils do
+  desc "Say 'Hello World' n times"        # Descrição ao utilizar 'rake -T'
+  # Verifica ambiente de execução e variáveis de ambiente
+  task say_hello: :environment do
+    if Rails.env.development?             # Verifica o ambiente
+      ENV['QTD'].to_i.times do |i|        # Valor da chave 'QTD' ao utilizar o comando rake (ARGV contém todos argumentos)
+        puts "Hello World"
+      end
+    end
+  end
+
+  # Argumentos
+  task :generate, [:year, :month] => :environment do |_, args|
+    puts "Ano: #{args[:year]}, Mês: #{args[:month]}"
+  end
+end
+
+# Uso: rake utils:say_hello QTD=10        # Variável de ambiente
+# Uso: rake "utils:generate[2025,15]"     # Argumento
+```
+
+## Cron Jobs
+
+Cron Jobs são utilizados para agendar a execução de tarefas recorrentes fora do ciclo de requisição HTTP, normalmente para rotinas operacionais, manutenção e rake tasks. O **cron é um agendador do sistema operacional Unix/Linux** que dispara comandos em horários definidos, independentemente da aplicação estar recebendo requisições.
+
+Embora seja possível executar lógica pesada diretamente no cron, o padrão de mercado é utilizá-lo apenas como gatilho, delegando o processamento para jobs em background (como Sidekiq).
+
+```shell
+# Edita o cron
+crontab -e
+
+# Executar a task todos os dias às 09:00
+0 9 * * * cd /path/to/my_app && bin/rails "utils:say_hello QTD=10" >> log/cron.log 2>&1
+```
+
+### Sidekiq
 
 > TODO
 
 ## Dicas
 
+- [Ruby Toolbox](https://www.ruby-toolbox.com/categories): RubyGems por categorias
 - [Simple CSS](https://github.com/kevquirk/simple.css/wiki/Getting-Started-With-Simple.css): Estilização sem customização inicial

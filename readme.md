@@ -384,6 +384,22 @@ array_a[1, 3]         # [8.1, true, "cinco"] (start, count)
 array_a[1..3]         # [8.1, true, "cinco"] (start..end)
 ```
 
+#### Avançado
+
+```ruby
+# [ tabela de decisão ][ índice gerado (ou não) por *expressão* ]
+
+# Retorna um array com 10 posições cujo valores são "a"
+(1..10).map { |_| ["a", "b"][0] }
+
+# Retorna um array de 10 posições
+# Funcionamento:
+# 1. Converte regras booleanas em números
+# 2. Usa a soma como índice
+# 3. Aplica o índice em uma tabela de decisão fixa
+(1..10).map { |i| [i.to_s, 'Fizz', 'Buzz', 'FizzBuzz'][(i % 3 == 0 ? 1 : 0) + (i % 5 == 0 ? 2 : 0)]}
+```
+
 ### 2D Array (Matriz)
 
 ```ruby
