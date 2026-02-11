@@ -11,6 +11,7 @@ Rails se baseia fortemente nos princípios de **CoC** (Convention over Configura
 - [Ruby on Rails](#ruby-on-rails)
   - [Table of Contents](#table-of-contents)
   - [Características](#características)
+    - [Convention over Configuration (CoC)](#convention-over-configuration-coc)
     - [Estrutura de pastas](#estrutura-de-pastas)
   - [Comandos](#comandos)
   - [Models](#models)
@@ -21,8 +22,11 @@ Rails se baseia fortemente nos princípios de **CoC** (Convention over Configura
       - [Polymorphic association](#polymorphic-association)
     - [Callbacks](#callbacks)
       - [Service Object](#service-object)
+    - [UUID](#uuid)
+      - [Converter projeto existente](#converter-projeto-existente)
     - [Enum](#enum)
     - [Scopes](#scopes)
+    - [Active Record Encryption (Rails 7+)](#active-record-encryption-rails-7)
   - [Controllers](#controllers)
     - [Actions](#actions)
     - [Helpers](#helpers)
@@ -33,17 +37,17 @@ Rails se baseia fortemente nos princípios de **CoC** (Convention over Configura
       - [Helpers](#helpers-1)
       - [Formulários complexos e Nested Attributes](#formulários-complexos-e-nested-attributes)
     - [yield](#yield)
-  - [Helpers](#helpers-2)
+    - [Helpers](#helpers-2)
   - [Scaffold](#scaffold)
   - [Rotas](#rotas)
     - [Recuperando parâmetros](#recuperando-parâmetros)
     - [REST / RESTful](#rest--restful)
+  - [Active Record](#active-record)
   - [Migration](#migration)
-    - [Adicionando/removendo campos](#adicionandoremovendo-campos)
+    - [Adicionando / removendo campos](#adicionando--removendo-campos)
     - [Aplicando migrações pendentes](#aplicando-migrações-pendentes)
     - [Operações em tabelas](#operações-em-tabelas)
-  - [ActiveRecord](#activerecord)
-  - [Upload de arquivos](#upload-de-arquivos)
+  - [Solid Cache (Rails 8+)](#solid-cache-rails-8)
   - [Devise (Auth)](#devise-auth)
     - [Roles](#roles)
     - [Controller filters and helpers](#controller-filters-and-helpers)
@@ -88,6 +92,29 @@ Rails se baseia fortemente nos princípios de **CoC** (Convention over Configura
   - [Dicas](#dicas)
 
 ## Características
+
+### Convention over Configuration (CoC)
+
+Convention over Configuration (CoC) é um dos princípios estruturantes do Ruby on Rails. A ideia central é reduzir decisões repetitivas assumindo convenções padronizadas. Se você segue essas convenções, o framework “adivinha” corretamente como sua aplicação deve funcionar — eliminando configuração explícita. Complementa o princípio DRY (Don't Repeat Yourself).
+
+Se você seguir os padrões esperados, o framework funciona sem configuração adicional.
+
+> Você configura apenas o que é **excepcional**.
+
+Rails presume padrões para:
+
+- Estrutura de diretórios
+- Nomeação de classes
+- Nomeação de tabelas
+- Relacionamento entre camadas (MVC)
+- Carregamento automático de constantes (Zeitwerk)
+
+Impacto:
+
+- Estrutura MVC rígida
+- REST como padrão
+- Naming consistente
+- Estrutura opinativa
 
 ### Estrutura de pastas
 
@@ -424,6 +451,59 @@ end
 
 > TODO: Service Object usando RSpec (Testes)
 
+### UUID
+
+O [Active Record](#active-record) possui suporte integrado para o uso de `UUIDs` (Identificadores Únicos Universais) como chaves primárias ou como tipo de coluna, especialmente com o PostgreSQL.
+
+Implementação:
+
+```ruby
+# 1. Habilitar extensão UUID no PostgreSQL (migration)
+class EnableUuidExtension < ActiveRecord::Migration[7.1]
+  def change
+    # pgcrypto fornece a função gen_random_uuid()
+    enable_extension 'pgcrypto' unless extension_enabled?('pgcrypto')
+  end
+end
+
+# 2. Definir UUID como padrão global (opcional, recomendado)
+# config/application.rb
+config.generators do |g|
+  g.orm :active_record, primary_key_type: :uuid
+end
+
+# NOTA: Caso deseje por ambiente altere em: config/environments/[production | development].rb
+Rails.application.config.active_record.primary_key_type = :uuid
+```
+
+#### Converter projeto existente
+
+Em sistemas já em produção com `bigint`, a migração exige:
+
+- Criar nova coluna uuid
+- Popular com `gen_random_uuid()`
+- Atualizar FKs
+- Recriar índices e constraints
+- Trocar PK
+- Remover coluna antiga
+
+```ruby
+# Adicionando uma coluna UUID a um modelo existente
+class AddUuidToUsers < ActiveRecord::Migration[7.1]
+  def change
+    add_column :users, :uuid, :uuid, default: "gen_random_uuid()", null: false
+  end
+end
+
+# Gerando UUID fora do Active Record
+require 'securerandom'
+# Generates a version 4 (random) UUID
+uuid_v4 = SecureRandom.uuid
+
+# Generates a version 7 (time-based) UUID in newer Ruby versions
+uuid_v7 = SecureRandom.uuid_v7
+```
+
 ### Enum
 
 ```ruby
@@ -461,6 +541,45 @@ end
 # Utilização no *Controller*
 def index
   @orders = Order.by_author(1).published.recent(7).limit(20)
+end
+```
+
+### Active Record Encryption (Rails 7+)
+
+Um recurso integrado do Ruby on Rails que fornece criptografia em nível de aplicação para dados sensíveis armazenados no banco de dados. Ele criptografa e descriptografa de forma transparente atributos específicos do modelo, adicionando uma camada crucial de segurança contra acesso não autorizado ao banco de dados ou aos logs.
+
+A criptografia ocorre:
+
+- Antes de persistir no banco
+- A descriptografia ocorre automaticamente ao ler
+
+```shell
+# Geração de chaves
+bin/rails db:encryption:init
+```
+
+```yml
+# Opção 1
+# bin/rails credentials:edit
+active_record_encryption:
+  primary_key: xxxxxxxxxxxxxxxxx
+  deterministic_key: xxxxxxxxxxxxxxxxx
+  key_derivation_salt: xxxxxxxxxxxxxxxxx
+
+# Opção 2
+# Variáveis de ambiente
+ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY: "xxxxxxxxxxxxxxxxx"
+ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY: "xxxxxxxxxxxxxxxxx"
+ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT: "xxxxxxxxxxxxxxxxx"
+```
+
+```ruby
+class User < ApplicationRecord
+  # O mesmo valor gera hashes diferentes
+  encrypts :cpf
+
+  # O mesmo valor gera hashes iguais
+  encrypts :cpf, deterministic: true
 end
 ```
 
@@ -778,7 +897,7 @@ end
 <p>Hello, Rails!</p>
 ```
 
-## Helpers
+### Helpers
 
 | Helper                  | Descrição                                 | Exemplo                                                 |
 | ----------------------- | ----------------------------------------- | ------------------------------------------------------- |
@@ -815,16 +934,83 @@ rails g scaffold Article title:string body:text
 
 ## Rotas
 
-> config/routes.rb
+Rotas definem como requisições HTTP (URL + verbo) são mapeadas para actions de controllers. Elas são o ponto de entrada da aplicação e conectam o mundo externo (web/API) à camada de controle.
 
-Arquivo que determina as rotas (e verbos) da aplicação. A URL "<host>/rails/info/routes" mostra todas as rotas disponíveis no aplicativo.
+As rotas também geram helpers de URL (`users_path`, `user_path(@user)`), usados em views e controllers.
+
+> Arquivo: config/routes.rb
 
 ```ruby
-# [get | post | put | patch | delete | options] "nome_da_rota" => "controller#action"
-get "inicio" => "welcome#index"
-
-# Rota padrão (raiz), index da aplicação
+# Rota raiz
 root "view#action"
+
+# Rota simples
+get "/about", to: "pages#about"
+get "/about" => "pages#about"
+
+# Rotas RESTful (Gera automaticamente: index, show, new, create, edit, update, destroy)
+resources :users
+
+# Restringir actions
+resources :users, only: [:index, :show]         # Apenas: index e show
+resources :users, except: [:index, :show]       # Todos, exceto: index e show
+
+# Rotas customizadas
+get "login", to: "sessions#new"
+post "login", to: "sessions#create"
+
+# Rotas aninhadas (Evite aninhamentos profundos)
+# /users/1/posts
+resources :users do
+  resources :posts
+end
+
+# Collection e member
+resources :orders do
+  # Define rotas que atuam sobre o conjunto inteiro de recursos, sem exigir `:id`
+  # /orders/recent
+  collection do
+    get :recent
+  end
+
+  # Define rotas que atuam sobre um recurso específico, exigindo `:id`
+  # /orders/1/cancel
+  member do
+    post :cancel
+  end
+end
+
+# Agrupa rotas com prefixo de URL e namespace de controller
+# URL: /admin/users
+# Controller: Admin::UsersController
+namespace :admin do
+  resources :users
+end
+
+# Agrupa rotas sem obrigar namespace de controller
+# URL: /admin/users
+# Controller: UsersController
+scope "/admin" do
+  resources :users
+end
+
+# URL: /users
+# Controller: Admin::UsersController
+scope module: :admin do
+  resources :users
+end
+
+# Equivale a `namespace`
+# URL: /admin/users
+# Controller: Admin::UsersController
+scope "/admin", module: :admin do
+  resources :users
+end
+
+# Restringe rotas com base em condições (regex, ip, etc.)
+constraints subdomain: "api" do
+  resources :users
+end
 ```
 
 [Guia completo](https://guiarails.com.br/routing.html)
@@ -852,11 +1038,55 @@ Em resumo, REST é uma forma simples e eficiente de criar APIs que seguem padrõ
 
 > Adiciona semântica nas requisições web.
 
+## Active Record
+
+O Active Record é o ORM (Object-Relational Mapping) padrão do Ruby on Rails. Cada classe do sistema representa uma tabela do banco de dados e cada instância dessa classe representa um registro (linha) dessa tabela.
+
+Além de mapear objetos para registros persistidos, o Active Record encapsula lógica de consulta, validação, callbacks, associações e transações diretamente no model, centralizando a camada de persistência.
+
+A diferença entre **Active Record** e **Active Model** está no escopo de responsabilidade. Active Record é responsável por persistência em banco de dados relacional, incluindo mapeamento objeto-relacional e query interface. Já o Active Model fornece funcionalidades de modelagem — como validações, callbacks, naming e conversões — mas sem obrigatoriedade de persistência em banco.
+
+```ruby
+# Operações CRUD
+# Create
+model = Model.create(name: "John Doe", age: 20)     # Cria o objeto no Banco de Dados e retorna a instância do modelo criado
+model = Model.new(name: "John Doe", age: 20)        # Instância o objeto e depois salva no banco de dados
+model.save
+Model.insert(title: "The Lord of the Rings", author: "J.R.R. Tolkien")                # Insere sem validações e callbacks
+Model.insert_all([{ title: "The Lord of the Rings", author: "J.R.R. Tolkien" }])
+
+# Read
+Model.all                     # Retorna um array com *todos* os registros
+Model.find_each               # Retorna um batch de 1000 elementos (padrão)
+Model.ids                     # Retorna um array contendo todos os ids
+Model.first                   # Retorna o primeiro elemento
+Model.last                    # Retorna o último elemento
+Model.find(1)                 # Busca por id. Aceita múltiplos argumentos
+Model.find_by(name: "John")   # Busca por atributo. Retorna o primeiro elemento encontrado
+Model.where(name: :John)      # Busca por atributo. Retorna um array
+
+# Update
+model = Model.find_by(title: "The Lord of the Rings")
+model.update(title: "The Lord of the Rings: The Fellowship of the Ring")
+Model.update_all(status: "already own")
+
+# Delete
+model = Model.find_by(title: "The Lord of the Rings")
+model.destroy
+Model.destroy_by(author: "Douglas Adams")
+Model.destroy_all
+Model.delete_all              # Remove sem validações e callbacks
+
+# Método "where" com "like"
+Model.where("name like '%#{params[:name]}%'")     # ERRO: Perigo de SQL Injection
+Model.where("name like ?", "%#{params[:name]}%")  # Correto
+```
+
 ## Migration
 
 É um mecanismo de versionamento do banco de dados que permite criar, alterar e manter a estrutura das tabelas de forma organizada e reprodutível por meio de código Ruby, garantindo consistência entre ambientes e facilitando a evolução do schema ao longo do desenvolvimento
 
-### Adicionando/removendo campos
+### Adicionando / removendo campos
 
 ```shell
 # Sintaxe
@@ -933,45 +1163,15 @@ class ChangeTypeOfDescriptionInDemos < ActiveRecord::Migration[6.1]
 end
 ```
 
-## ActiveRecord
+## Solid Cache (Rails 8+)
 
-ActiveRecord é uma gem presente no Ruby on Rails e é responsável por tratar a persistência das informações no Banco de Dados (ORM).
+> TODO
 
-> NOTA: Para visualizar os campos do modelo, veja os arquivos de migrate.
+O armazenamento em cache consiste em guardar o conteúdo gerado durante o ciclo de pedido-resposta e reutilizá-lo ao responder a pedidos semelhantes.
 
-Active Record permite o desenvolvedor crie DBs sem necessitar de SQL, pois, utiliza DSL (Doman Specif Language)
+O armazenamento em cache é uma das maneiras mais eficazes de melhorar o desempenho de um aplicativo.
 
-> Active Record também é um padrão de projeto para Banco de Dados relacionais. **É onde ocorre as validações**.
-
-```ruby
-# Operações CRUD
-# Create
-model = <Model>.create(name: "John Doe", age: 20) # Cria o objeto no Banco de Dados e retorna a instância do modelo criado
-model = <Model>.new(name: "John Doe", age: 20) # Instância o objeto e depois salva no banco de dados
-model.save
-
-# Read
-<Model>.all           # Retorna um array com *todos* os registros
-<Model>.find_each     # Retorna um batch de 1000 elementos (padrão)
-<Model>.ids           # Retorna um array contendo todos os ids
-<Model>.first         # Retorna o primeiro elemento
-<Model>.last          # Retorna o último elemento
-<Model>.find(1)       # Busca por id. Aceita múltiplos argumentos
-<Model>.find_by(name: "John")   # Busca por atributo. Retorna o primeiro elemento encontrado
-<Model>.where(name: :John)      # Busca por atributo. Retorna um array
-
-# Método "where" com "like"
-<Model>.where("name like '%#{params[:name]}%'")     # ERRO: Perigo de SQL Injection
-<Model>.where("name like ?", "%#{params[:name]}%")  # Correto
-
-# TODO: Pesquisar escopos (Scopes)
-
-# DICA: Modifique o Model para ter um método where_like
-```
-
-## Upload de arquivos
-
-> TODO: gem Paperclip
+[Outros tipos de cache](https://guides.rubyonrails.org/caching_with_rails.html)
 
 ## Devise (Auth)
 
